@@ -28,7 +28,7 @@ PORT = process.env.PORT || 3000
 
 const io = require("socket.io")(8080, {
   cors: {
-    origin: "http://deploy-testing-3.herokuapp.com/"
+    origin: "https://deploy-testing-3.herokuapp.com/"
   }
 })
 
