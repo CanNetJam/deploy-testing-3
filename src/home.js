@@ -44,9 +44,9 @@ function App() {
   const [ liveNotif, setLiveNotif ] = useState([])
   const [ number, setNumber ] = useState(0)
   
-  //ws://localhost:8080 
+  //ws://deploy-testing-3.herokuapp.com/socket.io/?EIO=4&transport=websocket
   useEffect(()=> {
-    setSocket(io("ws://deploy-testing-3.herokuapp.com/socket.io/?EIO=4&transport=websocket"))
+    setSocket(io("ws://deploy-testing-3.herokuapp.com/:8080"))
   }, [])
 
   useEffect(() => {
