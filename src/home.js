@@ -45,7 +45,7 @@ function App() {
   const [ number, setNumber ] = useState(0)
   //revert all changes
   useEffect(()=> {
-    setSocket(io("ws://localhost:8080"))
+    setSocket(io())
   }, [])
 
   useEffect(() => {
