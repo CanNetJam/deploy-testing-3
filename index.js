@@ -18,6 +18,7 @@ const reviews = require("./models/reviews")
 const gallery = require("./models/gallery")
 const notifications = require("./models/notifications")
 const answers = require("./models/answers")
+const bugreports = require("./models/bugreports")
 
 const mongoose = require("mongoose")
 const jwt = require("jsonwebtoken")
@@ -43,6 +44,7 @@ const server = app.listen(PORT,
 const io = require("socket.io")(server, {
   cors: {
     origin: "https://deploy-testing-3.herokuapp.com/"
+    //origin: "http://localhost:3000"
   }
 })
 
@@ -56,8 +58,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-//"mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin"
-mongoose.connect(process.env.CONNECTIONSTRING, {
+//mongoose.connect("mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin", {
+mongoose.connect(process.env.CONNECTIONSTRING , {
 	useNewUrlParser: true,
 	useUnifiedTopology: true
 })
@@ -1254,6 +1256,31 @@ app.get("/api/answers/:userid/:projectid", async (req, res) => {
     res.status(200).send(data)
   } catch (err) {
     res.status(400).json(err)
+  }
+})
+
+//Bug Reports---------------------------------------------------------------------------------------------
+app.post("/api/bug-report", upload.single("photo"), async (req, res) => {
+  obj = {
+    userid: req.body.userid,
+    title: req.body.title,
+    photo: req.file.filename,
+    description: req.body.description,
+  }
+  try {
+    await bugreports.create(obj)
+    res.status(200).send(true)
+  } catch (err) {
+    res.status(200).send(false)
+  }
+})
+
+app.get("/api/all-bug-report",  async (req, res) => {
+  try {
+    const data = await bugreports.find()
+    res.status(200).send(data)
+  } catch (err) {
+    res.status(400).send(err)
   }
 })
 

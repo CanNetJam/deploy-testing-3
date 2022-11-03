@@ -18,6 +18,7 @@ function Reports() {
     const [ selectedYear, setSelectedYear] = useState(yearNow)
     const [ numMonth, setNumMonth] = useState(moment(Date.now()).format("MM"))
     const [ allRecords, setAllRecords] = useState([])
+    const [ bugReports, setBugReports] = useState([])
 
     useEffect(() => {
         const getRecords = async () => {  
@@ -58,6 +59,18 @@ function Reports() {
         }
         getProject()
     }, [numMonth, selectedYear])
+
+    useEffect(() => {
+        const getBugReports = async () => {
+          try {
+            const res = await Axios.get("/api/all-bug-report")
+            setBugReports(res.data)
+          } catch (err) {
+            console.log(err)
+          }
+        }
+        getBugReports()
+    }, [])
 
     useEffect(() => {
         const setMonth = async () => {
@@ -141,14 +154,14 @@ function Reports() {
             </div>
             <div className="card">
                 <h3>Requests Count: </h3>
-                <label>Job request(s) sent during the month of {selectedMonth}, {selectedYear}: {requests ? <b>{requests.length}</b> : 0}</label>
+                <label>Request(s) sent during the month of {selectedMonth}, {selectedYear}: {requests ? <b>{requests.length}</b> : 0}</label>
                 <br />
-                <label>Job request(s) approved during the month of {selectedMonth}, {selectedYear}: {approved ? <b>{approved?.length}</b> : 0}</label>
+                <label>Request(s) approved during the month of {selectedMonth}, {selectedYear}: {approved ? <b>{approved?.length}</b> : 0}</label>
                 <br />
-                <label>Job request(s) denied during the month of {selectedMonth}, {selectedYear}: {denied ? <b>{denied?.length}</b> : 0}</label>
+                <label>Request(s) denied during the month of {selectedMonth}, {selectedYear}: {denied ? <b>{denied?.length}</b> : 0}</label>
                 <br />
-                <h3>Jobs Count: </h3>
-                <label>Job(s) completed during the month of {selectedMonth}, {selectedYear}: {projects ? <b>{projects.length}</b> : 0}</label>
+                <h3>Jobs and Projects Count: </h3>
+                <label>Job(s) and Project(s) completed during the month of {selectedMonth}, {selectedYear}: {projects ? <b>{projects.length}</b> : 0}</label>
                 <br />
 
                 <h3>Ongoing Job(s): </h3>
@@ -174,6 +187,31 @@ function Reports() {
                                 <td>{a.approved}</td>
                                 <td>{a.denied}</td>
                                 <td>{a.projects}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <h2>Bug Reports</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sender</th>
+                            <th>Title</th>
+                            <th>Photo</th>
+                            <th>Desription</th>
+                            <th>Report Id</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {bugReports.map((a)=> (
+                            <tr key={a.month}>
+                                <td>{a.userid}</td>
+                                <td>{a.title}</td>
+                                <td><img className="messageImg" src={a.photo ? `/uploaded-photos/${a.photo}` : "/fallback.png"} alt=""/></td>
+                                <td>{a.description}</td>
+                                <td>{a._id}</td>
                             </tr>
                         ))}
                     </tbody>

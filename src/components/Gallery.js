@@ -75,11 +75,11 @@ function Gallery(props) {
         if (description) {
             data.append("description", description)
         }
+        CreatePhotoField.current.value = ""
+        const res = await Axios.post(`/api/gallery/upload-photo/${userData?.user.id}`, data, { headers: { "Content-Type": "multipart/form-data" } })
         setTitle("")
         setFile("")
         setDescription("")
-        CreatePhotoField.current.value = ""
-        const res = await Axios.post(`/api/gallery/upload-photo/${userData?.user.id}`, data, { headers: { "Content-Type": "multipart/form-data" } })
         setAddPhoto(false)
         setPhotos(prev => prev.concat([res.data]))
         }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react"
 import { UserContext } from "../home"
 import Axios from "axios"
 import { useNavigate } from "react-router-dom"
+import BugReports from "../components/BugReports"
 
 function Settings(){ 
     let navigate = useNavigate()
@@ -72,6 +73,14 @@ function Settings(){
     
     return (
     <div className="settings">
+        <div>
+            <div>
+                <h3>Found a bug from the website? Submit reports to us so we can fix it immediately!</h3>
+            </div>
+            <div>
+                <BugReports />
+            </div>
+        </div>
         <div>
             <h1>Change Password:</h1>
         </div>
