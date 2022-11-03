@@ -25,15 +25,24 @@ const auth = require("./middleware/auth")
 const fs = require('fs')
 const cors = require("cors") 
 
-const io = require("socket.io")/*(8080, {
+const PORT = process.env.PORT || 3000
+const INDEX = '/public/index.html'
+
+const server = express()
+  .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+  .listen(PORT, () => console.log(`Listening on ${PORT}`))
+
+const io = socketIO(server)
+/*
+const io = require("socket.io")(8080, {
   cors: {
     origin: "http://localhost:3000"
   }
-})*/ (process.env.PORT, {
+}) (process.env.PORT, {
   cors: {
     origin: "https://deploy-testing-3.herokuapp.com/"
   }
-})
+})*/
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
