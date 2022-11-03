@@ -24,10 +24,11 @@ const jwt = require("jsonwebtoken")
 const auth = require("./middleware/auth")
 const fs = require('fs')
 const cors = require("cors") 
+PORT = process.env.PORT || 3000
 
 const io = require("socket.io")(8080, {
   cors: {
-    origin: "http://deploy-testing-3.herokuapp.com/:8080"
+    origin: "http://deploy-testing-3.herokuapp.com/"
   }
 })
 
@@ -41,8 +42,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-//"mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin" 
-mongoose.connect(process.env.CONNECTIONSTRING, {
+//process.env.CONNECTIONSTRING
+mongoose.connect("mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin", {
 	useNewUrlParser: true,
 	useUnifiedTopology: true
 });
@@ -1389,4 +1390,4 @@ function projectCleanup(req, res, next) {
   next()
 }
 
-app.listen(process.env.PORT || 3000)
+app.listen(PORT)
