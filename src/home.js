@@ -47,7 +47,7 @@ function App() {
   //ws://deploy-testing-3.herokuapp.com/socket.io/?EIO=4&transport=websocket
   //ws://localhost:8080 
   useEffect(()=> {
-    setSocket(io("https://deploy-testing-3.herokuapp.com/"))
+    setSocket(io("ws://deploy-testing-3.herokuapp.com/"))
   }, [])
 
   useEffect(() => {
