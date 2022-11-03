@@ -24,10 +24,17 @@ const jwt = require("jsonwebtoken")
 const auth = require("./middleware/auth")
 const fs = require('fs')
 const cors = require("cors") 
-//http://localhost:3000
-const io = require("socket.io")(8080, {
+
+const PORT = process.env.PORT || 3000
+
+const server = app.listen (
+  PORT,
+  console.log(`Server started at port ${PORT}`)
+)
+
+const io = require("socket.io")(server, {
   cors: {
-    origin: "https://deploy-testing-3.herokuapp.com/"
+    origin: "http://localhost:3000"
   }
 }) /*(process.env.PORT, {
   cors: {
@@ -1393,4 +1400,4 @@ function projectCleanup(req, res, next) {
   next()
 }
 
-app.listen(process.env.PORT || 3000)
+//app.listen(process.env.PORT || 3000)
