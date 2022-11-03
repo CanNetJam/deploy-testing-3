@@ -25,7 +25,7 @@ const auth = require("./middleware/auth")
 const fs = require('fs')
 const cors = require("cors") 
 
-const io = require("socket.io")(PORT, {
+const io = require("socket.io")(8080, {
   cors: {
     origin: "http://localhost:3000"
   }
