@@ -43,9 +43,9 @@ function App() {
   const [ savedNotifications, setSavedNotifications ] = useState([])
   const [ liveNotif, setLiveNotif ] = useState([])
   const [ number, setNumber ] = useState(0)
-  //revert all changes
+
   useEffect(()=> {
-    setSocket(io("https://deploy-testing-3.herokuapp.com/:8080"))
+    setSocket(io("https://deploy-testing-3.herokuapp.com/"))
   }, [])
 
   useEffect(() => {

@@ -24,9 +24,23 @@ const jwt = require("jsonwebtoken")
 const auth = require("./middleware/auth")
 const fs = require('fs')
 const cors = require("cors") 
-PORT = process.env.PORT || 3000
 
-const io = require("socket.io")(8080, {
+fse.ensureDirSync(path.join("public", "uploaded-photos"))
+
+const app = express()
+app.use(express.static("public"))
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(cors())
+app.use(favicon(__dirname + '/public/favicon.png'))
+
+const PORT = process.env.PORT || 3000
+
+const server = app.listen(PORT, 
+  console.log(`Server started at port ${PORT}`)
+)
+
+const io = require("socket.io")(server, {
   cors: {
     origin: "https://deploy-testing-3.herokuapp.com/"
   }
@@ -42,22 +56,11 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-//process.env.CONNECTIONSTRING
-mongoose.connect("mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin", {
+//"mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin"
+mongoose.connect(process.env.CONNECTIONSTRING, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true
-});
-
-// when the app first launches, make sure the public/uploaded-photos folder exists
-fse.ensureDirSync(path.join("public", "uploaded-photos"))
-
-const app = express()
-app.use(express.static("public"))
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
-app.use(cors())
-app.use(favicon(__dirname + '/public/favicon.png'))
-
+})
 //Sochet.IO---------------------------------------------------------------------------------------------
 let users = []
 
@@ -1389,5 +1392,3 @@ function projectCleanup(req, res, next) {
   }
   next()
 }
-
-app.listen(PORT)
