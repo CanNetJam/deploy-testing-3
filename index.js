@@ -66,11 +66,7 @@ const PORT = process.env.PORT || 3000
 const server = express()
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
-const io = socketIO(server, {
-  cors: {
-    origin: "https://deploy-testing-3.herokuapp.com/"
-  }
-}) 
+const io = socketIO(server) 
 
 //Sochet.IO---------------------------------------------------------------------------------------------
 let users = []
