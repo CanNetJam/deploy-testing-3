@@ -27,7 +27,7 @@ const cors = require("cors")
 
 const PORT = process.env.PORT || 3000
 
-const io = require("socket.io")(PORT, {
+const io = require("socket.io")/*(PORT, {
   cors: {
     origin: "http://localhost:3000"
   }
@@ -36,6 +36,7 @@ const io = require("socket.io")(PORT, {
     origin: "https://deploy-testing-3.herokuapp.com/"
   }
 })*/
+io.listen(PORT)
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
