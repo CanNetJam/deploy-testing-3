@@ -25,7 +25,18 @@ const auth = require("./middleware/auth")
 const fs = require('fs')
 const cors = require("cors") 
 
-const io = require("socket.io")/*(PORT, {
+import { createServer } from "http";
+import { Server } from "socket.io";
+
+const httpServer = createServer();
+const io = new Server(httpServer, {
+  cors: {
+    origin: "https://deploy-testing-3.herokuapp.com/"
+  }
+});
+
+httpServer.listen(process.env.PORT || 3000);
+/*const io = require("socket.io")(PORT, {
   cors: {
     origin: "http://localhost:3000"
   }
@@ -34,11 +45,6 @@ const io = require("socket.io")/*(PORT, {
     origin: "https://deploy-testing-3.herokuapp.com/"
   }
 })*/
-io.listen(process.env.PORT || 3000, {
-  cors: {
-    origin: "https://deploy-testing-3.herokuapp.com/"
-  }
-})
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
