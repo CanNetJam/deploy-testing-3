@@ -25,9 +25,13 @@ const auth = require("./middleware/auth")
 const fs = require('fs')
 const cors = require("cors") 
 
-const io = require("socket.io")(8080, {
+const io = require("socket.io")/*(8080, {
   cors: {
-    origin: ["http://localhost:3000", "https://deploy-testing-3.herokuapp.com/"]
+    origin: "http://localhost:3000"
+  }
+})*/ (process.env.PORT, {
+  cors: {
+    origin: "https://deploy-testing-3.herokuapp.com/"
   }
 })
 

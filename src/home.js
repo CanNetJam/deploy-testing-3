@@ -45,7 +45,7 @@ function App() {
   const [ number, setNumber ] = useState(0)
   
   useEffect(()=> {
-    setSocket(io("ws://localhost:8080", "ws://deploy-testing-3.herokuapp.com/"))
+    setSocket(io("ws://deploy-testing-3.herokuapp.com/"))
   }, [])
 
   useEffect(() => {
