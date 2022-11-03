@@ -46,7 +46,7 @@ function App() {
   
   //ws://deploy-testing-3.herokuapp.com/socket.io/?EIO=4&transport=websocket
   useEffect(()=> {
-    setSocket(io())
+    setSocket(io("https://deploy-testing-3.herokuapp.com/"))
   }, [])
 
   useEffect(() => {
