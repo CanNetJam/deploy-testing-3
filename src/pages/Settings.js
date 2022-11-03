@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react"
 import { UserContext } from "../home"
 import Axios from "axios"
 import { useNavigate } from "react-router-dom"
-import BugReports from "../components/BugReports"
+import BugReports from "../components/Bugreports"
 
 function Settings(){ 
     let navigate = useNavigate()
