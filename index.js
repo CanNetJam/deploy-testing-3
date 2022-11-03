@@ -27,12 +27,7 @@ const cors = require("cors")
 
 const PORT = process.env.PORT || 3000
 
-const server = app.listen (
-  PORT,
-  console.log(`Server started at port ${PORT}`)
-)
-
-const io = require("socket.io")(server, {
+const io = require("socket.io")(PORT, {
   cors: {
     origin: "http://localhost:3000"
   }
@@ -1400,4 +1395,4 @@ function projectCleanup(req, res, next) {
   next()
 }
 
-//app.listen(process.env.PORT || 3000)
+app.listen(process.env.PORT || 3000)

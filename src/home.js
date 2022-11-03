@@ -45,7 +45,6 @@ function App() {
   const [ number, setNumber ] = useState(0)
   
   //ws://deploy-testing-3.herokuapp.com/socket.io/?EIO=4&transport=websocket
-  //ws://localhost:8080 
   useEffect(()=> {
     setSocket(io())
   }, [])
