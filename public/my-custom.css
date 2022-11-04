@@ -386,6 +386,16 @@ html, body {
   width: 100%;
   max-width: 1500px;
   padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19);
+}
+
+.projectRequestApplication {
+  height: auto;
+  width: auto;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19);
 }
 
 .projects-grid {
@@ -404,17 +414,9 @@ html, body {
   padding: 10px;
 }
 
-.projectRequest {
+.projectRequestForm {
   height: auto;
   width: auto;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19);
-}
-
-.projectRequestForm {
-  height: 100%;
-  width: 100%;
   max-width: 1500px;
   padding: 15px;
   text-align:left;
@@ -438,9 +440,9 @@ html, body {
   min-height: 500px;
   padding: 10px;
   border-radius: 8px;
-  height: 100%;
-  width: 100%;
-  max-width: 1300px;
+  height: auto;
+  width: auto;
+  max-width: 1500px;
 }
 
 .projectRequestTop {
@@ -462,13 +464,30 @@ html, body {
   justify-content: center;
 }
 
+.locationWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+}
+
 .eachStep div {
   width: 100%;
 }
 
 .nextPageBtn {
+  padding: 5px;
+  height: auto;
+  width: 100%;
   display: flex;
-  align-items: center;
+  justify-content: space-evenly;
+}
+
+.nextPageBtn div {
+  flex: 6;
+  display: flex;
+  justify-content: center;
 }
 
 .adminRequestsTop,
@@ -495,6 +514,17 @@ html, body {
   display: flex;
   justify-content: space-between;
   gap: 5px;
+}
+
+.requiredLabel {
+  display: flex;
+}
+
+.requiredAlert {
+  color: crimson;
+  font-size: 30px;
+  font-weight: 400;
+  font-family:Cambria , monospace;
 }
 /*-------------------------------------------------Homes----------------------------------------------*/
 .homes {
@@ -903,7 +933,6 @@ html, body {
 }
 
 /*-------------------------------------------------Profile----------------------------------------------*/
-.profileCard,
 .searchProfile {
   min-height: 100vh;
   height: 100%;
@@ -912,6 +941,22 @@ html, body {
   padding: 15px;
   display: grid;
   gap: 2px 5px;
+}
+
+.profileCard {
+  min-height: 100vh;
+  height: 100%;
+  width: 100%;
+  max-width: 1500px;
+  padding: 15px;
+  display: grid;
+  gap: 2px 5px;
+}
+
+.profileCardMid,
+.profileCardBot {
+  width: 100%;
+  max-width: 1500px;
 }
 
 .profile-ProfilePhotoWrapper {
@@ -937,6 +982,7 @@ html, body {
 .searchProfileTop {
   min-height: 300px;
   width: 100%;
+  max-width: 1500px;
   padding: 15px;
   background-color: cornflowerblue;
   display: flex;
@@ -950,6 +996,7 @@ html, body {
 }
 
 .profileCardText {
+  width: 100%;
   padding: 15px;
 }
 
@@ -957,17 +1004,14 @@ html, body {
   background-color: white;
   border-radius: 8px;
   flex: 10;
+  width: 100%;
 }
-
-.profileCardBot {
-  border: 2px solid;
-}
-
 /*-------------------------------------------------Gallery----------------------------------------------*/
 .gallery {
   height: 100%;
   padding: 10px;
   width: 100%;
+  max-width: 1500px;
   border-radius: 8px;
 }
 
@@ -1216,6 +1260,7 @@ html, body {
   min-height: 100px;
   height: 100%;
   width: 100%;
+  max-width: 1500px;
   padding: 10px;
 }
 
@@ -1283,9 +1328,8 @@ th{
 }
 
 .settingsForm {
-  height: 100%;
+  height: auto;
   width: 100%;
-  min-height: 90vh;
   max-width: 1500px;
   padding: 15px;
   border-radius: 10px;
@@ -1305,6 +1349,7 @@ th{
 }
 
 .location {
+  width: 100%;
   border: 0;
   border-radius: 2px;
   position: relative;
@@ -1312,15 +1357,15 @@ th{
 
 .dataResult {
   margin-top: 5px;
-  width: 300px;
-  height: auto;
+  width: 100%;
+  height: 400px;
   background-color: white;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   overflow: hidden;
   overflow-y: auto;
   position: absolute;
-  top: 75px;
-  bottom: -85px;
+  top: 80px;
+  bottom: 50px;
 }
 
 .dataResult::-webkit-scrollbar {
@@ -1329,10 +1374,11 @@ th{
 
 .dataResult .dataItem {
   width: 100%;
-  height: 50px;
+  height: auto;
   display: flex;
   align-items: center;
   color: black;
+  font-size: 18px;
 }
 
 .dataItem p {

@@ -270,7 +270,7 @@ function UserProfile(props) {
           )}
 
           {isEditing && (
-            <form className="p-3 bg-success bg-opacity-25 mb-5" onSubmit={submitHandler}>
+            <form className="settingsForm" onSubmit={submitHandler}>
               <div className="mb-1">
                 <label>First Name:</label>
                 <input autoFocus onChange={e => setDraftFirstName(e.target.value)} type="text" className="form-control form-control-sm" value={draftFirstName} placeholder="firstname" />
@@ -381,7 +381,7 @@ function UserProfile(props) {
                 </div>
               )}
               
-              <button className="btn btn-sm btn-success">Save</button>{" "}
+              <button className="btn btn-sm btn-primary">Save</button>{" "}
               <button onClick={() =>{
                 setIsEditing(false), 
                 setRemoveTag(false), 
@@ -396,14 +396,12 @@ function UserProfile(props) {
           )}
         </div>
       </div>
-      <div>
+      <div className="profileCardMid">
         <Gallery candidate={props.id} admin={location.state ? location.state : null}/>
       </div>
-      <div>
+      <div className="profileCardBot">
         {props.theFree && (
-          <div className="card">
-            <RatingsAndReviews ratings={props.ratings} averagerating={props.averagerating} candidate={props.id}/>
-          </div>
+          <RatingsAndReviews ratings={props.ratings} averagerating={props.averagerating} candidate={props.id}/>
         )}
       </div>
     </div>

@@ -51,9 +51,9 @@ function ProjectProposal({socket}) {
     const [ selectedRegion, setSelectedRegion ] = useState("")
     const [ selectedProvince, setSelectedProvince ] = useState("")
     const [ selectedCity, setSelectedCity ] = useState("")
-    const [ region, setRegion ] = useState()
-    const [ province, setProvince ] = useState()
-    const [ city, setCity ] = useState()
+    const [ region, setRegion ] = useState("")
+    const [ province, setProvince ] = useState("")
+    const [ city, setCity ] = useState("")
 
     const [ steps, setSteps ] = useState([1, 2, 3, 4, 5])
     const [ currentStep, setCurrentStep] = useState(1)
@@ -90,27 +90,33 @@ function ProjectProposal({socket}) {
     useEffect(() => {
       setFilteredRegions([])
       if (selectedRegion!=="") {
-        const data = regions?.filter((item) => item.name.includes(selectedRegion.toUpperCase()))
-        setFilteredRegions(data)
+        if (region==="") {
+          const data = regions?.filter((item) => item.name.includes(selectedRegion.toUpperCase()))
+          setFilteredRegions(data)
+        }
       }
     }, [selectedRegion])
 
     useEffect(() => {
       setFilteredProvinces([])
       if (selectedProvince!=="") {
-        const data = provinces?.filter((item) => (item.region_code=== region?.id) 
-        && (item.name.includes(selectedProvince.toUpperCase())))
-        setFilteredProvinces(data)
+        if (province==="") {
+          const data = provinces?.filter((item) => (item.region_code=== region?.id) 
+          && (item.name.includes(selectedProvince.toUpperCase())))
+          setFilteredProvinces(data)
+        }
       }
     }, [selectedRegion, selectedProvince])
 
     useEffect(() => {
       setFilteredCities([])
       if (selectedCity!=="") {
-        const data = cities?.filter((item) => (item.region_code=== region?.id) && 
-        (item.province_code=== province?.id) && 
-        (item.name.includes(selectedCity.toUpperCase())))
-        setFilteredCities(data)
+        if (city==="") {
+          const data = cities?.filter((item) => (item.region_code=== region?.id) && 
+          (item.province_code=== province?.id) && 
+          (item.name.includes(selectedCity.toUpperCase())))
+          setFilteredCities(data)
+        }
       }
     }, [selectedRegion, selectedProvince, selectedCity])
 
@@ -253,7 +259,7 @@ function ProjectProposal({socket}) {
     }
 
     return (
-      <div className="projectRequest">
+      <div className="projectRequestApplication">
         <div className="projectRequestFormTop">
             <h3>Request Form</h3> 
             <button className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=> navigate(-1)}>Cancel</button>
@@ -274,7 +280,10 @@ function ProjectProposal({socket}) {
           <form className="projectRequestForm" onSubmit={submitHandler}>
           {currentStep===1 && (
             <div className="eachStep">
-              <h4><b>Step 1:</b> Select application type.</h4>
+              <div className="requiredLabel">
+                <h4><b>Step 1:</b> Select application type.</h4>
+                <p className="requiredAlert"> <b> *</b></p>
+              </div>
               <br />
               <div onChange={(e) => {
                   setRequestType(e.target.value)
@@ -303,7 +312,7 @@ function ProjectProposal({socket}) {
                     </div>
                   </div>
                 :<div className="mb-2 eachStep">
-                  <label>Selected Project Request, automatically set to Part-time employment.</label>
+                  <label>Selected Project Request, automatically set to <b>Part-time employment</b>.</label>
                 </div>}
               </div>
 
@@ -318,7 +327,10 @@ function ProjectProposal({socket}) {
 
           {currentStep===2 && (
             <div className="eachStep">
-              <h4><b>Step 2:</b> Select the specific skill required.</h4>
+              <div className="requiredLabel">
+                <h4><b>Step 2:</b> Select the specific skill required.</h4>
+                <p className="requiredAlert"> <b> *</b></p>
+              </div>
               {isSkill===false && (
                 <label>Please select the skill you are looking for.</label>
               )}
@@ -400,8 +412,12 @@ function ProjectProposal({socket}) {
           )}
 
           {currentStep===3 && (
-            <div className="mb-2 eachStep">
-              <h4><b>Step 3:</b> Indicate minimum qualifications. </h4>
+            <div className="eachStep">
+              <div className="requiredLabel">
+                <h4><b>Step 3:</b> Indicate minimum qualifications. </h4>
+                <p className="requiredAlert"> <b> *</b></p>
+              </div>
+              
               <br />
               <div onChange={e => {
                 setMinimumReq(e.target.value)
@@ -418,6 +434,7 @@ function ProjectProposal({socket}) {
                   setReqSpecified(e.target.value)
                   step3Check(e.target.value)
                 }} value={reqSpecified} type="text" className="form-control" placeholder="NC I-III passer, High school graduate..."/>
+                <p className="requiredAlert"> <b> *</b></p>
                 </div>
               :<></>}
               <br />
@@ -443,34 +460,50 @@ function ProjectProposal({socket}) {
           )}
 
           {currentStep===4 && (
-            <div className="mb-2 eachStep">
-              <h4><b>Step 4:</b> Add full {requestType} request details.</h4>
+            <div className="eachStep">
+              <div className="requiredLabel">
+                <h4><b>Step 4:</b> Add full {requestType} request details.</h4>
+                <p className="requiredAlert"> <b> *</b></p>
+              </div>
               <div className="mb-2">
-                <label>{requestType} Title:</label>
+                <div className="requiredLabel">
+                  <label>{requestType} Title:</label>
+                  <p className="requiredAlert"> <b> *</b></p>
+                </div>
                 <input required onChange={e => {
                   setTitle(e.target.value) 
                   inputCheck()
                 }} value={title} type="text" className="form-control" />
               </div>
               <div className="mb-2">
-                <label>Expected Sallary (in Philippine Pesos):</label>
+                <div className="requiredLabel">
+                  <label>Expected Sallary (in Philippine Pesos):</label>
+                  <p className="requiredAlert"> <b> *</b></p>
+                </div>
                 <input required onChange={e => {
                   setSallary(e.target.value)
                   inputCheck()
                 }} value={sallary} type="number" className="form-control" />
               </div>
               <div className="mb-2"> 
-                <label>{requestType} Duration (in Months):</label>
+                <div className="requiredLabel">
+                  <label>{requestType} Duration (in Months):</label>
+                  <p className="requiredAlert"> <b> *</b></p>
+                </div>
                 <input required onChange={e => {
                   setDuration(e.target.value)
                   inputCheck()
                 }} value={duration} type="number" className="form-control" />
               </div>
 
-              <div className="mb-2 centerLocation"> 
-                <label>Work Location:</label>
+              <div className="locationWrapper"> 
+                <label>Location:</label>
                 <div className="location">
-                    <label>Region:</label>
+                    <div className="requiredLabel">
+                      <label>Region:</label>
+                      <p className="requiredAlert"> <b> *</b></p>
+                    </div>
+
                     <input required onChange={e => {
                       setSelectedRegion(e.target.value)
                       inputCheck()
@@ -493,7 +526,11 @@ function ProjectProposal({socket}) {
                 </div>
 
                 <div className="location">
-                  <label>Province:</label>
+                  <div className="requiredLabel">
+                    <label>Province:</label>
+                    <p className="requiredAlert"> <b> *</b></p>
+                  </div>
+                  
                   <input required onChange={e => {
                     setSelectedProvince(e.target.value)
                     inputCheck()
@@ -516,7 +553,11 @@ function ProjectProposal({socket}) {
                 </div>
 
                 <div className="location">
-                  <label>City:</label>
+                  <div className="requiredLabel">
+                    <label>City:</label>
+                    <p className="requiredAlert"> <b> *</b></p>
+                  </div>
+                  
                   <input required onChange={e => {
                     setSelectedCity(e.target.value)
                     inputCheck()
@@ -538,9 +579,13 @@ function ProjectProposal({socket}) {
                   )}
                 </div>
               </div>
-
+              <br />
               <div className="mb-2">
-                <label>{requestType} Description:</label>
+                <div className="requiredLabel">
+                  <label>{requestType} Description:</label>
+                  <p className="requiredAlert"> <b> *</b></p>
+                </div>
+
                 <input required onChange={e => {
                   setDescription(e.target.value)
                   inputCheck()
@@ -555,9 +600,16 @@ function ProjectProposal({socket}) {
               <div className="mb-2">
                 <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
               </div>
+              <br />
               <div className="nextPageBtn">
                 <div>
                   <button className="btn btn-sm btn-outline-secondary cancelBtn" type="button" onClick={()=> {
+                    setSelectedRegion("")
+                    setSelectedProvince("")
+                    setSelectedCity("")
+                    setRegion("")
+                    setProvince("")
+                    setCity("")
                     setTitle("")
                     setSallary("")
                     setDuration("")
@@ -629,21 +681,33 @@ function ProjectProposal({socket}) {
                 </div>
               </div>
               <div>
-                <label>Question #1:</label>
+                <div className="requiredLabel">
+                  <label>Question #1:</label>
+                  <p className="requiredAlert"> <b> *</b></p>
+                </div>
+                
                 <input required onChange={e => {
                   setQuestion1(e.target.value)
                   questionCheck()
                 }} value={question1} type="text" className="form-control"/>
               </div>
               <div>
-                <label>Question #2:</label>
+                <div className="requiredLabel">
+                  <label>Question #2:</label>
+                  <p className="requiredAlert"> <b> *</b></p>
+                </div>
+
                 <input required onChange={e => {
                   setQuestion2(e.target.value)
                   questionCheck()
                 }} value={question2} type="text" className="form-control"/>
               </div>
               <div>
-                <label>Question #3:</label>
+                <div className="requiredLabel">
+                  <label>Question #3:</label>
+                  <p className="requiredAlert"> <b> *</b></p>
+                </div>
+
                 <input required onChange={e => {
                   setQuestion3(e.target.value)
                   questionCheck()

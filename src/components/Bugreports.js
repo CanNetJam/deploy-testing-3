@@ -31,24 +31,21 @@ function BugReports() {
     }
     
     return (
-        <div >
-            <h3>Bug Report</h3>
-                        <div className="galleryForm">
-                            <form className="p-3 bg-success bg-opacity-25 mb-5" onSubmit={submitHandler}>
-                                <h3>Select a photo (Required!)</h3>
-                                    <div className="mb-2">
-                                        <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
-                                    </div>
-                                    {isPhoto===false ? <div className="alert"><p>Please select a photo to upload!</p></div> : <></>}
-                                    <div className="mb-2">
-                                        <input required onChange={e => setTitle(e.target.value)} value={title} type="text" className="form-control" placeholder="Title of the bug report." />
-                                    </div>
-                                    <div className="mb-2">
-                                        <input required onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder="Explain how you think the bug happen." />
-                                    </div>
-                                <button className="btn btn-sm btn-primary">Send Report</button>
-                            </form>
-                        </div>
+        <div>
+            <form className="settingsForm" onSubmit={submitHandler}>
+                <label>Select a photo (Required!)</label>
+                <div className="mb-2">
+                    <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
+                </div>
+                {isPhoto===false ? <div className="alert"><p>Please select a photo to upload!</p></div> : <></>}
+                <div className="mb-2">
+                    <input required onChange={e => setTitle(e.target.value)} value={title} type="text" className="form-control" placeholder="Title of the bug report." />
+                </div>
+                <div className="mb-2">
+                    <input required onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder="Explain how you think the bug happen." />
+                </div>
+                <button className="btn btn-sm btn-primary">Send Report</button>
+            </form>
         </div>  
     )
 }

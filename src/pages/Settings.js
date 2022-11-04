@@ -73,18 +73,12 @@ function Settings(){
     
     return (
     <div className="settings">
-        <div>
-            <div>
-                <h3>Found a bug from the website? Submit reports to us so we can fix it immediately!</h3>
-            </div>
-            <div>
+            <div className="settingsform">
+                <h3>Encountered a bug? Submit a report to us so we can fix it immediately!</h3>
                 <BugReports />
             </div>
-        </div>
-        <div>
-            <h1>Change Password:</h1>
-        </div>
-        <div>
+            <br />
+            <h3>Change Password:</h3>
             <form className="settingsForm" onSubmit={submitHandler}>
                 <div className="mb-1">
                     <label>Email:</label>
@@ -132,7 +126,7 @@ function Settings(){
                     Cancel
                 </button>
             </form>
-        </div>
+ 
     </div>
     )
 }
