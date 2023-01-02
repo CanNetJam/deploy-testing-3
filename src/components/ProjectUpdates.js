@@ -6,6 +6,7 @@ import {format} from "timeago.js"
 import moment from "moment"
 
 function ProjectUpdates({projectid, employer, freelancer, ongoing, socket}) {
+    const cloud_name = "dzjkgjjut"
     const { userData, setUserData } = useContext(UserContext)
     const [ theFree, setTheFree ] = useState(false)
     const [ theEmp, setTheEmp ] = useState(false)
@@ -153,7 +154,7 @@ function ProjectUpdates({projectid, employer, freelancer, ongoing, socket}) {
                                     :<></>}
                                     
                                     <div className="projectUpdatePhoto">
-                                        <img src={a.photo ? `/uploaded-photos/${a.photo}` : "/fallback.png"} alt={`${a.title} named ${a.title}`} />
+                                        <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.image}.jpg` : "/fallback.png"} alt={`${a.title} named ${a.title}`}></img>
                                     </div>
                                     <p>Title: {a.title!== "" ? a.title : "Waiting for project update."}<br />
                                     Description: {a.description!== "" ? a.description : "Waiting for project update."}</p>

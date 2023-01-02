@@ -5,6 +5,7 @@ import { UserContext } from "../home"
 import {format} from "timeago.js"
 
 function Hiring() {
+    const cloud_name = "dzjkgjjut"
     let navigate = useNavigate()
     const { userData, setUserData } = useContext(UserContext)
     const [ projects, setProjects ] = useState([])
@@ -257,7 +258,7 @@ function Hiring() {
                                 }
                             }}>
                                 <div className="searchHiringTop">
-                                    <img className="hiringImg" src={a.photo ? `/uploaded-photos/${a.photo}` : "/fallback.png"} alt=""/>
+                                    <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.image}.jpg` : "/fallback.png"} className="hiringImg" alt={`${a.company} named ${a.title}`}></img>
                                     <div>
                                         <p>Looking for {a.employmenttype}: {a.skillrequired}</p>
                                     </div>

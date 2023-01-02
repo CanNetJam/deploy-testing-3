@@ -40,6 +40,7 @@ function AllRequests({socket}){
                   description ={projects.description} 
                   skillrequired ={projects.skillrequired} 
                   photo={projects.photo}
+                  image={projects.image}
                   employer={projects?.employer}
                   creationdate={projects.creationdate}
                   sallary={projects.sallary}
@@ -56,8 +57,8 @@ function AllRequests({socket}){
 }
 
 function Projects(props) {
+    const cloud_name = "dzjkgjjut"
     const [isEditing, setIsEditing] = useState(false)
-    const [file, setFile] = useState()
     const [draftStatus, setDraftStatus] = useState("")
     const [draftTitle, setDraftTitle] = useState("")
     const [draftCompany, setDraftCompany] = useState("")
@@ -83,9 +84,6 @@ function Projects(props) {
       e.preventDefault()
       setIsEditing(false)
       const data = new FormData()
-      if (file) {
-        data.append("photo", file)
-      }
       data.append("_id", props._id)
       data.append("requeststatus", draftStatus)
       data.append("title", draftTitle)
@@ -147,7 +145,7 @@ function Projects(props) {
           {isEditing && (
             <div className="our-custom-input"></div>
           )}
-          <img src={props.photo ? `/uploaded-photos/${props.photo}` : "/fallback.png"} className="card-img-top" alt={`${props.employername} named ${props.title}`} />
+          <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${props.image}.jpg` : "/fallback.png"} className="card-img-top" alt={`${props.employername} named ${props.title}`}></img>
         </div>
         <div className="card-body">
           {!isEditing && (
@@ -183,7 +181,6 @@ function Projects(props) {
 
                       setDraftCreationDate(props.creationdate)
                       setDraftApprovalDate(() => Date.now())
-                      setFile(props.photo)
                       setIsApproved(true)
                       if (props.type==="Project Request") {
                         setDraftType("Project")
@@ -213,18 +210,12 @@ function Projects(props) {
                       setDraftProvince(props.location.province)
                       setDraftCity(props.location.city)
                       setDraftCreationDate(props.creationdate)
-                      setFile(props.photo) 
                       setIsDenied(true)
-                      if (props.type==="Project Request") {
-                        setDraftType("Project")
-                      }
-                      if (props.type==="Job Request") {
-                        setDraftType("Job")
-                      }
+                      setDraftType(props.type)
                       setDraftNote("")
                       setStatus("")
                     }}
-                    className="btn btn-sm btn-primary"
+                    className="btn btn-sm btn-outline-secondary cancelBtn"
                   > 
                     Deny
                   </button>{" "}
@@ -283,10 +274,10 @@ function Projects(props) {
                         <input autoFocus onChange={e => setDraftNote(e.target.value)} type="text" className="form-control form-control-sm" value={draftNote} placeholder="Brief explanation on the project termination."/>
                     </div>
               )}
-              <button className="btn btn-sm btn-success">
+              <button className="btn btn-sm btn-primary">
                 Confirm
               </button>{" "}
-              <button onClick={() => [setIsEditing(false), setIsApproved(false), setIsDenied(false)]} className="btn btn-sm btn-outline-secondary">
+              <button onClick={() => [setIsEditing(false), setIsApproved(false), setIsDenied(false)]} className="btn btn-sm btn-outline-secondary cancelBtn">
                 Cancel
               </button>
             </form>

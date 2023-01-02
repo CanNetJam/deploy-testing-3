@@ -49,7 +49,7 @@ function SearchBox({projectid, projecttype}) {
             isCancelled = true
         }
     }, [query, searchBy, sortBy, searchCount])
-    
+
     useEffect(() => {
         const getFiltered = async () => {
             setResult([])

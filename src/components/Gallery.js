@@ -4,6 +4,8 @@ import Axios from "axios"
 import GalleryPhotos from "./GalleryPhotos"
 
 function Gallery(props) {
+    const api_key = "848182664545332"
+    const cloud_name = "dzjkgjjut"
     const { userData, setUserData } = useContext(UserContext)
     const [ addPhoto, setAddPhoto ] = useState(false)
     const [ title, setTitle ] = useState("")
@@ -75,6 +77,28 @@ function Gallery(props) {
         if (description) {
             data.append("description", description)
         }
+
+        const signatureResponse = await Axios.get("/get-signature")
+
+        const image = new FormData()
+        image.append("file", file)
+        image.append("api_key", api_key)
+        image.append("signature", signatureResponse.data.signature)
+        image.append("timestamp", signatureResponse.data.timestamp)
+      
+        const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: function (e) {
+            console.log(e.loaded / e.total)
+          }
+        })
+        let cloud_image = cloudinaryResponse.data.public_id
+  
+        data.append("image", cloud_image)
+        data.append("public_id", cloudinaryResponse.data.public_id)
+        data.append("version", cloudinaryResponse.data.version)
+        data.append("signature", cloudinaryResponse.data.signature)
+
         CreatePhotoField.current.value = ""
         const res = await Axios.post(`/api/gallery/upload-photo/${userData?.user.id}`, data, { headers: { "Content-Type": "multipart/form-data" } })
         setTitle("")
@@ -110,8 +134,8 @@ function Gallery(props) {
             </div>
                 <div>
                     {addPhoto && (
-                        <div className="galleryForm">
-                            <form className="p-3 bg-success bg-opacity-25 mb-5" onSubmit={submitHandler}>
+                        <div>
+                            <form  onSubmit={submitHandler}>
                                 <h3>Select a photo (Required!)</h3>
                                     <div className="mb-2">
                                         <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
@@ -139,6 +163,7 @@ function Gallery(props) {
                         title={photo.title}
                         username={photo.username}
                         photo={photo.photo}
+                        image={photo.image}
                         description={photo.description}
                         createdAt={photo.createdAt}
                         setPhotos={setPhotos}/>

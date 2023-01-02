@@ -3,10 +3,11 @@ import {UserContext} from "../home"
 import Axios from "axios"
 
 function MyRequests() {
+    const cloud_name = "dzjkgjjut"
     const { userData, setUserData } = useContext(UserContext)
     const [ requests, setRequests ] = useState([])
     const [ tab, setTab ] = useState("Pending")
-    
+
     useEffect(() => {
         async function go() {
           const response = await Axios.get(`/api/pending-requests/${userData.user.id}/${tab}`)
@@ -45,7 +46,7 @@ function MyRequests() {
                             return (
                                 <div className="card" key={idPlusKey(a._id, userData.user.id)}>
                                     <div className="our-project-card-top">
-                                        <img src={a.photo ? `/uploaded-photos/${a.photo}` : "/fallback.png"} className="card-img-top" alt={`${a.company} named ${a.title}`} />
+                                        <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.image}.jpg` : "/fallback.png"} className="card-img-top" alt={`${a.company} named ${a.title}`}></img>
                                     </div>
                                     <div className="card-body">
                                         <h3><b>Type:</b> {a.type}</h3>
@@ -54,6 +55,9 @@ function MyRequests() {
                                         <p className="text-muted small">Company: {a.company}</p>
                                         <p className="text-muted small">Skill Required: {a.skillrequired}</p>
                                         <p className="text-muted small">Description: {a.description}</p>
+                                        {a.requeststatus==="Denied" ? 
+                                            <p className="text-muted small">Disapproval reason: {a.note ? a.note : <i>Not Specified.</i>}</p>
+                                        :<></>}
                                     </div>
                                 </div>
                             )

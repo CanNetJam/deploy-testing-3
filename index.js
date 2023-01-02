@@ -6,8 +6,15 @@ const path = require("path")
 const sanitizeHTML = require("sanitize-html")
 const fse = require("fs-extra")
 const bcrypt = require("bcrypt")
+const mongoose = require("mongoose")
+const jwt = require("jsonwebtoken")
+const auth = require("./middleware/auth")
+const fs = require('fs')
+const cors = require("cors") 
+const cloudinary = require("cloudinary").v2
 const dotenv = require("dotenv")
 dotenv.config()
+
 const accounts = require("./models/accounts")
 const projects = require("./models/projects")
 const conversations = require("./models/conversations")
@@ -19,12 +26,6 @@ const gallery = require("./models/gallery")
 const notifications = require("./models/notifications")
 const answers = require("./models/answers")
 const bugreports = require("./models/bugreports")
-
-const mongoose = require("mongoose")
-const jwt = require("jsonwebtoken")
-const auth = require("./middleware/auth")
-const fs = require('fs')
-const cors = require("cors") 
 
 fse.ensureDirSync(path.join("public", "uploaded-photos"))
 
@@ -43,9 +44,16 @@ const server = app.listen(PORT,
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "https://deploy-testing-3.herokuapp.com/"
-    //origin: "http://localhost:3000"
+    //origin: "https://deploy-testing-3.herokuapp.com/"
+    origin: "http://localhost:3000"
   }
+})
+
+const cloudinaryConfig = cloudinary.config({
+  cloud_name: process.env.CLOUDNAME,
+  api_key: process.env.CLOUDAPIKEY,
+  api_secret: process.env.CLOUDINARYSECRET,
+  secure: true
 })
 
 const storage = multer.diskStorage({
@@ -58,8 +66,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-//mongoose.connect("mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin", {
-mongoose.connect(process.env.CONNECTIONSTRING , {
+mongoose.connect("mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin", {
+//mongoose.connect(process.env.CONNECTIONSTRING , {
 	useNewUrlParser: true,
 	useUnifiedTopology: true
 })
@@ -126,6 +134,18 @@ io.on("connection", (socket)=> {
 //Routes---------------------------------------------------------------------------------------------
 app.get("/", (req, res)=>{
   res.render("index", {})
+})
+
+//Cloudinary---------------------------------------------------------------------------------------------
+app.get("/get-signature", (req, res) => {
+  const timestamp = Math.round(new Date().getTime() / 1000)
+  const signature = cloudinary.utils.api_sign_request(
+    {
+      timestamp: timestamp
+    },
+    cloudinaryConfig.api_secret
+  )
+  res.json({ timestamp, signature })
 })
 
 //Dashboard---------------------------------------------------------------------------------------------
@@ -227,7 +247,7 @@ app.get("/api/pending-projects/:type", auth, async (req, res) => {
 app.get("/api/denied-projects/:type", auth, async (req, res) => {
   if(req.params.type==="Admin") {
     try {
-      const allProjects = await projects.find({type: {$in: ["Job Request", "Project Request"]}, requeststatus: "Denied"})
+      const allProjects = await projects.find({type: {$in: ["Job Request", "Job", "Project Request", "Project"]}, requeststatus: "Denied"})
       .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
       res.status(200).json(allProjects)
     } catch (err) {
@@ -334,6 +354,7 @@ app.get("/profile/user", auth, async (req, res) => {
     skill: user.skill,
     about: user.about,
     photo: user.photo,
+    image: user.image,
     type: user.type,
     email: user.email,
     company: user.company,
@@ -347,12 +368,21 @@ app.get("/profile/user", auth, async (req, res) => {
 app.post("/update-account", upload.single("photo"), profileCleanup, async (req, res) => {
   if (req.file) {
     // if they are uploading a new photo
+    const expectedSignature = cloudinary.utils.api_sign_request({ public_id: req.body.public_id, version: req.body.version }, cloudinaryConfig.api_secret)
+    if (expectedSignature === req.body.signature) {
+      req.cleanData.image = req.body.image
+    }
+
     req.cleanData.photo = req.file.filename
     const info = await accounts.findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: req.cleanData })
     if (info.photo) {
       fse.remove(path.join("public", "uploaded-photos", info.photo))
     } 
-    res.send(req.file.filename)
+    if (info.image) {
+      cloudinary.uploader.destroy(info.image)
+    }
+
+    res.send(req.body.image)
   } else {
     // if they are not uploading a new photo
     await accounts.findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: req.cleanData })
@@ -372,6 +402,12 @@ app.delete("/account/:id", async (req, res) => {
 //Project---------------------------------------------------------------------------------------------
 app.post("/create-project", upload.single("photo"), projectCleanup, async (req, res) => {  
   if (req.file) {
+
+    const expectedSignature = cloudinary.utils.api_sign_request({ public_id: req.body.public_id, version: req.body.version }, cloudinaryConfig.api_secret)
+    if (expectedSignature === req.body.signature) {
+      req.cleanData.image = req.body.image
+    }
+
     req.cleanData.photo = req.file.filename
     const obj = {
       title: req.cleanData.title,
@@ -390,6 +426,7 @@ app.post("/create-project", upload.single("photo"), projectCleanup, async (req, 
         city: req.body.city,
       },
       others: req.cleanData.others,
+      image: req.cleanData.image,
       minimumreq: {
         what: req.body.minimumreq,
         note: req.body.reqspecified ? req.body.reqspecified : "",
@@ -422,6 +459,7 @@ app.post("/create-project", upload.single("photo"), projectCleanup, async (req, 
         city: req.body.city,
       },
       others: req.cleanData.others,
+      image: req.body.image,
       minimumreq: {
         what: req.body.minimumreq,
         note: req.body.reqspecified ? req.body.reqspecified : "",
@@ -592,25 +630,36 @@ app.get("/api/updates/:projectid", async (req, res) => {
 })
 
 app.post("/api/project-update/edit", upload.single("photo"), async (req, res) => {
-  const obj = {
-    title: req.body.title,
-    description: req.body.description,
-    uploadedby: req.body.uploadedby, 
-  }
-  // if they are uploading a new photo
   if (req.file) {
+    const obj = {
+      title: req.body.title,
+      description: req.body.description,
+      uploadedby: req.body.uploadedby, 
+    }
+
+    const expectedSignature = cloudinary.utils.api_sign_request({ public_id: req.body.public_id, version: req.body.version }, cloudinaryConfig.api_secret)
+    if (expectedSignature === req.body.signature) {
+      obj.image = req.body.image
+    }
     try {
       obj.photo = req.file.filename
       const info = await pUpdates.findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: obj })
       if (info.photo) {
         fse.remove(path.join("public", "uploaded-photos", info.photo))
       } 
+      if (info.image) {
+        cloudinary.uploader.destroy(info.image)
+      }
       res.status(200).json(info)
     } catch (err) {
       res.status(500).json(err)
     }
   } else {
-    // if they are not uploading a new photo
+    const obj = {
+      title: req.body.title,
+      description: req.body.description,
+      uploadedby: req.body.uploadedby, 
+    }
     try {
       const info = await pUpdates.findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: obj })
       res.status(200).json(info)
@@ -870,7 +919,7 @@ app.post("/api/add-tag/", async (req, res)=> {
 app.get("/api/search-profile/:user", async (req, res) => {
   const userid = req.params.user
   try {
-    const user = await accounts.findById(userid).populate({path:"currentprojects", select:["type", "title", "duration", "acceptdate"]})
+    const user = await accounts.findById(userid).populate({path:"currentprojects", select:["type", "title", "duration", "acceptdate", "status"]})
     if (user) {
       res.status(200).json({
         id: user._id,
@@ -1011,6 +1060,12 @@ app.post("/api/gallery/upload-photo/:userId", upload.single("photo"), async (req
       title: req.body.title,
       description: req.body.description,
     }
+
+    const expectedSignature = cloudinary.utils.api_sign_request({ public_id: req.body.public_id, version: req.body.version }, cloudinaryConfig.api_secret)
+    if (expectedSignature === req.body.signature) {
+      obj.image = req.body.image
+    }
+
     try {
       obj.photo = req.file.filename
       const info = await gallery.create(obj, (err, item) => {
@@ -1057,6 +1112,9 @@ app.delete("/api/gallery/delete-photo/:photoId", async (req, res) => {
       const doc = await gallery.findOne({ _id: new ObjectId(req.params.photoId) })
   if (doc.photo) {
       fse.remove(path.join("public", "uploaded-photos", doc.photo))
+  }
+  if (doc.image) {
+    cloudinary.uploader.destroy(doc.image)
   }
   try {
     const deleted = await gallery.deleteOne(doc) 

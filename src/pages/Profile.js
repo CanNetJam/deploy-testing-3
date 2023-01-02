@@ -32,6 +32,7 @@ function Profile(){
           age ={Accounts.age} 
           address ={Accounts.address} 
           photo={Accounts.photo} 
+          image={Accounts.image} 
           id={location.state?.account ? location.state?.account._id : Accounts.id} 
           about ={Accounts.about} 
           company ={Accounts.company} 
@@ -49,10 +50,11 @@ function Profile(){
 
 function UserProfile(props) {
   const location = useLocation()
+  const api_key = "848182664545332"
+  const cloud_name = "dzjkgjjut"
   const { userData, setUserData } = useContext(UserContext)
   const [isEditing, setIsEditing] = useState(false)
   const [file, setFile] = useState()
-  const [file2, setFile2] = useState()
   const [draftFirstName, setDraftFirstName] = useState("")
   const [draftLastName, setDraftLastName] = useState("")
   const [draftMiddleName, setDraftMiddleName] = useState("")
@@ -124,6 +126,37 @@ function UserProfile(props) {
     const data = new FormData()
     if (file) {
       data.append("photo", file)
+      const signatureResponse = await Axios.get("/get-signature")
+
+      const image = new FormData()
+      image.append("file", file)
+      image.append("api_key", api_key)
+      image.append("signature", signatureResponse.data.signature)
+      image.append("timestamp", signatureResponse.data.timestamp)
+    
+      const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: function (e) {
+          console.log(e.loaded / e.total)
+        }
+      })
+      let cloud_image = cloudinaryResponse.data.public_id
+  
+      data.append("image", cloud_image)
+      data.append("public_id", cloudinaryResponse.data.public_id)
+      data.append("version", cloudinaryResponse.data.version)
+      data.append("signature", cloudinaryResponse.data.signature)
+
+      if (cloudinaryResponse) {
+        props.setAccounts(prev => {
+          return prev.map(function (Accounts) {
+            if (Accounts.id == props.id) {
+              return { ...Accounts, image: cloud_image }
+            }
+            return Accounts
+          })
+        })
+      }
     }
     data.append("_id", props.id)
     data.append("firstname", draftFirstName)
@@ -160,17 +193,6 @@ function UserProfile(props) {
         console.log(err)
       }
     }
-   
-    if (newPhoto.data) {
-      props.setAccounts(prev => {
-        return prev.map(function (Accounts) {
-          if (Accounts.id == props.id) {
-            return { ...Accounts, photo: newPhoto.data }
-          }
-          return Accounts
-        })
-      })
-    }
   }
 
   function expectedMonth(props){
@@ -178,16 +200,27 @@ function UserProfile(props) {
     let c = Number(moment(props.acceptdate).format("YYYY"))
     let d = props.duration
     let total = a
-    for(let i = 0; i<d ; i++){
-      total += 1
+    if (d<12) {
+      for(let i = 0; i<d ; i++){
+        total += 1
+      }
+      if (total>12) {
+        total= total-12,
+        c= c+1
+      }
+      return {
+        month: Number(total-1),
+        year: Number(c)
+      }
     }
-    if (total>12) {
-      total= total-12,
-      c= c+1
-    }
-    return {
-      month: Number(total-1),
-      year: Number(c)
+    if (d>12) {
+      total = d%12
+      let yeartotal = parseInt(d/12)
+      c= c+yeartotal
+      return {
+        month: Number(total-1),
+        year: Number(c)
+      }
     }
   }
 
@@ -207,7 +240,7 @@ function UserProfile(props) {
               </div>
             </div>
           )}
-          <img className="profile-ProfilePhoto"src={props.photo ? `/uploaded-photos/${props.photo}` : "/fallback.png"} alt={`${props.age} named ${props.lastname}`} />
+          <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${props.image}.jpg` : "/fallback.png"} className="profile-ProfilePhoto" alt={`${props.company} named ${props.title}`}></img>
         </div>
         
         <div className="profileCardTextWrapper">
@@ -322,7 +355,7 @@ function UserProfile(props) {
                     })}
                     {removeTag && (
                       <div>
-                        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={()=> {
+                        <button type="button" className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=> {
                           setTheTag(btnTheTag), setRemoveTag(false)
                         }}>Remove?</button>
                       </div>

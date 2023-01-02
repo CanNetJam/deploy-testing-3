@@ -28,6 +28,9 @@ const userSchema = new mongoose.Schema({
     photo: {
         type: String,
     },
+    image: {
+        type: String,
+    },
     resume: {
         type: String,
     },

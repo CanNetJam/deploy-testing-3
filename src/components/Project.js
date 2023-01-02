@@ -12,6 +12,7 @@ import Questions from "./Questions"
 function Project({socket}) {
     const location = useLocation()
     let navigate = useNavigate()
+    const cloud_name = "dzjkgjjut"
     const { userData, setUserData } = useContext(UserContext)
     const [ projectInfo, setProjectInfo ] = useState(null)
     const [ freeInfo, setFreeInfo ] = useState(false)
@@ -272,16 +273,27 @@ function Project({socket}) {
       let c = Number(moment(projectInfo?.acceptdate).format("YYYY"))
       let d = projectInfo?.duration
       let total = a
-      for(let i = 0; i<d ; i++){
-        total += 1
+      if (d<12) {
+        for(let i = 0; i<d ; i++){
+          total += 1
+        }
+        if (total>12) {
+          total= total-12,
+          c= c+1
+        }
+        return {
+          month: Number(total-1),
+          year: Number(c)
+        }
       }
-      if (total>12) {
-        total= total-12,
-        c= c+1
-      }
-      return {
-        month: Number(total-1),
-        year: Number(c)
+      if (d>12) {
+        total = d%12
+        let yeartotal = parseInt(d/12)
+        c= c+yeartotal
+        return {
+          month: Number(total-1),
+          year: Number(c)
+        }
       }
     }
     let expectedDate = expectedMonth()
@@ -298,7 +310,7 @@ function Project({socket}) {
                     <div className="projectCardTop">
                       <div>
                         <div>
-                          <img className="card-img-top projectPhoto" src={projectInfo.photo ? `/uploaded-photos/${projectInfo.photo}` : "/fallback.png"} alt={`${projectInfo.company} named ${projectInfo.title}`} />
+                          <img src={projectInfo.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${projectInfo.image}.jpg` : "/fallback.png"} className="card-img-top projectPhoto" alt={`${projectInfo.company} named ${projectInfo.title}`}></img>
                         </div>
                         <br />
 
@@ -365,12 +377,16 @@ function Project({socket}) {
                                   if (ending===true) {
                                     setEnding(false)
                                   }
-                                  }}>Accomplish {projectInfo.type}</button>
+                                }}>Accomplish {projectInfo.type}</button>
                                 {ending && (
                                   <form onSubmit={endProject}>
-                                    <p>Please type "Accomplished" to proceed.</p>
-                                    <input onChange={e => setEnd(e.target.value)} value={end} type="text"/>
-                                    <button className="btn btn-sm btn-primary">Confirm</button>
+                                    <div>
+                                      <p>Please type "Accomplished" to proceed.</p>
+                                      <input onChange={e => setEnd(e.target.value)} value={end} type="text"/>
+                                    </div>
+                                    <div>
+                                      <button className="btn btn-sm btn-primary">Confirm</button>
+                                    </div>
                                   </form>
                                 )}
                               </div>
@@ -488,7 +504,7 @@ function Project({socket}) {
                                           <button className="btn btn-sm btn-primary" onClick={()=> {acceptedYes(), setAccepted(true)}}>
                                             Accept {projectInfo.type}
                                           </button>
-                                          <button className="btn btn-sm btn-primary" onClick={()=> setToCancel(true)}>
+                                          <button className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=> setToCancel(true)}>
                                             Reject {projectInfo.type}
                                           </button>
                                         </div>
@@ -523,7 +539,7 @@ function Project({socket}) {
                           </div>
                         )}
                         <p className="text-muted small">Date submitted: {moment(projectInfo.creationdate).format("MMM. DD, YYYY")}</p>
-                        <p className="text-muted small">Date approved: {moment(projectInfo.approvaldate).format("MMM. DD, YYYY")}</p>
+                        <p className="text-muted small">Date approved: {projectInfo?.approvaldate ? moment(projectInfo.approvaldate).format("MMM. DD, YYYY"): "Not approved."}</p>
                         {accepted ? 
                           <div>
                             <p className="text-muted small">Began at: {moment(projectInfo.acceptdate).format("MMM. DD, YYYY")}</p>

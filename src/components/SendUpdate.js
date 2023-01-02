@@ -3,8 +3,9 @@ import {UserContext} from "../home"
 import Axios from "axios"
 
 function SendUpdate(props) {
+    const api_key = "848182664545332"
+    const cloud_name = "dzjkgjjut"
     const { userData, setUserData } = useContext(UserContext)
-
     const [ title, setTitle ] = useState(props.title)
     const [ file, setFile ] = useState("")
     const [ description, setDescription ] = useState(props.description)
@@ -25,8 +26,31 @@ function SendUpdate(props) {
       setFile("")
       setDescription("")
       setUploadedBy("")
+
+      const signatureResponse = await Axios.get("/get-signature")
+
+      const image = new FormData()
+      image.append("file", file)
+      image.append("api_key", api_key)
+      image.append("signature", signatureResponse.data.signature)
+      image.append("timestamp", signatureResponse.data.timestamp)
+    
+      const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: function (e) {
+          console.log(e.loaded / e.total)
+        }
+      })
+      let cloud_image = cloudinaryResponse.data.public_id
+
+      data.append("image", cloud_image)
+      data.append("public_id", cloudinaryResponse.data.public_id)
+      data.append("version", cloudinaryResponse.data.version)
+      data.append("signature", cloudinaryResponse.data.signature)
+
       CreatePhotoField.current.value = ""
       const res =await Axios.post("/api/project-update/edit", data, { headers: { "Content-Type": "multipart/form-data" } })
+      
       const subject = res.data.projectId
       const type = "Project Update"
       const action = "sent a"

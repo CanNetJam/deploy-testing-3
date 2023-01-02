@@ -4,6 +4,7 @@ import {UserContext} from "../home"
 import moment from "moment"
 
 function GalleryPhotos(props) {
+    const cloud_name = "dzjkgjjut"
     const { userData, setUserData } = useContext(UserContext)
     const [ isEditing, setIsEditing ] = useState(false)
     const [ draftTitle, setDraftTitle ] = useState(props.title ? props.title : "")
@@ -30,7 +31,7 @@ function GalleryPhotos(props) {
     return (
         <div className="galleryCard">
                 <div className="galleryPicTop">
-                    <img className="galleryPic" src={props.photo ? `/uploaded-photos/${props.photo}` : "/fallback.png"} alt={`${props.description} named ${props.title}`} />
+                    <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${props.image}.jpg` : "/fallback.png"} className="galleryPic" alt={`${props.description} named ${props.title}`}></img>
                 </div>
                 <div className="galleryPicBot card-body">
                     {!isEditing && (
@@ -71,7 +72,7 @@ function GalleryPhotos(props) {
                                 <input autoFocus onChange={e => setDraftTitle(e.target.value)} type="text" className="form-control form-control-sm" value={draftTitle} placeholder="Edit title..." />
                             </div>
                             <div className="mb-1">
-                                <label>Desription:</label>
+                                <label>Description:</label>
                                 <input autoFocus onChange={e => setDraftDescription(e.target.value)} type="text" className="form-control form-control-sm" value={draftDescription} placeholder="Edit description..."/>
                             </div>
                                 <button className="btn btn-sm btn-primary">Confirm</button>

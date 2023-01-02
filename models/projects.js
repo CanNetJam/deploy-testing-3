@@ -47,6 +47,9 @@ const projectSchema = new mongoose.Schema({
     photo: {
         type: String,
     },
+    image: {
+        type: String,
+    },
     employer: { 
         type: mongoose.Schema.Types.ObjectId, ref: "accounts",
     },
@@ -93,7 +96,10 @@ const projectSchema = new mongoose.Schema({
         what: {type: String},
         note: {type: String}
     },
-    questions: [String]
+    questions: [String],
+    note: {
+        type: String,
+    }
 })
 
 module.exports = mongoose.model("projects", projectSchema)

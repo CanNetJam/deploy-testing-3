@@ -14,6 +14,7 @@ function SearchProfile({socket}) {
     const [ project, setProject ] = useState()
     const [ occupied, setOccupied ] = useState(false)
     const [ currentprj, setCurrentPrj ] = useState(0)
+    const [ available, setAvailable ] = useState(true)
 
     useEffect(() => {
         const user = location?.state?._id
@@ -29,6 +30,12 @@ function SearchProfile({socket}) {
                 }
             })
             setSearchInfo(res.data)
+            if (location?.state?.projecttype==="Job" && occupied) {
+                setAvailable(false)
+            }
+            if (location?.state?.projecttype==="Project" && currentprj>=3) {
+                setAvailable(false)
+            }
             setProject(location?.state?.projectid ? location.state.projectid : null)
           } catch (err) {
             console.log(err)
@@ -36,7 +43,7 @@ function SearchProfile({socket}) {
         }
         getUserData()
     }, [])
-    
+
     async function addCandidate() {
         const projectid = project
         const candidate = searchInfo.id
@@ -125,16 +132,27 @@ function SearchProfile({socket}) {
         let c = Number(moment(props.acceptdate).format("YYYY"))
         let d = props.duration
         let total = a
-        for(let i = 0; i<d ; i++){
-          total += 1
+        if (d<12) {
+            for(let i = 0; i<d ; i++){
+              total += 1
+            }
+            if (total>12) {
+              total= total-12,
+              c= c+1
+            }
+            return {
+              month: Number(total-1),
+              year: Number(c)
+            }
         }
-        if (total>12) {
-          total= total-12,
-          c= c+1
-        }
-        return {
-          month: Number(total-1),
-          year: Number(c)
+        if (d>12) {
+            total = d%12
+            let yeartotal = parseInt(d/12)
+            c= c+yeartotal
+            return {
+              month: Number(total-1),
+              year: Number(c)
+            }
         }
     }
 
@@ -154,21 +172,21 @@ function SearchProfile({socket}) {
                             </div>
                             <br />
                             <div className="searchProfileMid">
-                                {!occupied ? 
+                                {available ? 
                                     <div>
-                                        {currentprj<3 ?
+                                        {userData?.user?.type==="Employer" && (
                                             <div>
-                                                {userData?.user?.type==="Employer" && (
-                                                    <div>
-                                                        <button className="btn btn-sm btn-primary" onClick={()=>{
-                                                            if (project) {
-                                                                addCandidate()
-                                                            }
-                                                        }}>Hire Now!</button>
-                                                    </div>
-                                                )}
+                                                <button className="btn btn-sm btn-primary" onClick={()=>{
+                                                    if (project) {
+                                                        addCandidate()
+                                                    }
+                                                    if (!project) {
+                                                        alert("Please select the job or project to hire the candidate first.")
+                                                        navigate("/project-list")
+                                                    }
+                                                }}>Hire Now!</button>
                                             </div>
-                                        :<></>}
+                                        )}
                                     </div>
                                 :<>You can not hire this person at the moment because the person is currently occupied.</>}
 

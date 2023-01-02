@@ -991,7 +991,7 @@ html, body {
 }
 
 .actionButtonWrapper {
-  display: flex;
+  display:grid;
   justify-content: space-around;
 }
 

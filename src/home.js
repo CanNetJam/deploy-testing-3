@@ -42,9 +42,10 @@ function App() {
   const [ savedNotifications, setSavedNotifications ] = useState([])
   const [ liveNotif, setLiveNotif ] = useState([])
   const [ number, setNumber ] = useState(0)
-  //http://localhost:3000 
+
+  //https://deploy-testing-3.herokuapp.com/
   useEffect(()=> {
-    setSocket(io("https://deploy-testing-3.herokuapp.com/"))
+    setSocket(io("http://localhost:3000"))
   }, [])
 
   useEffect(() => {
@@ -100,18 +101,6 @@ function App() {
     }
     isLoggedIn()
   }, [])
-
-  function conRender() {
-    if (userData.user.type ==="Freelancer"){
-      return <LeftNavFree savedNotifications={savedNotifications} setNumber={setNumber}/>
-    } 
-    if (userData.user.type ==="Employer"){
-      return <LeftNavEmp savedNotifications={savedNotifications} setNumber={setNumber}/>
-    }
-    if (userData.user.type ==="Admin"){
-      return <LeftNavAdmin savedNotifications={savedNotifications} setNumber={setNumber}/>
-    }
-  }
 
   return (
     <div className="all">

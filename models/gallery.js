@@ -13,6 +13,9 @@ const gallerySchema = new mongoose.Schema({
     photo: {
         type: String,
     },
+    image: {
+        type: String,
+    },
     description: {
         type: String,
     },

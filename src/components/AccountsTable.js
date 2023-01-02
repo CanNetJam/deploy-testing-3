@@ -4,6 +4,7 @@ import Axios from "axios"
 import { useNavigate } from "react-router-dom"
 
 function AccountsTable({accounts}) {
+    const cloud_name = "dzjkgjjut"
     let navigate = useNavigate()
     const { userData, setUserData } = useContext(UserContext)
 
@@ -53,7 +54,7 @@ function AccountsTable({accounts}) {
                         <tr key={acc._id}>
                             <td>{((accounts.indexOf(acc))+1)<10 ? "0"+((accounts.indexOf(acc))+1) : ((accounts.indexOf(acc))+1) }</td>
                             <td>{acc.type}</td>
-                            <td><img className="messageImg" src={acc.photo ? `/uploaded-photos/${acc.photo}` : "/fallback.png"} alt=""/></td>
+                            <td><img src={acc.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${acc.image}.jpg` : "/fallback.png"} className="messageImg"></img></td>
                             <td>{acc.firstname}</td>
                             <td>{acc.middlename ? acc.middlename : "-"}</td>
                             <td>{acc.lastname}</td>

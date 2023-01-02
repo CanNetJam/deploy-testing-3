@@ -38,6 +38,7 @@ function AllDenied(){
                     description ={projects.description} 
                     skillrequired ={projects.skillrequired} 
                     photo={projects.photo}
+                    image={projects.image}
                     employer={projects?.employer}
                     creationdate={projects.creationdate}
                     note={projects.note}/>
@@ -50,10 +51,12 @@ function AllDenied(){
 }
 
 function Projects(props) {
+  const cloud_name = "dzjkgjjut"
+
     return (
       <div className="card">
         <div className="our-card-top">
-          <img src={props.photo ? `/uploaded-photos/${props.photo}` : "/fallback.png"} className="card-img-top" alt={`${props.employername} named ${props.title}`} />
+          <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${props.image}.jpg` : "/fallback.png"} className="card-img-top" alt={`${props.employername} named ${props.title}`}></img>
         </div>
         <div className="card-body">
           <h4><b>{props.type}</b></h4>
