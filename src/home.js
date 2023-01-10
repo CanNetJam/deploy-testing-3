@@ -45,7 +45,7 @@ function App() {
 
   //http://localhost:3000
   useEffect(()=> {
-    setSocket(io("https://deploy-testing-3.onrender.com/"))
+    setSocket(io("https://deploy-testing-3.onrender.com"))
   }, [])
 
   useEffect(() => {
