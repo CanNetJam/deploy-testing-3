@@ -44,8 +44,8 @@ const server = app.listen(PORT,
 
 const io = require("socket.io")(server, {
   cors: {
-    //origin: "https://deploy-testing-3.herokuapp.com/"
-    origin: "http://localhost:3000"
+    origin: "https://deploy-testing-3.onrender.com"
+    //origin: "http://localhost:3000"
   }
 })
 
