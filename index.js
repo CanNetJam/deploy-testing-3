@@ -66,8 +66,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-mongoose.connect("mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin", {
-//mongoose.connect(process.env.CONNECTIONSTRING , {
+//mongoose.connect("mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin", {
+mongoose.connect(process.env.CONNECTIONSTRING , {
 	useNewUrlParser: true,
 	useUnifiedTopology: true
 })
