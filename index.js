@@ -288,6 +288,7 @@ app.post("/api/create-account/:type", upload.single("photo"), auth, registerClea
     }
     const newPassword = await bcrypt.hash(req.body.password, 10)
     req.cleanData.password = newPassword
+
     if (req.file) {
       req.cleanData.photo = req.file.filename
       const obj = {
@@ -295,7 +296,11 @@ app.post("/api/create-account/:type", upload.single("photo"), auth, registerClea
         lastname: req.cleanData.lastname,
         middlename: req.cleanData.middlename,
         age: req.cleanData.age,
-        address: req.cleanData.address,
+        location: {
+          region: req.cleanData.region,
+          province: req.cleanData.province,
+          city: req.cleanData.city,
+        },
         email: req.cleanData.email,
         password: req.cleanData.password,
         photo: req.cleanData.photo,
@@ -311,7 +316,23 @@ app.post("/api/create-account/:type", upload.single("photo"), auth, registerClea
         }
       })
     } else {
-      await accounts.create(req.cleanData)
+      const obj = {
+        firstname: req.cleanData.firstname,
+        lastname: req.cleanData.lastname,
+        middlename: req.cleanData.middlename,
+        age: req.cleanData.age,
+        location: {
+          region: req.cleanData.region,
+          province: req.cleanData.province,
+          city: req.cleanData.city,
+        },
+        email: req.cleanData.email,
+        password: req.cleanData.password,
+        photo: req.cleanData.photo,
+        type: req.cleanData.type,
+        sex: req.cleanData.sex
+      }
+      await accounts.create(obj)
       res.status(200).send(true)
     }
 })
@@ -338,6 +359,17 @@ app.post("/api/login", loginCleanup, async (req, res) =>{
         }
       })
     }
+  }
+})
+
+app.post("/api/logout/:userid",  async (req, res) =>{
+  const logout = await accounts.findOne({_id: req.params.userid})
+  if ( !logout) {
+    res.status(500).send(false)
+  }
+  if ( logout ) {
+    await accounts.findByIdAndUpdate({ _id: new ObjectId(req.params.userid) }, { $set: {lastactive: Date.now()} })
+    res.status(200).send(logout)
   }
 })
 
@@ -1263,29 +1295,206 @@ app.post("/api/account-settings/change-password/:userid/:password", async (req, 
 })
 
 //Reports---------------------------------------------------------------------------------------------
-app.get("/api/reports/projects/:month/:year", async (req, res) => {
+app.get("/api/reports/request-reports/:month/:year", async (req, res) => {
   let monthNum = Number(req.params.month)
   let yearNum = Number(req.params.year)
-  const data = await projects.aggregate([
-    {$addFields: { "month" : {$month: '$completiondate'}, "year": { $year: '$completiondate' }}},
-    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {type: "Job"}, {status: "Concluded"}]}}
+  const appCount = await projects.aggregate([
+    {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
+    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {requeststatus: "Approved"}]}}
   ])
-  res.status(200).send(data)
+  const denCount = await projects.aggregate([
+    {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
+    {$match: {$and: [ {month: monthNum}, {year: yearNum},  {requeststatus: "Denied"}]}}
+  ])
+  const penCount = await projects.aggregate([
+    {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
+    {$match: {$and: [ {month: monthNum}, {year: yearNum},  {requeststatus: "Pending"}]}}
+  ])
+  const overall = appCount.length + denCount.length + penCount.length
+  const requestReport = [
+    {
+      id: 1,
+      type: "Approved",
+      count: appCount.length
+    },
+    {
+      id: 2,
+      type: "Denied",
+      count: denCount.length
+    },
+    {
+      id: 3,
+      type: "Pending",
+      count: penCount.length
+    }
+  ]
+
+  const result = {
+    total: overall,
+    partial: requestReport
+  }
+  res.status(200).send(result)
+})
+
+app.get("/api/reports/account-reports/:month/:year", async (req, res) => {
+  let monthNum = Number(req.params.month)
+  let yearNum = Number(req.params.year)
+  const userCount = await accounts.find({$or: [{type: "Employer"}, {type: "Candidate"}]})
+  const activeUserCount = await accounts.aggregate([
+    {$addFields: { "month" : {$month: '$lastactive'}, "year": { $year: '$lastactive' }}},
+    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {$or: [{type: "Employer"}, {type: "Candidate"}]} ]}}
+  ])
+  const empCount = await accounts.aggregate([
+    {$addFields: { "month" : {$month: '$lastactive'}, "year": { $year: '$lastactive' }}},
+    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {type: "Employer"}]}}
+  ])
+  const canCount = await accounts.aggregate([
+    {$addFields: { "month" : {$month: '$lastactive'}, "year": { $year: '$lastactive' }}},
+    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {type: "Candidate"}]}}
+  ])
+
+  const result = {
+    users: [
+      {
+        id: 1,
+        type: "Overall User Count",
+        count: userCount.length
+      },
+      {
+        id: 2,
+        type: "Active Users",
+        count: activeUserCount.length
+      }
+    ],
+    allUsers: activeUserCount
+  }
+  res.status(200).send(result)
 })
 
 app.get("/api/reports/ongoing-projects", async (req, res) => {
-  const data = await projects.find({status: "Ongoing"})
-  res.status(200).send(data)
+  const data1 = await projects.find({status: "Ongoing", type: "Job"})
+  const data2 = await projects.find({status: "Ongoing", type: "Project"})
+
+  const overall = data1.length + data2.length
+  const ongoingReport = [
+    {
+      id: 1,
+      type: "Job",
+      count: data1.length
+    },
+    {
+      id: 2,
+      type: "Project",
+      count: data2.length
+    }
+  ]
+
+  const result = {
+    total: overall,
+    partial: ongoingReport
+  }
+  res.status(200).send(result)
 })
 
-app.get("/api/reports/requests/:month/:year", async (req, res) => {
+app.get("/api/reports/accomplished-reports/:month/:year", async (req, res) => {
   let monthNum = Number(req.params.month)
   let yearNum = Number(req.params.year)
-  const data = await projects.aggregate([
-    {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
-    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {$or: [ {type: "Job Request"}, {type:"Job"} ]} ]}}
+  const jobCount = await projects.aggregate([
+    {$addFields: { "month" : {$month: '$completiondate'}, "year": { $year: '$completiondate' }}},
+    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {type: "Job"}]}}
   ])
-  res.status(200).send(data)
+  const projectCount = await projects.aggregate([
+    {$addFields: { "month" : {$month: '$completiondate'}, "year": { $year: '$completiondate' }}},
+    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {type: "Project"}]}}
+  ])
+  const overall = jobCount.length + projectCount.length
+  const accomplishedReport = [
+    {
+      id: 1,
+      type: "Job",
+      count: jobCount.length
+    },
+    {
+      id: 2,
+      type: "Project",
+      count: projectCount.length
+    }
+  ]
+
+  const result = {
+    total: overall,
+    partial: accomplishedReport
+  }
+  res.status(200).send(result)
+})
+
+app.get("/api/reports/annual-reports/:month/:year", async (req, res) => {
+  let monthNum = Number(req.params.month)
+  let yearNum = Number(req.params.year)
+
+  let requestCount, approvedCount, deniedCount, accomplishedCount
+  let allRequest = []
+  let allApproved = []
+  let allDenied = []
+  let allAccomplished = []
+
+  for (i=((monthNum+1)-monthNum); i<13; i++){
+    requestCount = await projects.aggregate([
+      {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
+      {$match: {$and: [ {month: i}, {year: yearNum}, {$or: [{type: "Job Request"}, {type: "Project Request"}, {type: "Job"}, {type: "Project"}]} ]}}
+    ])
+    allRequest = allRequest.concat(requestCount.length)
+    
+    approvedCount = await projects.aggregate([
+      {$addFields: { "month" : {$month: '$approvaldate'}, "year": { $year: '$approvaldate' }}},
+      {$match: {$and: [ {month: i}, {year: yearNum}, {$or :[{type: "Job"}, {type: "Project"}]} ]}}
+    ])
+    allApproved = allApproved.concat(approvedCount.length)
+
+    deniedCount = await projects.aggregate([
+      {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
+      {$match: {$and: [ {month: i}, {year: yearNum}, {$or: [{type: "Job Request"}, {type: "Project Request"}]} ]}}
+    ])
+    allDenied = allDenied.concat(deniedCount.length)
+
+    accomplishedCount = await projects.aggregate([
+      {$addFields: { "month" : {$month: '$completiondate'}, "year": { $year: '$completiondate' }}},
+      {$match: {$and: [ {month: i}, {year: yearNum}, {$or: [{type: "Job"}, {type: "Project"}]} ]}}
+    ])
+    allAccomplished = allAccomplished.concat(accomplishedCount.length)
+  }
+
+  let requestReport = []
+  let approvedReport = []
+  let deniedReport = []
+  let accomplishedReport = []
+
+  for (i=0; i<12; i++){
+    requestReport = requestReport.concat({
+      id: i+1,
+      count: allRequest[i]
+    })
+    approvedReport = approvedReport.concat({
+      id: i+1,
+      count: allApproved[i]
+    })
+    deniedReport = deniedReport.concat({
+      id: i+1,
+      count: allDenied[i]
+    })
+    accomplishedReport = accomplishedReport.concat({
+      id: i+1,
+      count: allAccomplished[i]
+    })
+  }
+  
+  const result = {
+    requestReport,
+    approvedReport,
+    deniedReport,
+    accomplishedReport
+  }
+  res.status(200).send(result)
 })
 
 app.get("/api/reports/all-projects", async (req, res) => {
@@ -1369,7 +1578,9 @@ function registerCleanup(req, res, next) {
   if (typeof req.body.lastname != "string") req.body.lastname = ""
   if (typeof req.body.middlename != "string") req.body.middlename = ""
   if (typeof req.body.age != "string") req.body.age = ""
-  if (typeof req.body.address != "string") req.body.address = ""
+  if (typeof req.body.region != "string") req.body.region = ""
+  if (typeof req.body.province != "string") req.body.province = ""
+  if (typeof req.body.city != "string") req.body.city = ""
   if (typeof req.body._id != "string") req.body._id = ""
   if (typeof req.body.email != "string") req.body.email = ""
   if (typeof req.body.password != "string") req.body.password = ""
@@ -1380,7 +1591,9 @@ function registerCleanup(req, res, next) {
     lastname: sanitizeHTML(req.body.lastname.trim(), { allowedTags: [], allowedAttributes: {} }),
     middlename: sanitizeHTML(req.body.middlename.trim(), { allowedTags: [], allowedAttributes: {} }),
     age: sanitizeHTML(req.body.age.trim(), { allowedTags: [], allowedAttributes: {} }),
-    address: sanitizeHTML(req.body.address.trim(), { allowedTags: [], allowedAttributes: {} }),
+    region: sanitizeHTML(req.body.region.trim(), { allowedTags: [], allowedAttributes: {} }),
+    province: sanitizeHTML(req.body.province.trim(), { allowedTags: [], allowedAttributes: {} }),
+    city: sanitizeHTML(req.body.city.trim(), { allowedTags: [], allowedAttributes: {} }),
     email: sanitizeHTML(req.body.email.trim(), { allowedTags: [], allowedAttributes: {} }),
     password: sanitizeHTML(req.body.password.trim(), { allowedTags: [], allowedAttributes: {} }),
     type: sanitizeHTML(req.body.type.trim(), { allowedTags: [], allowedAttributes: {} }),

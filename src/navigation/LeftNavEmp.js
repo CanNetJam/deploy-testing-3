@@ -49,7 +49,12 @@ function LeftNavEmp({ savedNotifications, setNumber}){
         }
     }
 
-    const logOut = () => {
+    const logOut = async () => {
+        try {
+            await Axios.post(`/api/logout/${userData.user.id}`)
+        } catch (err) {
+            console.log(err)
+        }
         setUserData({
           token: undefined,
           user: undefined,

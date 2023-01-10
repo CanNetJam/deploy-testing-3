@@ -10,6 +10,11 @@ const userSchema = new mongoose.Schema({
     middlename: String,
     age: Number,
     address: String,
+    location: {
+        region: {type: String}, 
+        province: {type:String},
+        city: {type:String}
+    },
     sex: String,
     email: {
         type: String,
@@ -44,6 +49,10 @@ const userSchema = new mongoose.Schema({
     currentprojects: [
         { type: mongoose.Schema.Types.ObjectId, ref: "projects" }
     ],
+    lastactive: {
+        type: Date,
+        default: () => Date.now(),
+    },
 })
 
 module.exports = mongoose.model("accounts", userSchema)

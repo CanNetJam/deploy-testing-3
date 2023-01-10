@@ -16,6 +16,12 @@ html, body {
   align-items: center;
 }
 
+.sideContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .top {
   height: 10%;
 }
@@ -859,7 +865,8 @@ html, body {
 
 .selectCategory {
   height: 35px;
-  width: 100%;
+  min-width: 100px;
+  max-width: 100%;
 }
 
 .selectedCategory {
@@ -1342,6 +1349,31 @@ th{
 }
 
 /*-------------------------------------------------Reports----------------------------------------------*/
+.reports {
+  align-items: center;
+}
+
+.requests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px 25px;
+}
+
+.reportContent {
+  padding: 15px;
+  min-width: 270px;
+}
+
+.annual-report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(700px, 1fr));
+  gap: 15px 25px;
+}
+
+.reportContentBar {
+  padding: 15px;
+  min-width: 700px;
+}
 
 /*-------------------------------------------------DashBoard----------------------------------------------*/
 .dashBoard {
@@ -1480,4 +1512,8 @@ a:hover {
 .actionButton {
   min-width: 200px;
   min-height: 40px;
+}
+
+.toPrint {
+  padding: 20px;
 }
