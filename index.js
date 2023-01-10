@@ -41,11 +41,17 @@ const PORT = process.env.PORT || 3000
 const server = app.listen(PORT, 
   console.log(`Server started at port ${PORT}`)
 )
-
+/*
 const io = require("socket.io")(server, {
   cors: {
     origin: "https://deploy-testing-3.onrender.com"
     //origin: "http://localhost:3000"
+  }
+})
+*/
+const io = require("socket.io")(PORT, {
+  cors: {
+    origin: "https://deploy-testing-3.onrender.com"
   }
 })
 
