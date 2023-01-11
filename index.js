@@ -44,7 +44,7 @@ const server = app.listen(PORT,
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "https://deploy-testing-3.onrender.com/"
+    origin: "https://deploy-testing-3.onrender.com"
   }
 })
 

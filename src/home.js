@@ -41,12 +41,12 @@ function App() {
   const [ number, setNumber ] = useState(0)
 
   useEffect(()=> {
-    setSocket(io("htpps://deploy-testing-3.onrender.com/"))
+    setSocket(io("htpps://deploy-testing-3.onrender.com"))
+    console.log(socket)
   }, [])
 
   useEffect(() => {
     socket?.emit("addUser", userData?.user?.id)
-    console.log(socket)
   }, [socket, userData])
 
   useEffect(() => {
