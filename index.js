@@ -48,7 +48,7 @@ const io = require("socket.io")(server, {
     //origin: "http://localhost:3000"
   }
 })
-console.log(io)
+
 const cloudinaryConfig = cloudinary.config({
   cloud_name: process.env.CLOUDNAME,
   api_key: process.env.CLOUDAPIKEY,
