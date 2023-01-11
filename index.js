@@ -36,16 +36,13 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cors())
 app.use(favicon(__dirname + '/public/favicon.png'))
 
-const { createServer } = require("http");
-const httpServer = createServer(app)
-
 const PORT = process.env.PORT || 3000
 
 const server = app.listen(PORT, 
   console.log(`Node server started at port ${PORT}`)
 )
 
-const io = require("socket.io")(httpServer, {
+const io = require("socket.io")(server, {
   cors: {
     origin: "https://deploy-testing-3.onrender.com"
   }
