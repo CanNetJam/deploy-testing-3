@@ -41,7 +41,7 @@ function App() {
   const [ number, setNumber ] = useState(0)
 
   useEffect(()=> {
-    setSocket(io("https://deploy-testing-3.onrender.com"))
+    setSocket(io("ws://deploy-testing-3.onrender.com:8080"))
   }, [])
 
   useEffect(() => {
