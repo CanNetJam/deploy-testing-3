@@ -48,10 +48,10 @@ function App() {
   useEffect(()=> {
     setSocket(io("https://deploy-testing-3.onrender.com"))
   }, [])
-  console.log(socket)
 
   useEffect(() => {
     socket?.emit("addUser", userData?.user?.id)
+    console.log(socket)
   }, [socket, userData])
 
   useEffect(() => {
