@@ -42,7 +42,7 @@ const server = app.listen(PORT,
   console.log(`Node server started at port ${PORT}`)
 )
 
-const io = require("socket.io")(server, {
+const io = require("socket.io")(5000, {
   cors: {
     origin: "https://deploy-testing-3.onrender.com"
   }

@@ -41,8 +41,11 @@ function App() {
   const [ number, setNumber ] = useState(0)
 
   useEffect(()=> {
-    setSocket(io("htpps://deploy-testing-3.onrender.com"))
-    console.log(socket)
+    try {
+      setSocket(io("ws://deploy-testing-3.onrender.com:5000"))
+    } catch (err) {
+      console.log(err)
+    }
   }, [])
 
   useEffect(() => {
