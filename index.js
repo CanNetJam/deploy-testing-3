@@ -45,9 +45,10 @@ const server = app.listen(PORT,
 const io = require("socket.io")(server, {
   cors: {
     origin: "https://deploy-testing-3.onrender.com"
+    //origin: "http://localhost:3000"
   }
 })
-
+console.log(io)
 const cloudinaryConfig = cloudinary.config({
   cloud_name: process.env.CLOUDNAME,
   api_key: process.env.CLOUDAPIKEY,
@@ -65,7 +66,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
+//mongoose.connect("mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin", {
 mongoose.connect(process.env.CONNECTIONSTRING , {
 	useNewUrlParser: true,
 	useUnifiedTopology: true
