@@ -42,7 +42,7 @@ function App() {
 
   useEffect(()=> {
     try {
-      setSocket(io("ws://deploy-testing-3.onrender.com:5000"))
+      setSocket(io("ws://deploy-testing-3.onrender.com:3000"))
     } catch (err) {
       console.log(err)
     }
