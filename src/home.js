@@ -5,6 +5,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { io } from "socket.io-client"
 
 import TopNav from "./navigation/TopNav"
+import LeftNavFree from "./navigation/LeftNavFree"
+import LeftNavEmp from "./navigation/LeftNavEmp"
+import LeftNavAdmin from "./navigation/LeftNavAdmin"
 
 import Home from "./pages/Homes"
 import About from "./pages/About"
@@ -40,12 +43,10 @@ function App() {
   const [ liveNotif, setLiveNotif ] = useState([])
   const [ number, setNumber ] = useState(0)
 
+  //http://localhost:3000
+  //https://deploy-testing-3.onrender.com
   useEffect(()=> {
-    try {
-      setSocket(io("ws://deploy-testing-3.onrender.com:3000"))
-    } catch (err) {
-      console.log(err)
-    }
+    setSocket(io("https://deploy-testing-3.onrender.com:8080"))
   }, [])
 
   useEffect(() => {
