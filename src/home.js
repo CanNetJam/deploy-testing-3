@@ -42,16 +42,13 @@ function App() {
   const [ savedNotifications, setSavedNotifications ] = useState([])
   const [ liveNotif, setLiveNotif ] = useState([])
   const [ number, setNumber ] = useState(0)
-  /*
+
   //http://localhost:3000
   //https://deploy-testing-3.onrender.com
   useEffect(()=> {
     setSocket(io("https://deploy-testing-3.onrender.com"))
-  }, [])*/
-  const socket = io("https://deploy-testing-3.onrender.com",{
-    transports: ['websocket'],
-   })
-
+  }, [])
+  
   useEffect(() => {
     socket?.emit("addUser", userData?.user?.id)
     console.log(socket)
