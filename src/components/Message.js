@@ -3,6 +3,7 @@ import {format} from "timeago.js"
 import Axios from "axios"
 
 function Message({message, own}) {
+    const cloud_name = "dzjkgjjut"
     const [pic, setPic] = useState()
 
     useEffect(() => {
@@ -10,7 +11,7 @@ function Message({message, own}) {
         const getUser = async () => {
           try {
             const res = await Axios.get(`/members/${memberId}`)
-            setPic(res.data[0].photo)
+            setPic(res.data[0].image)
           } catch (err) {
             console.log(err)
           }
@@ -21,7 +22,7 @@ function Message({message, own}) {
     return (
         <div className={own? "message own" : "message"}>
             <div className="messageTop">
-                <img className="messageImg" src={pic ? `/uploaded-photos/${pic}` : "/fallback.png"} alt=""/>
+                <img src={pic ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${pic}.jpg` : "/fallback.png"} className="messageImg"></img>
                 <p className="messageText">
                     {message.text}
                 </p>

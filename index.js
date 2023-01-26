@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cors())
 app.use(favicon(__dirname + '/public/favicon.png'))
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 3000
 
 const server = app.listen(PORT, 
   console.log(`Node server started at port ${PORT}`)
@@ -45,6 +45,7 @@ const server = app.listen(PORT,
 const io = require("socket.io")(server, {
   cors: {
     origin: "https://deploy-testing-3.onrender.com",
+    //origin: "http://localhost:3000",
     methods: ["GET", "POST"]
   }
 })
@@ -151,8 +152,31 @@ app.get("/get-signature", (req, res) => {
 //Dashboard---------------------------------------------------------------------------------------------
 app.get("/api/hiring-search", async (req, res)=> {
   const query = req.query.query
+  const location = req.query.location 
+  const sallary = req.query.sallary
   const key = req.query.key
   const rawsort = req.query.sort
+
+  function keyType(a) {
+    let b, c
+    if (a === "") {
+      b = "Job"
+      c = "Project"
+      return {b, c}
+    }
+    if (a === "Job Hiring") {
+      b = "Job"
+      c = "Job"
+      return {b, c}
+    }
+    if (a === "Project Hiring") {
+      b = "Project"
+      c = "Project"
+      return {b, c}
+    }
+  }
+  const type = keyType(key)
+
   function interpret(a) {
     let b, c
     if (a === "A-Z") {
@@ -177,43 +201,63 @@ app.get("/api/hiring-search", async (req, res)=> {
     }
   }
   const sort = interpret(rawsort)
-  if (key === "Job Hiring" ) {
+
+  function sallaryRange(a) {
+    let b, c
+    if (a === "1") {
+      b = 0
+      c = 10000
+      return {b, c}
+    }
+    if (a === "2") {
+      b = 10001 
+      c = 25000
+      return {b, c}
+    }
+    if (a === "3") {
+      b = 25001
+      c = 50000
+      return {b, c}
+    }
+    if (a === "4") {
+      b = 50001
+      c = 100000
+      return {b, c}
+    }
+    if (a === "5") {
+      b = 100000
+      c = 9999999
+      return {b, c}
+    }
+    if (a === "") {
+      b = 0
+      c = 9999999
+      return {b, c}
+    }
+  }
+  let range = sallaryRange(sallary)
+  
     try {
-      const allAccounts = (await projects.find({skillrequired: new RegExp(query, 'i'), type: "Job", status: "Hiring"})
+      const allResults = (await projects.find({$and: [
+      {skillrequired: new RegExp(query, 'i'), 
+      $or: [{type: type.b}, {type: type.c}], 
+      status: "Hiring"},
+
+      {$or: [{"location.province": new RegExp(location, 'i')}, 
+      {"location.region": new RegExp(location, 'i')}, 
+      {"location.city": new RegExp(location, 'i')}]},
+
+      {$and: [{sallary: {$gte: range.b}}, {sallary: {$lte: range.c}}]}
+      ]})
+
       .collation({locale:'en',strength: 2})
       .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
       .sort({[sort.b]: [sort.c]}))
-      res.status(200).json(allAccounts)
+
+      res.status(200).json(allResults)
     } catch (err) {
       res.status(500).json(err)
     }
-  }
-  if (key === "Project Hiring" ) {
-    try {
-      const allAccounts = (await projects.find({skillrequired: new RegExp(query, 'i'), type: "Project", status: "Hiring"})
-      .collation({locale:'en',strength: 2})
-      .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
-      .sort({[sort.b]: [sort.c]}))
-      res.status(200).json(allAccounts)
-    } catch (err) {
-      res.status(500).json(err)
-    }
-  }
-  if (key === "Location" ) {
-    try {
-      const allAccounts = (await projects.find({
-      $or: [{"location.province": new RegExp(query, 'i')}, 
-      {"location.region": new RegExp(query, 'i')}, 
-      {"location.city": new RegExp(query, 'i')}],
-      status: "Hiring"})
-      .collation({locale:'en',strength: 2})
-      .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
-      .sort({[sort.b]: [sort.c]}))
-      res.status(200).json(allAccounts)
-    } catch (err) {
-      res.status(500).json(err)
-    }
-  }
 })
 
 //Admin Monitoring---------------------------------------------------------------------------------------------

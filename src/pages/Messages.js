@@ -150,7 +150,7 @@ function Messages({socket}) {
                               </textarea>
                               <button
                                   onClick={handleSubmit} 
-                                  className="chatSubmitButton">
+                                  className="btn btn-sm btn-primary">
                                       Send
                               </button>
                           </div>

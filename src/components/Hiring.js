@@ -10,8 +10,10 @@ function Hiring() {
     const { userData, setUserData } = useContext(UserContext)
     const [ projects, setProjects ] = useState([])
     const [query, setQuery] = useState("")
+    const [queryLocation, setQueryLocation] = useState("")
+    const [querySallary, setQuerySallary] = useState("")
     const [keySearch, setKeySearch] = useState(false)
-    const [searchBy, setSearchBy] = useState("Job Hiring")
+    const [searchBy, setSearchBy] = useState("")
     const [category, setCategory] = useState([])
     const [advSearch, setAdvSearch] = useState(false)
     const [categoryBy, setCategoryBy] = useState("")
@@ -21,38 +23,18 @@ function Hiring() {
     const [result, setResult] = useState([])
     const [page, setPage] = useState(0)
     const [searchCount, setSearchCount] = useState(10)
+    const [sortSallaryText, setSortSallaryText] = useState("")
 
     const [btnSearchBy, setBtnSearchBy] = useState("")
     const [btnSortBy, setBtnSortBy] = useState("")
+    const [btnFilterSallary, setBtnFilterSallary] = useState("")
     const [btnSearchCount, setBtnSearchCount] = useState()
-
+    
     let length = projects.length
     let index = 0
+    console.log(result)
     useEffect(() => {
-        let isCancelled = false
-        const getProjects = async () => {
-          try {
-            const res = await Axios.get("/api/hiring-search", {params: {
-                query: query,
-                key: searchBy,
-                sort: sortBy
-            }})
-            if (!isCancelled) {
-                setProjects(res.data)
-            }
-          } catch (err) {
-            console.log(err)
-          }
-        }
-        if (query.length === 0 || query.length > 1) getProjects()
-        
-        return ()=> {
-            isCancelled = true
-        }
-    }, [query, searchBy, sortBy, searchCount])
-
-    useEffect(() => {
-        const getFiltered = async () => {
+        const getFiltered = async () => { 
             setResult([])
             let slice = (source, index) => source.slice(index, index + searchCount)
             while (index < length) {
@@ -62,8 +44,8 @@ function Hiring() {
             }
         }
         getFiltered()
-    }, [projects, searchBy, sortBy, searchCount])
-
+    }, [projects, queryLocation, querySallary, searchBy, sortBy, searchCount])
+    
     useEffect(() => {
         const getCategory = async () => {
           try {
@@ -81,18 +63,32 @@ function Hiring() {
         setFilteredCategory(tags[0]?.tags)
     }, [categoryBy])
 
+    async function getProjects() {
+        try {
+            const res = await Axios.get("/api/hiring-search", {params: {
+                query: query,
+                location: queryLocation,
+                key: searchBy,
+                sort: sortBy,
+                sallary: querySallary,
+            }})
+            setProjects(res.data)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    
+    useEffect(() => {
+        try {
+            getProjects()
+        } catch (err) {
+            console.log(err)
+        }
+    }, [searchBy, sortBy, searchCount, queryLocation, querySallary,])
+    
     function idPlusKey(a, b) {
         const key = a + b 
         return key
-    }
-
-    function queryPlaceHolder(a) {
-        if (!a) {
-            return `Search by ${searchBy}...`
-        }
-        if (a) {
-            return `${a}...`
-        }
     }
 
     return (
@@ -117,9 +113,22 @@ function Hiring() {
                     <input
                         type="text"
                         className="searchBox"
-                        placeholder={queryPlaceHolder(query)}
+                        placeholder={"Skill required or Job title"}
                         onChange={(e) => setQuery(e.target.value)}
                     />
+                </div>
+                <div className="searchBar">
+                    <input
+                        type="text"
+                        className="searchBox"
+                        placeholder={"Region, City or Town"}
+                        onChange={(e) => setQueryLocation(e.target.value)}
+                    />
+                </div>
+                <div>
+                    <button onClick={()=> getProjects()} className="btn btn-sm btn-primary">
+                        Search
+                    </button>
                 </div>
                 <div className="testing">
                     <div className="searchKey">
@@ -135,26 +144,77 @@ function Hiring() {
                         </button>
                     </div>
                 
-
                 <div className="keyPicker2">
                         {keySearch && (
                             <div className="advanceSearch">
                                 <div>
-                                    <h4>Search by:</h4>
+                                    <h5>Filter by:</h5>
                                     <div className="searchAdvWrapper">
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Job Hiring")}}>
-                                            <b>Job Hiring</b>
+                                        <label>Type: <b>{btnSearchBy}</b></label>
+                                        {searchBy==="" ? 
+                                            <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Job Hiring")}}>
+                                                <b>Job Hiring</b>
+                                            </button>
+                                        :<></>}
+                                        {searchBy==="" ? 
+                                            <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Project Hiring")}}>
+                                                <b>Project Hiring</b>
+                                            </button>
+                                        :<></>}
+                                        {searchBy!=="" ? 
+                                            <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("")}}>
+                                                <b>Remove type filter</b>
+                                            </button>
+                                        :<></>}
+                                    </div>
+                                    <div className="searchAdvWrapper">
+                                        <label>Sallary range: {sortSallaryText}</label>
+                                        {querySallary==="" ? 
+                                        <>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                            setBtnFilterSallary("1")
+                                            setSortSallaryText("less than ₱ 10, 001")
+                                        }}>
+                                            <b>less than ₱ 10, 001</b>
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Project Hiring")}}>
-                                            <b>Project Hiring</b>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                            setBtnFilterSallary("2")
+                                            setSortSallaryText("₱ 10, 001 to ₱ 25, 000")
+                                        }}>
+                                            <b>₱ 10, 001 to ₱ 25, 000</b>
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Location")}}>
-                                            <b>Location</b>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                            setBtnFilterSallary("3")
+                                            setSortSallaryText("₱ 25, 001 to ₱ 50, 000")
+                                        }}>
+                                            <b>₱ 25, 001 to ₱ 50, 000</b>
                                         </button>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                            setBtnFilterSallary("4")
+                                            setSortSallaryText("₱ 50, 001 to ₱ 100, 000")
+                                        }}>
+                                            <b>₱ 50, 001 to ₱ 100, 000</b>
+                                        </button>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                            setBtnFilterSallary("5")
+                                            setSortSallaryText("more than ₱ 100, 000")
+                                        }}>
+                                            <b>more than ₱ 100, 000</b>
+                                        </button>
+                                        </>
+                                        :<></>}
+                                        {querySallary!=="" ? 
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                            setBtnFilterSallary("")
+                                            setSortSallaryText("")
+                                        }}>
+                                            <b>Remove sallary filter</b>
+                                        </button>
+                                        :<></>}
                                     </div>
                                 </div>
                                 <div>
-                                    <h4>Sort by:</h4>
+                                    <h5>Sort by: {sortBy}</h5>
                                     <div className="searchAdvWrapper">
                                         <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Longest Duration")}}>
                                             Longest Duration
@@ -171,7 +231,7 @@ function Hiring() {
                                     </div>
                                 </div>
                                 <div>
-                                    <h4>Show results by:</h4>
+                                    <h5>Show {searchCount} results</h5>
                                     <div className="searchAlign centerContent">
                                         <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(5)}}>
                                             5
@@ -190,12 +250,11 @@ function Hiring() {
                                 <br />    
                                 <div className="centerContent">
                                     <button className="btn btn-sm btn-primary" onClick={()=> {
-                                        if (btnSearchBy!=="") {
-                                            setSearchBy(btnSearchBy)
-                                        }
+                                        setSearchBy(btnSearchBy)
                                         if (btnSortBy!=="") {
                                             setSortBy(btnSortBy)
                                         }
+                                        setQuerySallary(btnFilterSallary)
                                         if (btnSearchCount!==undefined) {
                                             setSearchCount(btnSearchCount)
                                         }
