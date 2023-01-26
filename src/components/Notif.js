@@ -6,6 +6,7 @@ import {format} from "timeago.js"
 import moment from "moment"
 
 function Notif(props) {
+    const cloud_name = "dzjkgjjut"
     let navigate = useNavigate()
     const { userData, setUserData } = useContext(UserContext)
 
@@ -34,7 +35,7 @@ function Notif(props) {
         <div className="notif" onClick={()=>redirectTo(props)}>
             <div className="notifTop">
                 <div>
-                    <img className="messageImg" src={props?.sender?.photo ? `/uploaded-photos/${props.sender.photo}` : "/fallback.png"} alt={`${props.type} named ${props.action}`} />
+                    <img src={props?.sender?.photo ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${props.sender.photo}.jpg` : "/fallback.png"} className="card-img-top projectPhoto" alt={`${props.type} named ${props.action}`}></img>
                 </div>
                 <div>
                     {props.sender?.firstname} {props?.sender?.middlename ? props.sender.middlename.charAt(0).toUpperCase() + ". " : "" }{props.sender?.lastname}
