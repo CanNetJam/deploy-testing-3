@@ -6,6 +6,7 @@ import PieChart from "../charts/PieChart"
 import BarChart from "../charts/BarChart"
 
 function Reports() {
+    const cloud_name = "dzjkgjjut"
     let monthNow = moment(Date.now()).format("MMMM")
     let yearNow = moment(Date.now()).format("YYYY")
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -441,7 +442,7 @@ function Reports() {
                                 <tr key={a.month}>
                                     <td>{a.userid}</td>
                                     <td>{a.title}</td>
-                                    <td><img className="messageImg" src={a.photo ? `/uploaded-photos/${a.photo}` : "/fallback.png"} alt=""/></td>
+                                    <td><img src={a.photo ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.photo}.jpg` : "/fallback.png"} className="messageImg"></img></td>
                                     <td>{a.description}</td>
                                     <td>{a._id}</td>
                                 </tr>
