@@ -48,6 +48,30 @@ function App() {
   }, [])
 
   useEffect(() => {
+    socket?.emit("addUser", userData?.user?.id)
+  }, [socket, userData])
+
+  useEffect(() => {
+    const getNotifications = async () => {
+      if (userData.user) {
+        try {
+          const res = await Axios.get(`/api/notifications/${userData?.user?.id}`, {headers: {'auth-token': userData.token}})
+          setSavedNotifications(res.data)
+        } catch (err) {
+          console.log(err)
+        }
+      }
+    }
+    getNotifications()
+  }, [userData, number, liveNotif])
+  
+  useEffect(() => {
+    socket?.on("getNotification", (data) => {
+      setLiveNotif((prev) => [...prev, data])
+    })
+  }, [socket])
+
+  useEffect(() => {
     const isLoggedIn = async () => {
       let token = localStorage.getItem("auth-token")
       if (token == null){
@@ -76,30 +100,6 @@ function App() {
     }
     isLoggedIn()
   }, [])
-
-  useEffect(() => {
-    socket?.emit("addUser", userData?.user?.id)
-  }, [socket, userData])
-
-  useEffect(() => {
-    const getNotifications = async () => {
-      if (userData.user) {
-        try {
-          const res = await Axios.get(`/api/notifications/${userData?.user?.id}`, {headers: {'auth-token': userData.token}})
-          setSavedNotifications(res.data)
-        } catch (err) {
-          console.log(err)
-        }
-      }
-    }
-    getNotifications()
-  }, [userData, number, liveNotif])
-  
-  useEffect(() => {
-    socket?.on("getNotification", (data) => {
-      setLiveNotif((prev) => [...prev, data])
-    })
-  }, [socket])
 
   return (
     <div className="all">
