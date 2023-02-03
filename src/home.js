@@ -79,7 +79,7 @@ function App() {
         token = ""
       }
       
-      if (token !== null){
+      if (token !== null && token !== ""){
         const tokenResponse = await Axios.post('/tokenIsValid', null, {headers: {"auth-token": token}})
         if(tokenResponse.data){
           const userResponse = await Axios.get('/profile/user', {headers: {'auth-token': token}})
