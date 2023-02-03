@@ -603,11 +603,15 @@ function Project({socket}) {
                           <div>
                             {!applied ? 
                               <div>
+                                {toApply!==true ?
+                                  <div>
                                 {userData?.user?.type==="Candidate" ?
                                   <div>
                                     <button className="btn btn-sm btn-primary" onClick={()=> {setToApply(true)}}>
                                       Apply Now!
                                     </button>
+                                  </div>
+                                :<></>}
                                   </div>
                                 :<></>}
                               </div>
@@ -719,16 +723,6 @@ function Project({socket}) {
                                     <div>
                                       {theEmp && (
                                         <div>
-                                          <button className="btn btn-sm btn-primary" onClick={()=> {
-                                            if(writeReview===false) {
-                                              setWriteReview(true)
-                                            }
-                                            if(writeReview===true) {
-                                              setWriteReview(false)
-                                            }
-                                          }}>
-                                            Write an Employee Review
-                                          </button>
                                           {writeReview && (
                                             <div>
                                               <Review 

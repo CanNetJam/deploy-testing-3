@@ -32,7 +32,6 @@ function Hiring() {
     
     let length = projects.length
     let index = 0
-    console.log(result)
     useEffect(() => {
         const getFiltered = async () => { 
             setResult([])
@@ -175,31 +174,31 @@ function Hiring() {
                                             setBtnFilterSallary("1")
                                             setSortSallaryText("less than ₱ 10, 001")
                                         }}>
-                                            <b>less than ₱ 10, 001</b>
+                                            <b>less than ₱10,001</b>
                                         </button>
                                         <button className="btn btn-sm btn-primary" onClick={()=>{
                                             setBtnFilterSallary("2")
                                             setSortSallaryText("₱ 10, 001 to ₱ 25, 000")
                                         }}>
-                                            <b>₱ 10, 001 to ₱ 25, 000</b>
+                                            <b>₱10,001 to ₱25,000</b>
                                         </button>
                                         <button className="btn btn-sm btn-primary" onClick={()=>{
                                             setBtnFilterSallary("3")
                                             setSortSallaryText("₱ 25, 001 to ₱ 50, 000")
                                         }}>
-                                            <b>₱ 25, 001 to ₱ 50, 000</b>
+                                            <b>₱25,001 to ₱50,000</b>
                                         </button>
                                         <button className="btn btn-sm btn-primary" onClick={()=>{
                                             setBtnFilterSallary("4")
                                             setSortSallaryText("₱ 50, 001 to ₱ 100, 000")
                                         }}>
-                                            <b>₱ 50, 001 to ₱ 100, 000</b>
+                                            <b>₱50,001 to ₱100,000</b>
                                         </button>
                                         <button className="btn btn-sm btn-primary" onClick={()=>{
                                             setBtnFilterSallary("5")
                                             setSortSallaryText("more than ₱ 100, 000")
                                         }}>
-                                            <b>more than ₱ 100, 000</b>
+                                            <b>more than ₱100,000</b>
                                         </button>
                                         </>
                                         :<></>}

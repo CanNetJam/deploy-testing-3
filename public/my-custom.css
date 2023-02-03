@@ -81,7 +81,6 @@ html, body {
   border: white;
   border-radius: 8px;
 }
-
 /*--------------------------------------------Navigation---------------------------------------------flex-direction: column;*/
 .topnav {
   display: flex;
@@ -953,8 +952,8 @@ html, body {
 .profileCard {
   min-height: 100vh;
   height: 100%;
-  width: 100%;
-  max-width: 1500px;
+  min-width: 1000px;
+  max-width: 100%;
   padding: 15px;
   display: grid;
   gap: 2px 5px;
@@ -1036,8 +1035,9 @@ html, body {
 }
 
 .galleryPicTop {
-  padding: 5px;
-  width: 100%;
+  padding: 10px;
+  max-height: 230px;
+  max-width: 320px;
   background-color: cornflowerblue;
   border-radius: 5px;
 }
@@ -1048,12 +1048,7 @@ html, body {
 
 .galleryPic {
   height: 100%;
-  max-height: 250px;
-  min-height: 250px;
   width: 100%;
-  max-width: 250px;
-  min-width: 250px;
-  border-radius: 5px;
 }
 
 .galleryForm {
@@ -1285,12 +1280,16 @@ html, body {
   padding: 5px;
 }
 
-.eachReview img {
-  height: auto;
-  width: auto;
-  max-width: 330px;
+.eachReviewImage {
+  padding: 10px;
   max-height: 230px;
-  border-radius: 3px;
+  max-width: 320px;
+  border-radius: 5px;
+}
+
+.eachReviewImage img {
+  height: 100%;
+  width: 100%;
 }
 /*-------------------------------------------------Tables----------------------------------------------*/
 table, th, td {

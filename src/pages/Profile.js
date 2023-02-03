@@ -5,13 +5,13 @@ import RatingsAndReviews from "../components/Ratings&Reviews"
 import Gallery from "../components/Gallery"
 import { useLocation } from 'react-router-dom'
 import moment from "moment"
+import {format} from "timeago.js"
 
 function Profile(){
   const location = useLocation()
   const { userData, setUserData } = useContext(UserContext)
   const [ accounts, setAccounts ] = useState([location.state?.account ? location.state.account : userData.user])
   const [ theFree, setTheFree ] = useState(false)
-  
   useEffect(()=> {
     const whatType = async () => {
       if(userData.user.type==="Candidate" || location.state?.account.type==="Candidate") {
@@ -31,6 +31,7 @@ function Profile(){
           middlename ={Accounts.middlename} 
           age ={Accounts.age} 
           address ={Accounts.address} 
+          location ={Accounts.location} 
           photo={Accounts.photo} 
           image={Accounts.image} 
           id={location.state?.account ? location.state?.account._id : Accounts.id} 
@@ -42,6 +43,7 @@ function Profile(){
           averagerating={Accounts.averagerating} 
           currentprojects={Accounts.currentprojects}
           theFree={theFree}
+          lastactive ={Accounts.lastactive} 
           setAccounts={setAccounts} />
       })}
     </div>
@@ -76,6 +78,79 @@ function UserProfile(props) {
 
   const [userSkill, setUserSkill] = useState([])
   const [filteredCategory, setFilteredCategory] = useState([])
+
+  const [ regions, setRegions ] = useState([])
+  const [ provinces, setProvinces ] = useState([])
+  const [ cities, setCities ] = useState([])
+  const [ filteredRegions, setFilteredRegions ] = useState([])
+  const [ filteredProvinces, setFilteredProvinces ] = useState([])
+  const [ filteredCities, setFilteredCities ] = useState([])
+  const [ selectedRegion, setSelectedRegion ] = useState("")
+  const [ selectedProvince, setSelectedProvince ] = useState("")
+  const [ selectedCity, setSelectedCity ] = useState("")
+  const [ region, setRegion ] = useState("")
+  const [ province, setProvince ] = useState("")
+  const [ city, setCity ] = useState("")
+
+  useEffect(() => {
+    const getLocations = async () => {
+      try {
+        const res1 = await Axios.get("https://ph-locations-api.buonzz.com/v1/regions")
+        setRegions(res1.data.data)
+
+        const res2 = await Axios.get("https://ph-locations-api.buonzz.com/v1/provinces")
+        setProvinces(res2.data.data)
+        
+        const res3 = await Axios.get("https://ph-locations-api.buonzz.com/v1/cities")
+        setCities(res3.data.data)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    getLocations()
+  }, [])
+
+  useEffect(() => {
+    setFilteredRegions([])
+    if (selectedRegion!=="" && selectedRegion!==props.location?.region) {
+      if (region==="") {
+        const data = regions?.filter((item) => item.name.includes(selectedRegion.toUpperCase()))
+        setFilteredRegions(data)
+      }
+    }
+    if (selectedRegion==="" && isEditing===true) {
+      setRegion("")
+    }
+  }, [selectedRegion])
+
+  useEffect(() => {
+    setFilteredProvinces([])
+    if (selectedProvince!=="" && selectedProvince!==props.location?.province) {
+      if (province==="") {
+        const data = provinces?.filter((item) => (item.region_code=== region?.id) 
+        && (item.name.includes(selectedProvince.toUpperCase())))
+        setFilteredProvinces(data)
+      }
+    }
+    if (selectedProvince==="" && isEditing===true) {
+      setProvince("")
+    }
+  }, [selectedRegion, selectedProvince])
+
+  useEffect(() => {
+    setFilteredCities([])
+    if (selectedCity!=="" && selectedCity!==props.location?.city) {
+      if (city==="") {
+        const data = cities?.filter((item) => (item.region_code=== region?.id) && 
+        (item.province_code=== province?.id) && 
+        (item.name.includes(selectedCity.toUpperCase())))
+        setFilteredCities(data)
+      }
+    }
+    if (selectedCity==="" && isEditing===true) {
+      setCity("")
+    }
+  }, [selectedRegion, selectedProvince, selectedCity])
   
   useEffect(() => {
     const user = location.state?.account ? location.state.account._id : userData.user.id
@@ -118,7 +193,11 @@ function UserProfile(props) {
     props.setAccounts(prev =>
       prev.map(function (Accounts) {
         if (Accounts.id == props.id) {
-          return { ...Accounts, firstname: draftFirstName, lastname: draftLastName, middlename: draftMiddleName, age: draftAge, address: draftAddress, about: draftAbout, company: draftCompany, position: draftPosition}
+          return { ...Accounts, firstname: draftFirstName, lastname: draftLastName, 
+            middlename: draftMiddleName, age: draftAge, 
+            address: draftAddress, about: draftAbout, 
+            company: draftCompany, position: draftPosition,
+            location: {region: region.name, province: province.name, city: city.name} }
         }
         return Accounts
       })
@@ -164,6 +243,9 @@ function UserProfile(props) {
     data.append("middlename", draftMiddleName)
     data.append("age", draftAge)
     data.append("address", draftAddress)
+    data.append("region", region.name)
+    data.append("province", province.name)
+    data.append("city", city.name)
     data.append("about", draftAbout)
     data.append("company", draftCompany)
     data.append("position", draftPosition)
@@ -247,20 +329,21 @@ function UserProfile(props) {
           {!isEditing && (
             <div className="profileCardText">
               <h4><b>{props.type}: </b> {props.firstname} {props.middlename ? props.middlename?.charAt(0).toUpperCase()+". " : " "} {props.lastname} </h4>
-              <p>Age: {props.age}</p>
-              <p>Adress: {props.address}</p>
-              {props?.theFree && (
-                <p> Skill(s): {userSkill.skill?.map((a)=> {
+              <p>Active {format(props.lastactive)}.</p>
+              <p>Age: {props.age} <br/>
+              Address: {props.location?.city ? (props.location?.city+", ") : ""} {props.location?.province ? (props.location?.province+", ") : ""} {props.location?.region}
+              {props?.theFree ? 
+                <div> Skill(s): {userSkill.skill?.map((a)=> {
                 return <label key={idPlusKey(props.id, a)}>{a ? (a)+", " : <></>} </label>
-                })} </p>
-              )}
+                })} </div>
+              :<br />}
               {props.type==="Employer" ? 
                 <div>
-                  <p>Company: {props?.company ? props.company : ""}</p>
-                  <p>Position: {props?.position ? props.position : ""}</p>
+                  <p>Company: {props?.company ? props.company : ""}<br />
+                  Position: {props?.position ? props.position : ""}</p>
                 </div>
-              :<></>}
-              <p>About: {props.about}</p>
+              :<br />}
+              About: {props.about}</p>
               {!props.readOnly && (
                 <>
                   <button
@@ -271,6 +354,9 @@ function UserProfile(props) {
                       setDraftMiddleName(props.middlename)
                       setDraftAge(props.age)
                       setDraftAddress(props.address)
+                      setSelectedRegion(props.location?.region)
+                      setSelectedProvince(props.location?.province)
+                      setSelectedCity(props.location?.city)
                       setDraftAbout(props.about)
                       setDraftCompany(props.company)
                       setDraftPosition(props.position)
@@ -289,10 +375,10 @@ function UserProfile(props) {
                     {props?.currentprojects?.map((a)=> {
                       return (
                         <div key={idPlusKey(props?.id, a.title)}>
-                          <p>{a.type}: {a.title}</p>
-                          <p>Duration: {a.duration} month(s)</p>
-                          <p>Began at: {moment(a.acceptdate).format("MMM. DD, YYYY")}</p>
-                          <p>Expected to end at: {moment(expectedMonth(a)).format("MMM. YYYY")}</p>
+                          <p>{a.type}: {a.title}<br />
+                          Duration: {a.duration} month(s)<br />
+                          Began at: {moment(a.acceptdate).format("MMM. DD, YYYY")}<br />
+                          Expected to end at: {moment(expectedMonth(a)).format("MMM. YYYY")}</p>
                         </div>
                       )
                     })}
@@ -321,12 +407,71 @@ function UserProfile(props) {
                 <input onChange={e => setDraftAge(e.target.value)} type="number" className="form-control form-control-sm" value={draftAge} placeholder="age"/>
               </div>
               <div className="mb-2">
-                <label>Adress:</label>
-                <input onChange={e => setDraftAddress(e.target.value)} type="text" className="form-control form-control-sm" value={draftAddress} placeholder="address"/>
+                <label>Region:</label>
+                <input required onChange={e => {
+                    setSelectedRegion(e.target.value)
+                  }} value={selectedRegion} type="text" className="form-control" />
+                  
+                  {filteredRegions.length != 0 && (
+                    <div className="dataResult">
+                      {filteredRegions.map((a) => {
+                        return (
+                          <a key={a.id} className="dataItem" onClick={()=> {
+                          setSelectedRegion(a.name)
+                          setRegion(a)
+                          setFilteredRegions([])}}>
+                            <p>{a.name} </p>
+                          </a>
+                        )
+                      })}
+                    </div>
+                  )}
+              </div>
+              <div className="mb-2">
+                <label>Province:</label>
+                  <input required onChange={e => {
+                    setSelectedProvince(e.target.value)
+                  }} value={selectedProvince} type="text" className="form-control" />
+                
+                  {filteredProvinces.length != 0 && (
+                    <div className="dataResult">
+                      {filteredProvinces.map((a) => {
+                        return (
+                          <a key={a.id} className="dataItem" onClick={()=> {
+                          setSelectedProvince(a.name)
+                          setProvince(a)
+                          setFilteredProvinces([])}}>
+                            <p>{a.name} </p>
+                          </a>
+                        )
+                      })}
+                    </div>
+                  )}
+              </div>
+              <div className="mb-2">
+                <label>City:</label>
+                  <input onChange={e => {
+                    setSelectedCity(e.target.value)
+                  }} value={selectedCity} type="text" className="form-control" />
+                
+                  {filteredCities.length != 0 && (
+                    <div className="dataResult">
+                      {filteredCities.map((a) => {
+                        return (
+                          <a key={a.id} className="dataItem" onClick={()=> {
+                          setSelectedCity(a.name)
+                          setCity(a)
+                          setFilteredCities([])}}>
+                            <p>{a.name} </p>
+                          </a>
+                        )
+                      })}
+                    </div>
+                  )}
               </div>
               <div className="mb-2">
                 <label>About:</label>
-                <input onChange={e => setDraftAbout(e.target.value)} type="text" className="form-control form-control-sm" value={draftAbout} placeholder="about"/>
+                <textarea rows = "5" cols = "60" onChange={e => setDraftAbout(e.target.value)} type="text" className="form-control form-control-sm" value={draftAbout} placeholder="about"/>
               </div>
 
               {props.type==="Employer" ? 
@@ -360,6 +505,14 @@ function UserProfile(props) {
                         }}>Remove?</button>
                       </div>
                     )}
+
+                    {theTag && (
+                      <div>
+                        <p>
+                          Removing "{btnTheTag}" to your skills list.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <button type="button" className="btn btn-sm btn-primary" onClick={()=>{
@@ -374,7 +527,7 @@ function UserProfile(props) {
                   {addTagSelected && (
                     <div>
                       <p>
-                        Adding "{addTag}" to your skill list.
+                        Adding "{addTag}" to your skills list.
                       </p>
                     </div>
                   )}

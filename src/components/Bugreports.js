@@ -3,6 +3,8 @@ import { UserContext } from "../home"
 import Axios from "axios"
 
 function BugReports() {
+    const api_key = "848182664545332"
+    const cloud_name = "dzjkgjjut"
     const { userData, setUserData } = useContext(UserContext)
     const [ title, setTitle ] = useState("")
     const [ file, setFile ] = useState("")
@@ -19,8 +21,29 @@ function BugReports() {
             const data = new FormData()
             data.append("userid", userData?.user.id) 
             data.append("title", title)
-            data.append("photo", file)
             data.append("description", description)
+
+            const signatureResponse = await Axios.get("/get-signature")
+
+            const image = new FormData()
+            image.append("file", file)
+            image.append("api_key", api_key)
+            image.append("signature", signatureResponse.data.signature)
+            image.append("timestamp", signatureResponse.data.timestamp)
+        
+            const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
+            headers: { "Content-Type": "multipart/form-data" },
+            onUploadProgress: function (e) {
+                console.log(e.loaded / e.total)
+            }
+            })
+            let cloud_image = cloudinaryResponse.data.public_id
+    
+            data.append("photo", cloud_image)
+            data.append("public_id", cloudinaryResponse.data.public_id)
+            data.append("version", cloudinaryResponse.data.version)
+            data.append("signature", cloudinaryResponse.data.signature)
+
             CreatePhotoField.current.value = ""
             await Axios.post("/api/bug-report", data, { headers: { "Content-Type": "multipart/form-data" } })
             alert("Successfully sent a bug report. We'll try to fix it as soon as possible. Thank you for your time.")
@@ -42,7 +65,7 @@ function BugReports() {
                     <input required onChange={e => setTitle(e.target.value)} value={title} type="text" className="form-control" placeholder="Title of the bug report." />
                 </div>
                 <div className="mb-2">
-                    <input required onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder="Explain how you think the bug happen." />
+                    <textarea required rows = "5" cols = "60" onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder="Explain how you think the bug happen." />
                 </div>
                 <button className="btn btn-sm btn-primary">Send Report</button>
             </form>

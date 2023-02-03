@@ -59,53 +59,45 @@ function Gallery(props) {
     
     async function submitHandler(e) {
         e.preventDefault()
-
         if (!file) {
             setIsPhoto(false)
         }
         if (file) {
-
-        const data = new FormData()
-        data.append("userId", userData?.user.id) 
-        data.append("username", freeInfo)
-        if (title) {
+            const data = new FormData()
+            data.append("userId", userData?.user.id) 
+            data.append("username", freeInfo)
             data.append("title", title)
-        }
-        if (file) {
             data.append("photo", file)
-        }
-        if (description) {
             data.append("description", description)
-        }
 
-        const signatureResponse = await Axios.get("/get-signature")
+            const signatureResponse = await Axios.get("/get-signature")
 
-        const image = new FormData()
-        image.append("file", file)
-        image.append("api_key", api_key)
-        image.append("signature", signatureResponse.data.signature)
-        image.append("timestamp", signatureResponse.data.timestamp)
-      
-        const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
-          headers: { "Content-Type": "multipart/form-data" },
-          onUploadProgress: function (e) {
-            console.log(e.loaded / e.total)
-          }
-        })
-        let cloud_image = cloudinaryResponse.data.public_id
-  
-        data.append("image", cloud_image)
-        data.append("public_id", cloudinaryResponse.data.public_id)
-        data.append("version", cloudinaryResponse.data.version)
-        data.append("signature", cloudinaryResponse.data.signature)
+            const image = new FormData()
+            image.append("file", file)
+            image.append("api_key", api_key)
+            image.append("signature", signatureResponse.data.signature)
+            image.append("timestamp", signatureResponse.data.timestamp)
+        
+            const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
+            headers: { "Content-Type": "multipart/form-data" },
+            onUploadProgress: function (e) {
+                console.log(e.loaded / e.total)
+            }
+            })
+            let cloud_image = cloudinaryResponse.data.public_id
+    
+            data.append("image", cloud_image)
+            data.append("public_id", cloudinaryResponse.data.public_id)
+            data.append("version", cloudinaryResponse.data.version)
+            data.append("signature", cloudinaryResponse.data.signature)
 
-        CreatePhotoField.current.value = ""
-        const res = await Axios.post(`/api/gallery/upload-photo/${userData?.user.id}`, data, { headers: { "Content-Type": "multipart/form-data" } })
-        setTitle("")
-        setFile("")
-        setDescription("")
-        setAddPhoto(false)
-        setPhotos(prev => prev.concat([res.data]))
+            CreatePhotoField.current.value = ""
+            const res = await Axios.post(`/api/gallery/upload-photo/${userData?.user.id}`, data, { headers: { "Content-Type": "multipart/form-data" } })
+            setTitle("")
+            setFile("")
+            setDescription("")
+            setAddPhoto(false)
+            setPhotos(prev => prev.concat([res.data]))
         }
     }
     

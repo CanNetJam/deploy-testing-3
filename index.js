@@ -426,6 +426,11 @@ app.get("/profile/user", auth, async (req, res) => {
     middlename: user.middlename,
     sex: user.sex,
     age: user.age,
+    location: {
+      region: user.location.region,
+      province: user.location.province,
+      city: user.location.city
+    },
     address: user.address,
     skill: user.skill,
     about: user.about,
@@ -438,10 +443,16 @@ app.get("/profile/user", auth, async (req, res) => {
     currentprojects: user.currentprojects,
     ratings: user.ratings,
     averagerating: user.averagerating,
+    lastactive: user.lastactive
   });
 })
 
 app.post("/update-account", upload.single("photo"), profileCleanup, async (req, res) => {
+  const obj = {
+    region: req.body.region,
+    province: req.body.province,
+    city: req.body.city,
+  }
   if (req.file) {
     // if they are uploading a new photo
     const expectedSignature = cloudinary.utils.api_sign_request({ public_id: req.body.public_id, version: req.body.version }, cloudinaryConfig.api_secret)
@@ -450,7 +461,8 @@ app.post("/update-account", upload.single("photo"), profileCleanup, async (req, 
     }
 
     req.cleanData.photo = req.file.filename
-    const info = await accounts.findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: req.cleanData })
+    req.cleanData.location = obj
+    const info = await accounts.findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: req.cleanData, location: {region: req.body.region, province: req.body.province, city: req.body.city} })
     if (info.photo) {
       fse.remove(path.join("public", "uploaded-photos", info.photo))
     } 
@@ -461,7 +473,8 @@ app.post("/update-account", upload.single("photo"), profileCleanup, async (req, 
     res.send(req.body.image)
   } else {
     // if they are not uploading a new photo
-    await accounts.findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: req.cleanData })
+    req.cleanData.location = obj
+    await accounts.findOneAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: req.cleanData})
     res.send(false)
   }
 }) 
@@ -1026,7 +1039,7 @@ app.post("/api/reviews/:projectid/:candidate", upload.single("photo"), async (re
   // if they are uploading a photo
   if (req.file) {
     try {
-      const obj = {
+      obj = {
         projectId: req.params.projectid,
         candidate: req.params.candidate,
         description: req.body.description,
@@ -1035,7 +1048,10 @@ app.post("/api/reviews/:projectid/:candidate", upload.single("photo"), async (re
         empname: req.body.empname, 
         freename: req.body.freename, 
       }
-      obj.photo = req.file.filename
+      const expectedSignature = cloudinary.utils.api_sign_request({ public_id: req.body.public_id, version: req.body.version }, cloudinaryConfig.api_secret)
+      if (expectedSignature === req.body.signature) {
+        obj.photo = req.body.image
+      }
       reviews.create(obj, (err, item) => {
         if (err) {
           console.log(err)
@@ -1046,12 +1062,13 @@ app.post("/api/reviews/:projectid/:candidate", upload.single("photo"), async (re
         }
       })
     } catch (err) {
-      res.status(500).json(err)
+      //res.status(500).json(err)
+      console.log(err)
     }
   } else {
     // if they are not uploading a photo
     try {
-      const obj = {
+      obj = {
         projectId: req.params.projectid,
         candidate: req.params.candidate,
         description: req.body.description,
@@ -1232,7 +1249,7 @@ app.get("/api/notifications/:user", auth, async (req, res)=> {
   if (req.params.user) {
     try {
       const data = await notifications.find({recieverId: req.params.user})
-      .populate({path:"senderId", select:["firstname", "middlename", "lastname", "photo"]})
+      .populate({path:"senderId", select:["firstname", "middlename", "lastname", "image"]})
       .sort({createdAt: -1})
       res.status(200).json(data)
     }catch (err) {
@@ -1575,8 +1592,12 @@ app.post("/api/bug-report", upload.single("photo"), async (req, res) => {
   obj = {
     userid: req.body.userid,
     title: req.body.title,
-    photo: req.file.filename,
     description: req.body.description,
+  }
+
+  const expectedSignature = cloudinary.utils.api_sign_request({ public_id: req.body.public_id, version: req.body.version }, cloudinaryConfig.api_secret)
+  if (expectedSignature === req.body.signature) {
+    obj.photo = req.body.photo
   }
   try {
     await bugreports.create(obj)
@@ -1588,7 +1609,7 @@ app.post("/api/bug-report", upload.single("photo"), async (req, res) => {
 
 app.get("/api/all-bug-report",  async (req, res) => {
   try {
-    const data = await bugreports.find()
+    const data = await bugreports.find().populate({path:"userid", select:["firstname", "middlename", "lastname"]})
     res.status(200).send(data)
   } catch (err) {
     res.status(400).send(err)

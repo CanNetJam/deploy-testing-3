@@ -31,7 +31,7 @@ function GalleryPhotos(props) {
     return (
         <div className="galleryCard">
                 <div className="galleryPicTop">
-                    <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${props.image}.jpg` : "/fallback.png"} className="galleryPic" alt={`${props.description} named ${props.title}`}></img>
+                    <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_85/${props.image}.jpg` : "/fallback.png"} className="galleryPic" alt={`${props.description} named ${props.title}`}></img>
                 </div>
                 <div className="galleryPicBot card-body">
                     {!isEditing && (
@@ -66,7 +66,7 @@ function GalleryPhotos(props) {
                     )}
                     {isEditing && (
                         <div>
-                            <form className="p-3 bg-success bg-opacity-25 mb-5" onSubmit={submitHandler}>
+                            <form onSubmit={submitHandler}>
                             <div className="mb-1">
                                 <label>Title:</label>
                                 <input autoFocus onChange={e => setDraftTitle(e.target.value)} type="text" className="form-control form-control-sm" value={draftTitle} placeholder="Edit title..." />

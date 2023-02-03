@@ -3,6 +3,8 @@ import {UserContext} from "../home"
 import Axios from "axios"
 
 function Review(props) {
+    const api_key = "848182664545332"
+    const cloud_name = "dzjkgjjut"
     const { userData, setUserData } = useContext(UserContext)
     const [ file, setFile ] = useState("")
     const [ description, setDescription ] = useState("")
@@ -55,6 +57,26 @@ function Review(props) {
       const data = new FormData()
       if (file) {
         data.append("photo", file)
+        const signatureResponse = await Axios.get("/get-signature")
+  
+        const image = new FormData()
+        image.append("file", file)
+        image.append("api_key", api_key)
+        image.append("signature", signatureResponse.data.signature)
+        image.append("timestamp", signatureResponse.data.timestamp)
+      
+        const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: function (e) {
+            console.log(e.loaded / e.total)
+          }
+        })
+        let cloud_image = cloudinaryResponse.data.public_id
+    
+        data.append("image", cloud_image)
+        data.append("public_id", cloudinaryResponse.data.public_id)
+        data.append("version", cloudinaryResponse.data.version)
+        data.append("signature", cloudinaryResponse.data.signature)
       }
       data.append("description", description)
       data.append("rating", rating)
@@ -71,7 +93,6 @@ function Review(props) {
       setDescription("")
       setRating("")
       setUploadedBy("")
-      CreatePhotoField.current.value = ""
 
       await Axios.post(`/api/reviews/${projectid}/${candidate}`, data, { headers: { "Content-Type": "multipart/form-data" } })
       props.setWriteReview(false)
@@ -86,7 +107,7 @@ function Review(props) {
 
     return (
       <div>
-        <form className="p-3 bg-success bg-opacity-25 mb-5" onSubmit={submitHandler}>
+        <form className="settingsForm" onSubmit={submitHandler}>
             <h2>Writing a review about {freeInfo?.firstname} { freeInfo?.middlename ? freeInfo?.middlename?.charAt(0).toUpperCase() + "." : ""} {freeInfo?.lastname}...</h2>
             <div className="mb-2">
                 <input required onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder="Write what you think about your partner's work performance." />

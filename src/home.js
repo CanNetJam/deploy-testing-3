@@ -22,6 +22,7 @@ import ProjectProposal from "./pages/ProjectRequest"
 import Notifications from "./pages/Notifications"
 import Settings from "./pages/Settings"
 import Reports from "./pages/Reports"
+import BugReports from "./pages/BugReports"
 
 import SearchBox from "./components/SearchBox"
 import SearchProfile from "./components/SearchProfile"
@@ -45,30 +46,6 @@ function App() {
   useEffect(()=> {
     setSocket(io("https://deploy-testing-3.onrender.com"))
   }, [])
-
-  useEffect(() => {
-    socket?.emit("addUser", userData?.user?.id)
-  }, [socket, userData])
-
-  useEffect(() => {
-    const getNotifications = async () => {
-      if (userData.user) {
-        try {
-          const res = await Axios.get(`/api/notifications/${userData?.user?.id}`, {headers: {'auth-token': userData.token}})
-          setSavedNotifications(res.data)
-        } catch (err) {
-          console.log(err)
-        }
-      }
-    }
-    getNotifications()
-  }, [userData, number, liveNotif])
-  
-  useEffect(() => {
-    socket?.on("getNotification", (data) => {
-      setLiveNotif((prev) => [...prev, data])
-    })
-  }, [socket])
 
   useEffect(() => {
     const isLoggedIn = async () => {
@@ -99,6 +76,30 @@ function App() {
     }
     isLoggedIn()
   }, [])
+
+  useEffect(() => {
+    socket?.emit("addUser", userData?.user?.id)
+  }, [socket, userData])
+
+  useEffect(() => {
+    const getNotifications = async () => {
+      if (userData.user) {
+        try {
+          const res = await Axios.get(`/api/notifications/${userData?.user?.id}`, {headers: {'auth-token': userData.token}})
+          setSavedNotifications(res.data)
+        } catch (err) {
+          console.log(err)
+        }
+      }
+    }
+    getNotifications()
+  }, [userData, number, liveNotif])
+  
+  useEffect(() => {
+    socket?.on("getNotification", (data) => {
+      setLiveNotif((prev) => [...prev, data])
+    })
+  }, [socket])
 
   return (
     <div className="all">
@@ -133,6 +134,7 @@ function App() {
                     <Route path="/messages" element={<Messages socket={socket}/>} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/reports" element={<Reports />} />
+                    <Route path="/bug-reports" element={<BugReports />} />
                   </Routes> 
             </div>
           </UserContext.Provider>

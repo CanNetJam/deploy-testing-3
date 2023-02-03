@@ -3,6 +3,7 @@ import Axios from "axios"
 import moment from "moment"
 
 function RatingsAndReviews(props) {
+    const cloud_name = "dzjkgjjut"
     const [ reviews, setReviews ] = useState([])
 
     useEffect(() => {
@@ -37,8 +38,8 @@ function RatingsAndReviews(props) {
                                 <p>{a.empname}<br />
                                 Date: {moment(a.createdAt).format("MMM. DD, YYYY")}<br />
                                 Description: {a.description}</p>
-                                <div>
-                                    <img src={a.photo ? `/uploaded-photos/${a.photo}` : "/fallback.png"} className="card-img-top" alt={`${a.freename} named ${a.empname}`} />
+                                <div className="eachReviewImage">
+                                    <img src={a.photo ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_85/${a.photo}.jpg` : "/fallback.png"} className="profile-ProfilePhoto" alt={"Rating image"}></img>
                                 </div>
                             </div>
                         )

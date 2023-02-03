@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef} from "react"
 import Axios from "axios"
 import moment from "moment"
 import { useReactToPrint } from "react-to-print"
+import { useNavigate } from "react-router-dom"
 import PieChart from "../charts/PieChart"
 import BarChart from "../charts/BarChart"
 
 function Reports() {
     const cloud_name = "dzjkgjjut"
+    let navigate = useNavigate()
     let monthNow = moment(Date.now()).format("MMMM")
     let yearNow = moment(Date.now()).format("YYYY")
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -16,7 +18,6 @@ function Reports() {
     const [ selectedMonth, setSelectedMonth] = useState(monthNow)
     const [ selectedYear, setSelectedYear] = useState(yearNow)
     const [ numMonth, setNumMonth] = useState(moment(Date.now()).format("MM"))
-    const [ bugReports, setBugReports] = useState([])
 
     const [ requestData, setRequestData ] = useState({
         labels: "",
@@ -252,18 +253,6 @@ function Reports() {
     }, [allActiveUsersTally])
 
     useEffect(() => {
-        const getBugReports = async () => {
-          try {
-            const res = await Axios.get("/api/all-bug-report")
-            setBugReports(res.data)
-          } catch (err) {
-            console.log(err)
-          }
-        }
-        getBugReports()
-    }, [])
-
-    useEffect(() => {
         const setMonth = async () => {
             if (selectedMonth==="January") {
                 setNumMonth(1)
@@ -336,7 +325,10 @@ function Reports() {
                         </div>
                     </div>
                     <div>
-                        <button className="btn btn-sm btn-primary" onClick={handlePrint}>Print Report</button>
+                        <button onClick={handlePrint} className="btn btn-sm btn-primary">Print System Report</button>
+                        <button onClick={()=> navigate("/bug-reports")} className="btn btn-sm btn-primary">
+                            View Bug Reports
+                        </button>
                     </div>
                 </div>
                 <br />
@@ -425,31 +417,6 @@ function Reports() {
                         </div>
                     </div>
                 </div>
-                <div>
-                    <h2>Bug Reports</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Sender</th>
-                                <th>Title</th>
-                                <th>Photo</th>
-                                <th>Desription</th>
-                                <th>Report Id</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bugReports.map((a)=> (
-                                <tr key={a.month}>
-                                    <td>{a.userid}</td>
-                                    <td>{a.title}</td>
-                                    <td><img src={a.photo ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.photo}.jpg` : "/fallback.png"} className="messageImg"></img></td>
-                                    <td>{a.description}</td>
-                                    <td>{a._id}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div> 
             </div>
             </div>
         </>

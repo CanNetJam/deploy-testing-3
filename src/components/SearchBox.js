@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { UserContext } from "../home"
 
 function SearchBox({projectid, projecttype}) {
+    const cloud_name = "dzjkgjjut"
     let navigate = useNavigate()
     const { userData, setUserData } = useContext(UserContext)
     const [accounts, setAccounts] = useState([])
@@ -261,7 +262,7 @@ function SearchBox({projectid, projecttype}) {
                                 }
                             }}>
                                 <div className="searchBoxProfileTop">
-                                    <img className="searchImg" src={a.photo ? `/uploaded-photos/${a.photo}` : "/fallback.png"} alt=""/>
+                                    <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.image}.jpg` : "/fallback.png"} className="searchImg" ></img>
                                     {a.ratings[0] ? 
                                         <div>
                                             <p>Average Rating: <b>{a.averagerating}</b> <br></br>({a.ratings.length}) review(s).</p>

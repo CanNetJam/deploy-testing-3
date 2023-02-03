@@ -105,7 +105,7 @@ function Questions(props) {
             :<></>}
             {answerNow===true ?
                 <div>
-                    <form className="p-3 bg-success bg-opacity-25 mb-5" onSubmit={submitHandler}>
+                    <form className="settingsForm" onSubmit={submitHandler}>
                         <h2>Write your answers:</h2>
                         
                         <div className="mb-2">
@@ -175,7 +175,10 @@ function Questions(props) {
                                 <input required onChange={e => setAnswer10(e.target.value)} value={answer10} type="text" className="form-control"/>
                             </div>
                         :<></>}
-                        <button onClick={()=> applyNow()}className="btn btn-sm btn-primary">Send Answers</button>
+                        <div>
+                            <button onClick={()=> applyNow()} className="btn btn-sm btn-primary">Send Application</button>
+                            <button onClick={()=> props.setToApply(false)} type="button" className="btn btn-sm btn-outline-secondary cancelBtn">Cancel</button>
+                        </div>
                     </form>
                 </div>
             :<></>}

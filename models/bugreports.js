@@ -2,7 +2,7 @@ const mongoose = require("mongoose")
 
 const bugreportsSchema = new mongoose.Schema({
     userid: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId, ref: "accounts",
     },
     title: {
         type: String,

@@ -35,7 +35,7 @@ function Notif(props) {
         <div className="notif" onClick={()=>redirectTo(props)}>
             <div className="notifTop">
                 <div>
-                    <img src={props?.sender?.photo ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${props.sender.photo}.jpg` : "/fallback.png"} className="messageImg" alt={`${props.type} named ${props.action}`}></img>
+                    <img src={props?.sender?.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/${props.sender.image}.jpg` : "/fallback.png"} className="messageImg" alt={`${props.sender?.firstname}'s image` }></img>
                 </div>
                 <div>
                     {props.sender?.firstname} {props?.sender?.middlename ? props.sender.middlename.charAt(0).toUpperCase() + ". " : "" }{props.sender?.lastname}

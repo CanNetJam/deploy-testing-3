@@ -52,6 +52,9 @@ function RegisterAccount() {
           setFilteredRegions(data)
         }
       }
+      if (selectedRegion==="") {
+        setRegion("")
+      }
     }, [selectedRegion])
 
     useEffect(() => {
@@ -62,6 +65,9 @@ function RegisterAccount() {
           && (item.name.includes(selectedProvince.toUpperCase())))
           setFilteredProvinces(data)
         }
+      }
+      if (selectedProvince==="") {
+        setProvince("")
       }
     }, [selectedRegion, selectedProvince])
 
@@ -74,6 +80,9 @@ function RegisterAccount() {
           (item.name.includes(selectedCity.toUpperCase())))
           setFilteredCities(data)
         }
+      }
+      if (selectedCity==="") {
+        setCity("")
       }
     }, [selectedRegion, selectedProvince, selectedCity])
 
@@ -159,17 +168,17 @@ function RegisterAccount() {
             <input required onChange={e => setAge(e.target.value)} value={age} type="number" className="form-control" placeholder="1-99+" />
             <p> <b> *</b></p>
           </div>
-          <div className="mb-2 centerLabel locationWrapper"> 
-                <label>Location:</label>
+          <div className="mb-2 locationWrapper"> 
+                <label>Address:</label>
                 <div className="location">
-                    <div className="requiredLabel">
-                      <label>Region:</label>
-                      <p className="requiredAlert"> <b> *</b></p>
-                    </div>
-
-                    <input required onChange={e => {
-                      setSelectedRegion(e.target.value)
-                    }} value={selectedRegion} type="text" className="form-control" />
+                  <div className="requiredLabel">
+                    <label>Region:</label>
+                    <p className="requiredAlert"> <b> *</b></p>
+                  </div>
+                  
+                  <input required onChange={e => {
+                    setSelectedRegion(e.target.value)
+                  }} value={selectedRegion} type="text" className="form-control" />
                   
                   {filteredRegions.length != 0 && (
                     <div className="dataResult">
@@ -219,7 +228,7 @@ function RegisterAccount() {
                     <p className="requiredAlert"> <b> *</b></p>
                   </div>
                   
-                  <input required onChange={e => {
+                  <input onChange={e => {
                     setSelectedCity(e.target.value)
                   }} value={selectedCity} type="text" className="form-control" />
                 
