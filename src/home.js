@@ -46,7 +46,9 @@ function App() {
   useEffect(()=> {
     setSocket(io("https://deploy-testing-3.onrender.com", 
     {
-      "transports": ['websocket']
+      path: '/socket.io',
+      transports: ['websocket'],
+      secure: true,
     }))
   }, [])
 
