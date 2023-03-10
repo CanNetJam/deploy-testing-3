@@ -64,7 +64,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
       cb(null, Date.now() + path.extname(file.originalname))
   }
-});
+})
 
 const upload = multer({ storage: storage });
 //mongoose.connect("mongodb://root:root@localhost:27017/TrabaWho?&authSource=admin", {
