@@ -45,6 +45,12 @@ function App() {
   //https://deploy-testing-3.onrender.com
   useEffect(()=> {
     setSocket(io("https://deploy-testing-3.onrender.com"))
+
+    return () => {
+      if (socket.readyState === 1) { // <-- This is important
+          socket.close()
+      }
+    }
   }, [])
 
   useEffect(() => {
