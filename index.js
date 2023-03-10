@@ -261,16 +261,63 @@ app.get("/api/hiring-search", async (req, res)=> {
 })
 
 //Admin Monitoring---------------------------------------------------------------------------------------------
-app.get("/api/all-accounts/:type", auth, async (req, res) => {
-  if(req.params.type==="Admin") {
+app.get("/api/all-accounts", auth, async (req, res) => {
+  const query = req.query.query
+  const key = req.query.key
+  const rawsort = req.query.sort
+  function interpret(a) {
+    let b, c
+    if (a === "A-Z (First Name)") {
+      b = "firstname"
+      c = "1"
+      return {b, c}
+    }
+    if (a === "Z-A (First Name)") {
+      b = "firstname"
+      c = "-1"
+      return {b, c}
+    }
+    if (a === "A-Z (Last Name)") {
+      b = "lastname"
+      c = "1"
+      return {b, c}
+    }
+    if (a === "Z-A (Last Name)") {
+      b = "lastname"
+      c = "-1"
+      return {b, c}
+    }
+    if (a === "Highest Rating") {
+      b = "averagerating"
+      c = "-1"
+      return {b, c}
+    }
+    if (a === "Lowest Rating") {
+      b = "averagerating"
+      c = "1"
+      return {b, c}
+    }
+  }
+  const sort = interpret(rawsort)
+  if (key === "Skill" ) {
     try {
-      const allAccounts = (await accounts.find({type: {$in: ["Candidate", "Employer"]}}))
+      const allAccounts = (await accounts.find({skill: new RegExp(query, 'i'), type: {$in: ["Candidate", "Employer"]}})
+      .collation({locale:'en',strength: 2})
+      .sort({[sort.b]: [sort.c]}))
       res.status(200).json(allAccounts)
     } catch (err) {
-      res.status(400).json(err)
+      res.status(500).json(err)
     }
-  } else {
-    res.status(400).send(false)
+  }
+  if (key === "Name") {
+    try {
+      const allAccounts = (await accounts.find({$or: [{firstname: new RegExp(query, 'i')}, {lastname: new RegExp(query, 'i')}], type: {$in: ["Candidate", "Employer"]}})
+        .collation({locale:'en',strength: 2})
+        .sort({[sort.b]: [sort.c]}))
+      res.status(200).json(allAccounts)
+    } catch (err) {
+      res.status(500).json(err)
+    }
   }
 })
 
@@ -302,18 +349,117 @@ app.get("/api/denied-projects/:type", auth, async (req, res) => {
   }
 })
 
-app.get("/api/all-projects/:type", auth, async (req, res) => {
-  if(req.params.type==="Admin") {
-    try {
-      const allProjects = await projects.find({type: {$in: ["Job", "Project"]}, requeststatus: "Approved"})
-      .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
-      .populate({path:"candidate", select:["firstname", "middlename", "lastname"]}).sort({approvaldate: -1})
-      res.status(200).json(allProjects)
-    } catch (err) {
-      res.status(400).send(err)
+app.get("/api/all-approved-projects/", auth, async (req, res) => {
+
+  const query = req.query.query
+  const location = req.query.location 
+  const sallary = req.query.sallary
+  const key = req.query.key
+  const rawsort = req.query.sort
+
+  function keyType(a) {
+    let b, c
+    if (a === "") {
+      b = "Job"
+      c = "Project"
+      return {b, c}
     }
-  } else {
-    res.status(400).send(false)
+    if (a === "Job Hiring") {
+      b = "Job"
+      c = "Job"
+      return {b, c}
+    }
+    if (a === "Project Hiring") {
+      b = "Project"
+      c = "Project"
+      return {b, c}
+    }
+  }
+  const type = keyType(key)
+
+  function interpret(a) {
+    let b, c
+    if (a === "A-Z") {
+      b = "skillrequired"
+      c = "1"
+      return {b, c}
+    }
+    if (a === "Z-A") {
+      b = "skillrequired"
+      c = "-1"
+      return {b, c}
+    }
+    if (a === "Latest") {
+      b = "approvaldate"
+      c = "-1"
+      return {b, c}
+    }
+    if (a === "Oldest") {
+      b = "approvaldate"
+      c = "1"
+      return {b, c}
+    }
+  }
+  const sort = interpret(rawsort)
+
+  function sallaryRange(a) {
+    let b, c
+    if (a === "1") {
+      b = 0
+      c = 10000
+      return {b, c}
+    }
+    if (a === "2") {
+      b = 10001 
+      c = 25000
+      return {b, c}
+    }
+    if (a === "3") {
+      b = 25001
+      c = 50000
+      return {b, c}
+    }
+    if (a === "4") {
+      b = 50001
+      c = 100000
+      return {b, c}
+    }
+    if (a === "5") {
+      b = 100000
+      c = 9999999
+      return {b, c}
+    }
+    if (a === "") {
+      b = 0
+      c = 9999999
+      return {b, c}
+    }
+  }
+  let range = sallaryRange(sallary)
+
+  if(req.query.usertype==="Admin") {
+    try {
+      const allResults = (await projects.find({$and: [
+      {skillrequired: new RegExp(query, 'i'), 
+      $or: [{type: type.b}, {type: type.c}], 
+      requeststatus: "Approved"},
+
+      {$or: [{"location.province": new RegExp(location, 'i')}, 
+      {"location.region": new RegExp(location, 'i')}, 
+      {"location.city": new RegExp(location, 'i')}]},
+
+      {$and: [{sallary: {$gte: range.b}}, {sallary: {$lte: range.c}}]}
+      ]})
+
+      .collation({locale:'en',strength: 2})
+      .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
+      .populate({path:"candidate", select:["firstname", "middlename", "lastname"]})
+      .sort({[sort.b]: [sort.c]}))
+
+      res.status(200).json(allResults)
+    } catch (err) {
+      res.status(500).json(err)
+    }
   }
 })
 
@@ -508,6 +654,7 @@ app.post("/create-project", upload.single("photo"), projectCleanup, async (req, 
       photo: req.cleanData.photo,
       employer: req.cleanData.employer,
       sallary: req.cleanData.sallary,
+      slots: req.body.slots,
       duration: req.cleanData.duration,
       location: {
         region: req.body.region,
@@ -541,6 +688,7 @@ app.post("/create-project", upload.single("photo"), projectCleanup, async (req, 
       photo: req.cleanData.photo,
       employer: req.cleanData.employer,
       sallary: req.cleanData.sallary,
+      slots: req.body.slots,
       duration: req.cleanData.duration,
       location: {
         region: req.body.region,
@@ -1020,6 +1168,7 @@ app.get("/api/search-profile/:user", async (req, res) => {
         skill: user.skill,
         about: user.about,
         photo: user.photo,
+        image: user.image,
         type: user.type,
         currentprojects: user.currentprojects,
         ratings: user.ratings,

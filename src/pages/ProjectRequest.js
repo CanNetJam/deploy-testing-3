@@ -22,6 +22,7 @@ function ProjectProposal({socket}) {
     const [ employer, setEmployer ] = useState(userData.user.id)
     const [ sallary, setSallary ] = useState(0)
     const [ duration, setDuration ] = useState(0)
+    const [ slots, setSlots ] = useState(1)
     const [ others, setOthers ] = useState("")
     const CreatePhotoField = useRef()
 
@@ -179,6 +180,7 @@ function ProjectProposal({socket}) {
         data.append("reqspecified", reqSpecified)
       }
       data.append("title", title)
+      data.append("slots", slots)
       data.append("company", company)
       data.append("description", description)
       data.append("skillrequired", skillrequired)
@@ -216,36 +218,6 @@ function ProjectProposal({socket}) {
         type: requestType,
         action: "sent a",
       })
-
-      setFile("")
-      setRequestType("")
-      setEmploymentType("")
-      setMinimumReq("")
-      setTitle("")
-      setCompany("")
-      setDescription("")
-      setSkillRequired("")
-      setEmployer("")
-      setSallary(0)
-      setDuration(0)
-      setSelectedRegion("")
-      setSelectedProvince("")
-      setSelectedCity("")
-      setRegion("")
-      setProvince("")
-      setCity("")
-      setOthers("")
-      setQuestion1("")
-      setQuestion2("")
-      setQuestion3("")
-      setQuestion4("")
-      setQuestion5("")
-      setQuestion6("")
-      setQuestion7("")
-      setQuestion8("")
-      setQuestion9("")
-      setQuestion10("")
-    
       navigate("/start-project")
       }
     }
@@ -274,7 +246,7 @@ function ProjectProposal({socket}) {
     }
 
     function inputCheck() {
-      if (title!=="" && sallary!==0 && duration!==0 && selectedRegion!=="" && selectedProvince!=="" && selectedCity!=="" && description!=="") {
+      if (title!=="" && slots!==0 && sallary!==0 && duration!==0 && selectedRegion!=="" && selectedProvince!=="" && selectedCity!=="" && description!=="") {
         return setNextBtn(false)
       }
     }
@@ -416,14 +388,11 @@ function ProjectProposal({socket}) {
               <div className="nextPageBtn">
                 <div>
                   <button className="btn btn-sm btn-outline-secondary cancelBtn" type="button" onClick={()=> {
-                    setSkillRequired("")
-                    setTitle("")
-                    setCategoryBy("")
                     setIsSkill(false)
                     setCategoryPick(false)
                     setAdvSearch(false)
                     setCurrentStep(prev => prev-1)
-                    setNextBtn(true)
+                    setNextBtn(false)
                   }}>
                     Back
                   </button>
@@ -468,10 +437,8 @@ function ProjectProposal({socket}) {
               <div className="nextPageBtn">
                 <div>
                   <button className="btn btn-sm btn-outline-secondary cancelBtn" type="button" onClick={()=> {
-                    setMinimumReq("")
-                    setReqSpecified("")
                     setCurrentStep(prev => prev-1)
-                    setNextBtn(true)
+                    setNextBtn(false)
                   }}>
                     Back
                   </button>
@@ -631,23 +598,8 @@ function ProjectProposal({socket}) {
               <div className="nextPageBtn">
                 <div>
                   <button className="btn btn-sm btn-outline-secondary cancelBtn" type="button" onClick={()=> {
-                    setSelectedRegion("")
-                    setSelectedProvince("")
-                    setSelectedCity("")
-                    setRegion("")
-                    setProvince("")
-                    setCity("")
-                    setTitle("")
-                    setSallary("")
-                    setDuration("")
-                    setSelectedRegion("")
-                    setSelectedProvince("")
-                    setSelectedCity("")
-                    setDescription("")
-                    setOthers("")
-                    setFile("")
                     setCurrentStep(prev => prev-1)
-                    setNextBtn(true)
+                    setNextBtn(false)
                   }}>
                     Back
                   </button>
@@ -790,19 +742,8 @@ function ProjectProposal({socket}) {
               <div className="nextPageBtn">
                 <div>
                   <button className="btn btn-sm btn-outline-secondary cancelBtn" type="button" onClick={()=> {
-                    setQuestions(3)
-                    setQuestion1("")
-                    setQuestion2("")
-                    setQuestion3("")
-                    setQuestion4("")
-                    setQuestion5("")
-                    setQuestion6("")
-                    setQuestion7("")
-                    setQuestion8("")
-                    setQuestion9("")
-                    setQuestion10("")
                     setCurrentStep(prev => prev-1)
-                    setNextBtn(true)
+                    setNextBtn(false)
                   }}>
                     Back
                   </button>
@@ -820,3 +761,14 @@ function ProjectProposal({socket}) {
   }
 
 export default ProjectProposal
+
+/*              <div className="mb-2">
+                <div className="requiredLabel">
+                  <label>Available slots for hiring:</label>
+                  <p className="requiredAlert"> <b> *</b></p>
+                </div>
+                <input required onChange={e => {
+                  setSlots(e.target.value)
+                  inputCheck()
+                }} value={slots} type="number" className="form-control" />
+              </div>*/

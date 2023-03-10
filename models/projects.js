@@ -59,6 +59,27 @@ const projectSchema = new mongoose.Schema({
     candidate: { 
         type: mongoose.Schema.Types.ObjectId, ref: "accounts",
     },
+    slots: {
+        type: Number,
+        required: true,
+    },
+    tempcandidate: [{
+        applicantid: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
+        employmentstatus: {type: String},
+        accepted: { 
+            type: String,
+            default: "No",
+        },
+    }],
+    candidatelist: [{
+        applicantid: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
+        employmentstatus: {type: String},
+        acceptedAt: {type: Date},
+        accepted: { 
+            type: String,
+            default: "No",
+        },
+    }],
     accepted: { 
         type: String,
         default: "No",

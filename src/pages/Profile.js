@@ -109,7 +109,7 @@ function UserProfile(props) {
     }
     getLocations()
   }, [])
-
+  
   useEffect(() => {
     setFilteredRegions([])
     if (selectedRegion!=="" && selectedRegion!==props.location?.region) {
@@ -197,7 +197,12 @@ function UserProfile(props) {
             middlename: draftMiddleName, age: draftAge, 
             address: draftAddress, about: draftAbout, 
             company: draftCompany, position: draftPosition,
-            location: {region: region.name, province: province.name, city: city.name} }
+            location: {
+              region: region ? region.name : props.location?.region, 
+              province: province ? province.name : props.location?.province, 
+              city: city ? city.name : props.location?.city
+            } 
+          }
         }
         return Accounts
       })
@@ -243,9 +248,11 @@ function UserProfile(props) {
     data.append("middlename", draftMiddleName)
     data.append("age", draftAge)
     data.append("address", draftAddress)
-    data.append("region", region.name)
-    data.append("province", province.name)
-    data.append("city", city.name)
+
+    data.append("region", region ? region.name : props.location?.region)
+    data.append("province", province ? province.name : props.location?.province)
+    data.append("city", city ? city.name : props.location?.city)
+
     data.append("about", draftAbout)
     data.append("company", draftCompany)
     data.append("position", draftPosition)
@@ -354,9 +361,11 @@ function UserProfile(props) {
                       setDraftMiddleName(props.middlename)
                       setDraftAge(props.age)
                       setDraftAddress(props.address)
+
                       setSelectedRegion(props.location?.region)
                       setSelectedProvince(props.location?.province)
                       setSelectedCity(props.location?.city)
+
                       setDraftAbout(props.about)
                       setDraftCompany(props.company)
                       setDraftPosition(props.position)

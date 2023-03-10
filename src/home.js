@@ -109,7 +109,7 @@ function App() {
             <TopNav savedNotifications={savedNotifications} setNumber={setNumber}/>
           </div>
           <div className="horizontal_line"></div>
-            <div className="content">
+          <div className="content">
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/search" element={<SearchBox />} />
@@ -136,7 +136,7 @@ function App() {
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/bug-reports" element={<BugReports />} />
                   </Routes> 
-            </div>
+          </div>
           </UserContext.Provider>
       </Router>
     </div>

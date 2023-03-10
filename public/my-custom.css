@@ -531,6 +531,217 @@ html, body {
   font-weight: 400;
   font-family:Cambria , monospace;
 }
+
+/*-------------------------------------------------About----------------------------------------------*/
+.about {
+  min-height: 100vh;
+  height: 100%;
+  min-width: 400px;
+  max-width: 1500px;
+  padding: 15px;
+}
+
+.aboutTopic {
+  min-height: 500px;
+  width: auto;
+}
+
+.aboutTopic1 {
+  min-height: 450px;
+  background-image: url("/WebPhoto/About/employee-female.jpg");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items:center;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.aboutTopic1 p {
+  padding: 20px;
+  text-align: center;
+  width: 50%;
+}
+
+.aboutTopic2 {
+  min-height: 500px;
+  background-image: url("/WebPhoto/About/job-application-2.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.aboutTopic2Content {
+  display: flex;
+  align-items:center;
+  justify-content: center;
+}
+
+.aboutTopic2Content p {
+  background-color: white;
+  padding: 20px;
+  text-align: center;
+  width: 50%;
+  border-radius: 8px;
+  opacity: 0.9;
+}
+
+.aboutTopic2Options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-column-gap: 20px;
+  align-items: baseline;
+}
+
+.aboutTopic2Options div {
+  max-height: 100px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  background-color: cornflowerblue;
+  border-radius: 8px;
+}
+
+.aboutTopic3 {
+  min-height: 600px;
+  background-image: url("/WebPhoto/About/CVSU-Carmona.jpg");
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.aboutTopic3 p {
+  background-color: white;
+  padding: 20px;
+  text-align: center;
+  width: 50%;
+  border-radius: 8px;
+  opacity: 0.9;
+}
+
+.missionVissionContent {
+  min-height: 300px;
+  background-image: url("/WebPhoto/About/CVSU-logo.png");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.missionVissionContent p {
+  background-color: white;
+  text-align: center;
+  border-radius: 8px;
+  opacity: 0.9;
+}
+
+.aboutDeveloper {
+  display: grid;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.aboutDeveloper {
+  display: flex;
+  gap: 20px;
+}
+
+.aboutDeveloper img {
+  min-height: 150px;
+  max-height: 250px;
+  min-width: 150px;
+  max-width: 250px;
+  border-radius: 50%;
+  filter: brightness(60%);
+}
+
+.aboutDeveloper p {
+  max-width: 70%;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.aboutTitle {
+  background-color: cornflowerblue;
+  padding: 20px;
+  border-radius: 8px;
+  font-size: 24px;
+}
+
+.aboutContent {
+  min-height: 75px;
+  padding: 10px;
+  font-family:'Trebuchet MS', sans-serif;
+  font-size: 20px;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.missionVission {
+  display: flex;
+  gap: 20px;
+}
+
+.missionVission div{
+  flex: 6;
+  padding: 20px;
+  text-align: justify;
+  text-justify: inter-word;
+}
+/*-------------------------------------------------Help----------------------------------------------*/
+.help {
+  min-height: 100vh;
+  height: 100%;
+  width: 100%;
+  padding: 15px 125px 15px  125px;
+}
+
+.help div {
+  min-width: 800px;
+}
+
+.help button {
+  width: 100%;
+}
+
+.helpTitle {
+  cursor: pointer;
+  padding: 15px;
+  border: 1px;
+  border-radius: 3px;
+}
+
+.helpContent {
+  padding: 20px;
+  width: 100%;
+}
+
+.helpContent div {
+  display: flex;
+  justify-content: center;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.helpContent img {
+  width: 600px;
+}
+
+.intextIcon {
+  height: auto;
+  width: 10px;
+}
+
 /*-------------------------------------------------Homes----------------------------------------------*/
 .homes {
   min-height: 100vh;
@@ -578,7 +789,9 @@ html, body {
 
 .dashboard {
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/WebPhoto/Background3.jpg");
-  background-size: 100%;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   background-color: #878181;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -587,7 +800,9 @@ html, body {
 
 .dashboardCopy {
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/WebPhoto/Background3.jpg");
-  background-size: 100%;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   background-color: #878181;
 }
 
@@ -1352,15 +1567,45 @@ th{
   align-items: center;
 }
 
+.reportsTop {
+  padding: 15px;
+  min-width: 500px;
+  min-height: 250px;
+  border: solid 1px;
+  border-radius: 5px;
+}
+
 .requests-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 15px 25px;
+  gap: 25px 50px;
 }
 
 .reportContent {
   padding: 15px;
-  min-width: 270px;
+  min-width: 250px;
+  min-height: 500px;
+  border: solid 2px;
+  border-radius: 5px;
+}
+
+.reportContent h4 {
+  min-height: 80px;
+  min-width: 200px;
+  border-radius: 5px;
+  text-align: center;
+  padding: 10px;
+  background-color: cornflowerblue;
+}
+
+.pieChartFiller {
+  background-color: grey;
+  min-height: 200px;
+  min-width: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border-radius: 10px;
 }
 
 .annual-report-grid {
@@ -1372,6 +1617,8 @@ th{
 .reportContentBar {
   padding: 15px;
   min-width: 700px;
+  border: solid 2px;
+  border-radius: 5px;
 }
 
 /*-------------------------------------------------DashBoard----------------------------------------------*/

@@ -32,6 +32,7 @@ function Hiring() {
     
     let length = projects.length
     let index = 0
+
     useEffect(() => {
         const getFiltered = async () => { 
             setResult([])
@@ -43,7 +44,7 @@ function Hiring() {
             }
         }
         getFiltered()
-    }, [projects, queryLocation, querySallary, searchBy, sortBy, searchCount])
+    }, [projects, querySallary, searchBy, sortBy, searchCount])
     
     useEffect(() => {
         const getCategory = async () => {
@@ -83,7 +84,7 @@ function Hiring() {
         } catch (err) {
             console.log(err)
         }
-    }, [searchBy, sortBy, searchCount, queryLocation, querySallary,])
+    }, [searchBy, sortBy, searchCount, querySallary,])
     
     function idPlusKey(a, b) {
         const key = a + b 
@@ -104,7 +105,7 @@ function Hiring() {
                                     setCategoryBy("")
                                 }
                             }}>
-                                Quick Search
+                                Categories
                     </button>
                 </div>
 
@@ -124,6 +125,7 @@ function Hiring() {
                         onChange={(e) => setQueryLocation(e.target.value)}
                     />
                 </div>
+
                 <div>
                     <button onClick={()=> getProjects()} className="btn btn-sm btn-primary">
                         Search
@@ -167,7 +169,7 @@ function Hiring() {
                                         :<></>}
                                     </div>
                                     <div className="searchAdvWrapper">
-                                        <label>Sallary range: {sortSallaryText}</label>
+                                        <label>Sallary range: <b>{sortSallaryText}</b></label>
                                         {querySallary==="" ? 
                                         <>
                                         <button className="btn btn-sm btn-primary" onClick={()=>{
@@ -268,6 +270,7 @@ function Hiring() {
                     </div>
                 </div>
             </div>
+
             {advSearch===true? (
                 <div className="searchAdv">
                     {category.map((a)=> {
@@ -318,6 +321,7 @@ function Hiring() {
                                 <div className="searchHiringTop">
                                     <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.image}.jpg` : "/fallback.png"} className="hiringImg" alt={`${a.company} named ${a.title}`}></img>
                                     <div>
+                                        <p>Type: <b>{a.type}</b></p>
                                         <p>Looking for {a.employmenttype}: {a.skillrequired}</p>
                                     </div>
                                 </div>
@@ -338,8 +342,9 @@ function Hiring() {
                             </div>
                         )
                     })}
-                    </div>
+                </div>
                     :<span className="searchList">No Hiring(s) found.</span>}
+
                 <div className="pageNumber">
                     {result?.map((a)=>{
                         return (
@@ -351,6 +356,7 @@ function Hiring() {
                         )
                     })}
                 </div>
+                
             </div>
         </div>
     )

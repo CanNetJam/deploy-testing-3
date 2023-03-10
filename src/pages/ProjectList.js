@@ -50,6 +50,7 @@ function ProjectList() {
                       description ={Projects.description} 
                       skillrequired ={Projects.skillrequired} 
                       photo={Projects.photo}
+                      image={Projects.image}
                       employer={Projects.employer}
                       candidate={Projects.candidate}
                       approvaldate={Projects.approvaldate}
@@ -67,26 +68,28 @@ function ProjectList() {
 }
 
 function EachProject(props) {
+    const cloud_name = "dzjkgjjut"
     let navigate = useNavigate()
     return (
       <div className="projectListCard" onClick={(e)=>{navigate("/project", {state: {_id: props._id}})}}>
         <div className="projectListPhoto">
-          <img  className="card-img-top projectPhoto" src={props.photo ? `/uploaded-photos/${props.photo}` : "/fallback.png"} alt={`${props.company} named ${props.title}`} />
+          <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_85/${props.image}.jpg` : "/fallback.png"} className="card-img-top projectPhoto" alt={`${props.company} named ${props.title}`}></img>
         </div>
         <div className="projectListBot">
             <h3>{props.employmenttype}: {props.title}</h3>
             <h4>Type: {props.type}</h4>
             <p><b>Status: {props.status}</b></p>
-            <p className="text-muted small">Employer: {props?.employer?.firstname} {props.employer.middlename ? props.employer.middlename.charAt(0).toUpperCase() + ". " : "" }{props?.employer?.lastname}</p>
-            <p className="text-muted small">Skill Required: {props.skillrequired}</p>
+            <p className="text-muted small">Employer: {props?.employer?.firstname} {props.employer.middlename ? props.employer.middlename.charAt(0).toUpperCase() + ". " : "" }{props?.employer?.lastname}<br />
+            Skill Required: {props.skillrequired}<br />
             {props.candidate ? 
-              <p className="text-muted small">Employee: {props?.candidate?.firstname} {props.candidate.middlename ? props.candidate.middlename.charAt(0).toUpperCase() + ". " : "" }{props?.candidate?.lastname}</p>
-            :<></>}
+              <label>Employee: {props?.candidate?.firstname} {props.candidate.middlename ? props.candidate.middlename.charAt(0).toUpperCase() + ". " : "" }{props?.candidate?.lastname}</label>
+            :<></>}<br />
             {props.company!=="undefined" ?
-              <p className="text-muted small">Company: {props.company}</p>
-            :<p className="text-muted small">Company: <i>Not specified.</i></p>}
-            <p className="text-muted small">Began at: {moment(props.approvaldate).format("MMM. DD, YYYY")}</p>
-            {props.completiondate ? <p className="text-muted small">Ended at: {moment(props.completiondate).format("MMM. DD, YYYY")}</p> : <></>}
+              <label className="text-muted small">Company: {props.company}</label>
+            :<label>Company: <i>Not specified.</i></label>}<br />
+            Began at: {moment(props.approvaldate).format("MMM. DD, YYYY")}<br />
+            {props.completiondate ? <label>Ended at: {moment(props.completiondate).format("MMM. DD, YYYY")}</label> : <></>}
+            </p>
         </div>
       </div>
     )

@@ -8,6 +8,53 @@ function Notifications(props) {
     const [ notifications, setNotifications ] = useState(props.savedNotifications)
     const [ type, setType ] = useState("All")
     const [ unread, setUnread ] = useState([])
+    const [ result, setResult ] = useState([])
+    const [ page, setPage ] = useState(0)
+    const [ searchCount, setSearchCount ] = useState(10)
+    const [ notifResult, setNotifResult ] = useState([])
+
+    const scrollToEnd = ()=> {
+        setPage(page+1)
+    }
+    /* Supposed to be used for infinite scroll pagination
+    window.onscroll = function () {
+        if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
+            scrollToEnd()
+        }
+    }
+    */
+
+    let length = notifications.length
+    let index = 0
+
+    useEffect(() => {
+        const getFiltered = () => { 
+            setResult([])
+            let slice = (source, index) => source.slice(index, index + searchCount)
+            while (index < length) {
+                let temp = [slice(notifications, index)]
+                setResult(prev=>prev.concat(temp))
+                index += searchCount
+            }
+        }
+        getFiltered()
+    }, [])
+
+    useEffect(() => {
+        const getFiltered = () => { 
+            result[0] ? setNotifResult(result[0]) : <></>
+        }
+        getFiltered()
+    }, [result])
+
+    useEffect(() => {
+        const getFiltered = () => { 
+            result[page] !== undefined ?
+                notifResult!==[] ? setNotifResult(prev=>prev.concat(result[page])) : <></>
+            : <></>
+        }
+        getFiltered()
+    }, [page])
 
     async function readAll(props) {
         try {
@@ -50,9 +97,9 @@ function Notifications(props) {
             </div>
             <br />
             <div className="notificationsBot">
-                {notifications[0] ? 
+                {notifResult[0] ? 
                     <div className="notifList">
-                        {notifications.map(function(notif) {
+                        {notifResult.map(function(notif) {
                             return <Notif 
                                 _id={notif._id}
                                 key={idPlusKey(notif._id, userData.user.id)} 
@@ -65,6 +112,12 @@ function Notifications(props) {
                                 createdAt={notif.createdAt}
                                 setNumber={props.setNumber}/>
                         })}
+                        <br />
+                        <div className="centerContent">
+                            {result[page+1]!==undefined ?
+                                <button className="btn btn-sm btn-primary" onClick={()=> scrollToEnd()}>Load More</button>
+                            :<span>End of the list.</span>}
+                        </div>
                     </div>
                 : <span>No notifications at the moment.</span>}
             </div>

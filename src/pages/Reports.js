@@ -19,6 +19,7 @@ function Reports() {
     const [ selectedYear, setSelectedYear] = useState(yearNow)
     const [ numMonth, setNumMonth] = useState(moment(Date.now()).format("MM"))
 
+    const [ emptyRequest, setEmptyRequest] = useState(false)
     const [ requestData, setRequestData ] = useState({
         labels: "",
         datasets: [{
@@ -26,6 +27,7 @@ function Reports() {
             data: "",
         }]
     })
+    const [ emptyOngoing, setEmptyOngoing] = useState(false)
     const [ ongoingData, setOngoingData ] = useState({
         labels: "",
         datasets: [{
@@ -47,7 +49,7 @@ function Reports() {
         datasets: [{
             label: "",
             data: "",
-        }]
+        }],
     })
     const [ annualApprovedData, setAnnualApprovedData ] = useState({
         labels: "",
@@ -85,7 +87,7 @@ function Reports() {
         datasets: [{
             label: "",
             data: "",
-        }]
+        }],
     })
     const [ allActiveUsersGenderTally, setAllActiveUsersGenderTally ] = useState([])
     const [ activeUsersGenderData, setActiveUsersGenderData ] = useState({
@@ -95,7 +97,7 @@ function Reports() {
             data: "",
         }],
     })
-    
+
     const componentRef = useRef()
     const handlePrint = useReactToPrint({
         content: () => componentRef.current,
@@ -107,12 +109,19 @@ function Reports() {
         const getProject = async () => {
           try {
             const res = await Axios.get(`/api/reports/request-reports/${numMonth}/${selectedYear}`)
-            setRequestData({
-                labels: res.data?.partial.map((data)=> data.type),
-                datasets: [{
-                    data: res.data?.partial.map((data)=> data.count)
-                }]
-            })
+            if (res.data.total!==0) {
+                setRequestData({
+                    labels: res.data?.partial.map((data)=> data.type),
+                    datasets: [{
+                        data: res.data?.partial.map((data)=> data.count)
+                    }]
+                })
+                setEmptyRequest(false)
+            }
+            if (res.data.total===0) {
+                setEmptyRequest(true)
+            }
+
             const res2 = await Axios.get(`/api/reports/accomplished-reports/${numMonth}/${selectedYear}`)
             if (res2.data.total!==0) {
                 setAccomplishedData({
@@ -121,17 +130,26 @@ function Reports() {
                         data: res2.data?.partial.map((data)=> data.count)
                     }]
                 })
+                setEmptyAccomplished(false)
             }
             if (res2.data.total===0) {
                 setEmptyAccomplished(true)
             }
+
             const res3 = await Axios.get(`/api/reports/ongoing-projects`)
-            setOngoingData({
-                labels: res3.data?.partial.map((data)=> data.type),
-                datasets: [{
-                    data: res3.data?.partial.map((data)=> data.count)
-                }]
-            })
+
+            if (res3.data.total!==0) {
+                setOngoingData({
+                    labels: res3.data?.partial.map((data)=> data.type),
+                    datasets: [{
+                        data: res3.data?.partial.map((data)=> data.count)
+                    }]
+                })
+                setEmptyOngoing(false)
+            }
+            if (res3.data.total===0) {
+                setEmptyOngoing(true)
+            }
           } catch (err) {
             console.log(err)
           }
@@ -240,14 +258,16 @@ function Reports() {
             labels: allActiveUsersTally?.map((data)=> data.type),
             datasets: [{
                 label: "User type",
-                data:  allActiveUsersTally?.map((data)=> data.count)
+                data:  allActiveUsersTally?.map((data)=> data.count),
+                backgroundColor: ["#DA8B40", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"]
             }]
         })
         setActiveUsersGenderData({
             labels: allActiveUsersGenderTally?.map((data)=> data.type),
             datasets: [{
                 label: "Sex",
-                data:  allActiveUsersGenderTally?.map((data)=> data.count)
+                data:  allActiveUsersGenderTally?.map((data)=> data.count),
+                backgroundColor: ["#3e95cd", "#FF00FF"]
             }]
         })
     }, [allActiveUsersTally])
@@ -293,131 +313,137 @@ function Reports() {
         }
         setMonth()
     }, [selectedMonth])
-
+    
     return (
         <>  
             <div className="reports">
-                <div className="centerContent">
-                    <h1>System Reports</h1>
-                </div>
-                <br />
-                <div className="sideContent">
-                    <div>
-                        <h4>Set Month and Year:</h4>
+                <div className="reportsTop">
+                    <div className="centerContent">
+                        <h1>System Reports</h1>
+                    </div>
+                    <br />
+                    <div className="sideContent">
                         <div>
-                            <select className="selectCategory" onChange={e => {
-                                setSelectedMonth(e.target.value)}} 
-                            value={selectedMonth}>
-                                {months.map((a)=> {
-                                    return <option className="selectedCategory" key={a}>{a}</option>
-                                })}
-                            </select>
+                            <h4>Set Month and Year:</h4>
+                            <div>
+                                <select className="selectCategory" onChange={e => {
+                                    setSelectedMonth(e.target.value)}} 
+                                value={selectedMonth}>
+                                    {months.map((a)=> {
+                                        return <option className="selectedCategory" key={a}>{a}</option>
+                                    })}
+                                </select>
+                            </div>
+                            <div>
+                                <select className="selectCategory" onChange={e => {
+                                    setSelectedYear(e.target.value)
+                                }} 
+                                value={selectedYear}>
+                                    {years.map((a)=> {
+                                        return <option className="selectedCategory" key={a}>{a}</option>
+                                    })}
+                                </select>
+                            </div>
                         </div>
                         <div>
-                            <select className="selectCategory" onChange={e => {
-                                setSelectedYear(e.target.value)
-                            }} 
-                            value={selectedYear}>
-                                {years.map((a)=> {
-                                    return <option className="selectedCategory" key={a}>{a}</option>
-                                })}
-                            </select>
+                            <button onClick={handlePrint} className="btn btn-sm btn-primary">Print System Report</button>
+                            <button onClick={()=> navigate("/bug-reports")} className="btn btn-sm btn-primary">
+                                View Bug Reports
+                            </button>
                         </div>
                     </div>
+                </div>
+                <br />
+                <div className="toPrint" ref={componentRef} style={{width: '100%', height: '100%'}}>
                     <div>
-                        <button onClick={handlePrint} className="btn btn-sm btn-primary">Print System Report</button>
-                        <button onClick={()=> navigate("/bug-reports")} className="btn btn-sm btn-primary">
-                            View Bug Reports
-                        </button>
+                        <h2>Monthly Report: {selectedMonth}, {selectedYear}</h2>
                     </div>
-                </div>
-                <br />
-            <div className="toPrint" ref={componentRef} style={{width: '100%', height: '100%'}}>
-                <div>
-                    <h2>Monthly Report: {selectedMonth}, {selectedYear}</h2>
-                </div>
-                <br />
-                <div className="requests-grid">
-                    <div className="reportContent">
-                        <h4>Requests </h4>
-                        <label>Reports throughout the month of {selectedMonth}, {selectedYear}</label>
-                        <br />
-                        <div style={{ width: 300 }}>
-                            <PieChart chartData={requestData} />
-                        </div>
-                    </div>
-                    
-                    <div className="reportContent">
-                        <h4>Accomplished Jobs & Projects</h4>
-                        <label>Reports throughout the month of {selectedMonth}, {selectedYear}</label>
-                        <br />
-                        {emptyAccomplished!==true ?
-                            <div style={{ width: 300 }}>
-                                <PieChart chartData={accomplishedData} />
-                            </div>
-                        :<div><b>No data.</b></div>}
-                    </div>
-
-                    <div className="reportContent">
-                        <h4>Ongoing Jobs & Projects </h4>
-                        <label>Reports throughout the month of {selectedMonth}, {selectedYear}</label>
-                        <br />
-                        {ongoingData!==[] ?
-                            <div style={{ width: 300 }}>
-                                <PieChart chartData={ongoingData} />
-                            </div>
-                        :<></>}
-                    </div>
-                </div>
-                <br />
-                <br />
-                <div>
-                    <div>
-                        <h2>Annual Report: {selectedYear}</h2>
-                    </div>
-                    <div className="annual-report-grid">
-                        <div className="reportContentBar" style={{ width: 700 }}>
-                            <BarChart chartData={annualRequestData} />
-                        </div>
-                        <div className="reportContentBar" style={{ width: 700 }}>
-                            <BarChart chartData={annualApprovedData} />
-                        </div>
-                        <div className="reportContentBar" style={{ width: 700 }}>
-                            <BarChart chartData={annualDeniedData} />
-                        </div>
-                        <div className="reportContentBar" style={{ width: 700 }}>
-                            <BarChart chartData={annualAccomplishedData} />
-                        </div>
-                    </div>
-                </div>
-                <br />
-                <br />
-                <div>
-                    <div>
-                        <h3>User Reports:</h3>
-                    </div>
+                    <br />
                     <div className="requests-grid">
                         <div className="reportContent">
-                            <label>User Count: </label>
-                            <div style={{ width: 300 }}>
-                                <PieChart chartData={usersData} />
+                            <h4>Requests </h4>
+                            <label>Reports throughout the month of {selectedMonth}, {selectedYear}</label>
+                            <br />
+
+                            {emptyRequest!==true ?
+                                <div style={{ width: 300 }}>
+                                    <PieChart chartData={requestData} />
+                                </div>
+                            :<div className="pieChartFiller"><b>No data.</b></div>}
+                        </div>
+                        
+                        <div className="reportContent">
+                            <h4>Accomplished Jobs & Projects</h4>
+                            <label>Reports throughout the month of {selectedMonth}, {selectedYear}</label>
+                            <br />
+                            {emptyAccomplished!==true ?
+                                <div style={{ width: 300 }}>
+                                    <PieChart chartData={accomplishedData} />
+                                </div>
+                            :<div className="pieChartFiller"><b>No data.</b></div>}
+                        </div>
+
+                        <div className="reportContent">
+                            <h4>Ongoing Jobs & Projects </h4>
+                            <label>Reports throughout the month of {selectedMonth}, {selectedYear}</label>
+                            <br />
+
+                            {emptyOngoing!==true ?
+                                <div style={{ width: 300 }}>
+                                    <PieChart chartData={ongoingData} />
+                                </div>
+                            :<div className="pieChartFiller"><b>No data.</b></div>}
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <div>
+                        <div>
+                            <h2>Annual Report: {selectedYear}</h2>
+                        </div>
+                        <div className="annual-report-grid">
+                            <div className="reportContentBar" style={{ width: 700 }}>
+                                <BarChart chartData={annualRequestData} />
+                            </div>
+                            <div className="reportContentBar" style={{ width: 700 }}>
+                                <BarChart chartData={annualApprovedData} />
+                            </div>
+                            <div className="reportContentBar" style={{ width: 700 }}>
+                                <BarChart chartData={annualDeniedData} />
+                            </div>
+                            <div className="reportContentBar" style={{ width: 700 }}>
+                                <BarChart chartData={annualAccomplishedData} />
                             </div>
                         </div>
-                        <div className="reportContent">
-                            <label>Active Users Type: </label>
-                            <div style={{ width: 300 }}>
-                                <PieChart chartData={activeUsersData} />
-                            </div>
+                    </div>
+                    <br />
+                    <br />
+                    <div>
+                        <div>
+                            <h3>User Reports:</h3>
                         </div>
-                        <div className="reportContent">
-                            <label>Active Users Sex: </label>
-                            <div style={{ width: 300 }}>
-                                <PieChart chartData={activeUsersGenderData} />
+                        <div className="requests-grid">
+                            <div className="reportContent">
+                                <h4>User Count: </h4>
+                                <div style={{ width: 300 }}>
+                                    <PieChart chartData={usersData} />
+                                </div>
+                            </div>
+                            <div className="reportContent">
+                                <h4>Active Users Type: </h4>
+                                <div style={{ width: 300 }}>
+                                    <PieChart chartData={activeUsersData} />
+                                </div>
+                            </div>
+                            <div className="reportContent">
+                                <h4>Active Users Sex: </h4>
+                                <div style={{ width: 300 }}>
+                                    <PieChart chartData={activeUsersGenderData} />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
             </div>
         </>
     )

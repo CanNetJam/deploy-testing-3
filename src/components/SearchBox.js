@@ -109,7 +109,7 @@ function SearchBox({projectid, projecttype}) {
                                     setCategoryBy("")
                                 }
                             }}>
-                                Quick Search
+                                Categories
                     </button>
                 </div>
 
@@ -121,96 +121,99 @@ function SearchBox({projectid, projecttype}) {
                         onChange={(e) => setQuery(e.target.value)}
                     />
                 </div>
-            <div className="testing">
-                <div className="searchKey">
-                    <button className="btn btn-sm btn-primary" onClick={()=> {
-                        if (keySearch === false) {
-                            setKeySearch(true)
-                        }
-                        if (keySearch === true) {
-                            setKeySearch(false)
-                        }
-                    }}>
-                        ...
-                    </button>
-                </div>
+                <div className="testing">
+                    <div className="searchKey">
+                        <button className="btn btn-sm btn-primary" onClick={()=> {
+                            if (keySearch === false) {
+                                setKeySearch(true)
+                            }
+                            if (keySearch === true) {
+                                setKeySearch(false)
+                            }
+                        }}>
+                            ...
+                        </button>
+                    </div>
 
-                <div className="keyPicker">
-                    {keySearch && (
-                        <div className="advanceSearch">
-                            <div>
-                                <h4>Search by:</h4>
-                                <div className="searchAdvWrapper">
-                                    <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Skill")}}>
-                                        <b>Skill</b>
-                                    </button>
-                                    <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Name")}}>
-                                        <b>Name</b>
+                    <div className="keyPicker">
+                        {keySearch && (
+                            <div className="advanceSearch">
+                                <div>
+                                    <h4>Search by:</h4>
+                                    <div className="searchAdvWrapper">
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Skill")}}>
+                                            <b>Skill</b>
+                                        </button>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                            setBtnSearchBy("Name")
+                                            setQuery("")
+                                            }}>
+                                            <b>Name</b>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4>Sort by:</h4>
+                                    <div className="searchAdvWrapper">
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Highest Rating")}}>
+                                            Highest Rating
+                                        </button>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Lowest Rating")}}>
+                                            Lowest Rating
+                                        </button>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("A-Z (First Name)")}}>
+                                            A-Z (First Name)
+                                        </button>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Z-A (First Name)")}}>
+                                            Z-A (First Name)
+                                        </button>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("A-Z (Last Name)")}}>
+                                            A-Z (Last Name)
+                                        </button>
+                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Z-A (Last Name)")}}>
+                                            Z-A (Last Name)
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4>Show results by:</h4>
+                                    <div className="searchAlign centerContent">
+                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(5)}}>
+                                            5
+                                        </button>
+                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(10)}}>
+                                            10
+                                        </button>
+                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
+                                            25
+                                        </button>
+                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
+                                            50
+                                        </button>
+                                    </div>
+                                </div>
+                                <br />    
+                                <div className="centerContent">
+                                    <button className="btn btn-sm btn-primary" onClick={()=> {
+                                        if (btnSearchBy!=="") {
+                                            setSearchBy(btnSearchBy)
+                                        }
+                                        if (btnSortBy!=="") {
+                                            setSortBy(btnSortBy)
+                                        }
+                                        if (btnSearchCount!==undefined) {
+                                            setSearchCount(btnSearchCount)
+                                        }
+                                        setPage(0)
+                                        setKeySearch(false)
+                                    }}>
+                                        Confirm
                                     </button>
                                 </div>
                             </div>
-                            <div>
-                                <h4>Sort by:</h4>
-                                <div className="searchAdvWrapper">
-                                    <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Highest Rating")}}>
-                                        Highest Rating
-                                    </button>
-                                    <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Lowest Rating")}}>
-                                        Lowest Rating
-                                    </button>
-                                    <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("A-Z (First Name)")}}>
-                                        A-Z (First Name)
-                                    </button>
-                                    <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Z-A (First Name)")}}>
-                                        Z-A (First Name)
-                                    </button>
-                                    <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("A-Z (Last Name)")}}>
-                                        A-Z (Last Name)
-                                    </button>
-                                    <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Z-A (Last Name)")}}>
-                                        Z-A (Last Name)
-                                    </button>
-                                </div>
-                            </div>
-                            <div>
-                                <h4>Show results by:</h4>
-                                <div className="searchAlign centerContent">
-                                    <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(5)}}>
-                                        5
-                                    </button>
-                                    <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(10)}}>
-                                        10
-                                    </button>
-                                    <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
-                                        25
-                                    </button>
-                                    <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
-                                        50
-                                    </button>
-                                </div>
-                            </div>
-                            <br />    
-                            <div className="centerContent">
-                                <button className="btn btn-sm btn-primary" onClick={()=> {
-                                    if (btnSearchBy!=="") {
-                                        setSearchBy(btnSearchBy)
-                                    }
-                                    if (btnSortBy!=="") {
-                                        setSortBy(btnSortBy)
-                                    }
-                                    if (btnSearchCount!==undefined) {
-                                        setSearchCount(btnSearchCount)
-                                    }
-                                    setPage(0)
-                                    setKeySearch(false)
-                                }}>
-                                    Confirm
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
             </div>
 
             {advSearch===true? (
@@ -276,7 +279,11 @@ function SearchBox({projectid, projecttype}) {
                                     <p className="p1">{a.firstname} {a.middlename ? a.middlename?.charAt(0).toUpperCase()+". " : " "} {a.lastname}</p>
                                     <p className="p2">
                                         {a.skill.map((b)=> {
-                                            return <label key={idPlusKey(a._id, b)}>{b}</label>
+                                            return (
+                                                <div>
+                                                    <label key={idPlusKey(a._id, b)}>{b},</label>
+                                                </div>
+                                            )  
                                         })}
                                     </p>
                                 </div>

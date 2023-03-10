@@ -7,6 +7,7 @@ import Gallery from "../components/Gallery"
 import moment from "moment"
 
 function SearchProfile({socket}) {
+    const cloud_name = "dzjkgjjut"
     const location = useLocation()
     let navigate = useNavigate()
     const { userData, setUserData } = useContext(UserContext)
@@ -15,7 +16,7 @@ function SearchProfile({socket}) {
     const [ occupied, setOccupied ] = useState(false)
     const [ currentprj, setCurrentPrj ] = useState(0)
     const [ available, setAvailable ] = useState(true)
-
+    
     useEffect(() => {
         const user = location?.state?._id
         const getUserData = async () => {
@@ -168,7 +169,7 @@ function SearchProfile({socket}) {
                     <div className="searchProfileTop">
                         <div>
                             <div className="profile-ProfilePhotoWrapper">
-                                <img className="card-img-top profile-ProfilePhoto" src={searchInfo.photo ? `/uploaded-photos/${searchInfo.photo}` : "/fallback.png"} alt={`${searchInfo.age} named ${searchInfo.lastname}`} />
+                                <img src={searchInfo.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${searchInfo.image}.jpg` : "/fallback.png"} className="card-img-top profile-ProfilePhoto" alt={`${searchInfo.age} named ${searchInfo.lastname}`}></img>
                             </div>
                             <br />
                             <div className="searchProfileMid">
