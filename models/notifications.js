@@ -11,7 +11,7 @@ const notificationsSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, ref: "accounts",
     },
     subject: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId, ref: "projects",
     },
     action: {
         type: String,

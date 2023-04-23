@@ -28,6 +28,7 @@ import SearchBox from "./components/SearchBox"
 import SearchProfile from "./components/SearchProfile"
 import Project from "./components/Project"
 import Hiring from "./components/Hiring"
+import CompanyProfile from "./components/CompanyProfile"
 
 export const UserContext = createContext()
 
@@ -64,6 +65,39 @@ function App() {
     }
     getNotifications()
   }, [userData, number, liveNotif])
+
+  useEffect(() => {
+    const getProjects = async () => {
+      if (userData.user?.type==="Employer") {
+        try {
+          const res = await Axios.get(`/api/all-projects-expiry/${userData?.user?.id}`, {headers: {'auth-token': userData.token}})
+
+            res.data?.map( async (a) => {
+              const subject = a._id
+              const type = a.type + " Hiring"
+              const action = "impending expiration of your"
+
+              const notif = await Axios.get(`/api/check-existing-notif/${userData?.user?.id}/${action}/${type}/${subject}/`, {headers: {'auth-token': userData.token}})
+              if (notif.data.length===0) {
+                await Axios.post(`/api/send-notifications/${userData.user.id}/${userData.user.id}/${action}/${type}/${subject}`)
+                
+                socket.emit("sendNotification", {
+                  senderId: userData.user.id,
+                  receiverId: userData.user.id,
+                  subject: subject,
+                  type: type,
+                  action: action,
+                })
+              }
+            })
+
+        } catch (err) {
+          console.log(err)
+        }
+      }
+    }
+    getProjects ()
+  }, [userData, number])
   
   useEffect(() => {
     socket?.on("getNotification", (data) => {
@@ -108,34 +142,35 @@ function App() {
           <div className="top"> 
             <TopNav savedNotifications={savedNotifications} setNumber={setNumber}/>
           </div>
-          <div className="horizontal_line"></div>
           <div className="content">
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/search" element={<SearchBox />} />
-                    <Route path="/search-profile" element={<SearchProfile socket={socket} />}/>
-                    <Route path="/hiring" element={<Hiring />} />
-                    <Route path="/about" element={<About />}/>
-                    <Route path="/help" element={<Help />} />
-                    <Route path="/login" element={<Login />} />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/search" element={<SearchBox />} />
+              <Route path="/search-profile" element={<SearchProfile socket={socket} />}/>
+              <Route path="/hiring" element={<Hiring />} />
+              <Route path="/about" element={<About />}/>
+              <Route path="/help" element={<Help />} />
+              <Route path="/login" element={<Login />} />
 
-                    <Route path="/register" element={<RegisterAccount />} />
-                    <Route path="/user-profile" element={<AllAccounts />} />
-                    <Route path="/all-requests" element={<Requests socket={socket} />} />
-                    <Route path="/all-projects" element={<AllProjects />} />
-                    <Route path="/notifications" element={<Notifications 
-                      savedNotifications={savedNotifications} 
-                      setNumber={setNumber}/>} />
-                    <Route path="/profile/user" element={<Profile />} />
-                    <Route path="/start-project" element={<MyRequests />} />
-                    <Route path="/project-proposal" element={<ProjectProposal socket={socket}/>} />
-                    <Route path="/project-list" element={<ProjectList />} />
-                    <Route path="/project" element={<Project socket={socket}/>} />
-                    <Route path="/messages" element={<Messages socket={socket}/>} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/reports" element={<Reports />} />
-                    <Route path="/bug-reports" element={<BugReports />} />
-                  </Routes> 
+              <Route path="/register" element={<RegisterAccount />} />
+              <Route path="/user-profile" element={<AllAccounts />} />
+              <Route path="/all-requests" element={<Requests socket={socket} />} />
+              <Route path="/all-projects" element={<AllProjects />} />
+              <Route path="/notifications" element={<Notifications savedNotifications={savedNotifications} setNumber={setNumber}/>} />
+              <Route path="/profile/user" element={<Profile />} />
+              <Route path="/start-project" element={<MyRequests />} />
+              <Route path="/project-proposal" element={<ProjectProposal socket={socket}/>} />
+              <Route path="/project-list" element={<ProjectList />} />
+              <Route path="/project" element={<Project socket={socket}/>} />
+              <Route path="/messages" element={<Messages socket={socket}/>} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/bug-reports" element={<BugReports />} />
+              <Route path="/company-profile" element={<CompanyProfile />} />
+            </Routes> 
+          </div>
+          <div className="pagefooter">
+            <label className="">2023 Cavite State University Carmona Campus | Carmona, Cavite, Philippines</label>
           </div>
           </UserContext.Provider>
       </Router>

@@ -25,7 +25,7 @@ function ProjectUpdates({projectid, employer, freelancer, ongoing, socket}) {
             if(userData.user.id===employer) {
                 setTheEmp(true)
             }
-            if(userData.user.id===freelancer) {
+            if(userData.user.id===freelancer._id) {
                 setTheFree(true)
             }
         }
@@ -45,7 +45,7 @@ function ProjectUpdates({projectid, employer, freelancer, ongoing, socket}) {
     }, [addUpdate])
     
     useEffect(() => { 
-        const user = freelancer
+        const user = freelancer._id
         const getUserData = async () => {
             try {
                 const res = await Axios.get(`/api/search-profile/${user}`)
@@ -67,11 +67,11 @@ function ProjectUpdates({projectid, employer, freelancer, ongoing, socket}) {
             const subject = projectid
             const type = "Project Update Request"
             const action = "sent a"
-            await Axios.post(`/api/send-notifications/${userData.user.id}/${freelancer}/${action}/${type}/${subject}`)
+            await Axios.post(`/api/send-notifications/${userData.user.id}/${freelancer._id}/${action}/${type}/${subject}`)
 
             socket.emit("sendNotification", {
                 senderId: userData.user.id,
-                receiverId: freelancer,
+                receiverId: freelancer._id,
                 subject: subject,
                 type: type,
                 action: action,
@@ -89,10 +89,11 @@ function ProjectUpdates({projectid, employer, freelancer, ongoing, socket}) {
     }
 
     return (
-        <div className="notifications">
-            <div className="notificationsTop">
-                <div>
-                    <h2>Project Updates</h2>
+        <div className="projectUpdates">
+            <div className="horizontal_line"></div>
+            <div className="projectUpdatesTop">
+                <div className="contentTitle">
+                    <label><b>Project Updates</b></label>
                 </div>
                 <div>
                     {!ongoing && (
@@ -102,7 +103,7 @@ function ProjectUpdates({projectid, employer, freelancer, ongoing, socket}) {
                         <div>
                             {theEmp && (
                             <div>
-                                <button className="btn btn-sm btn-primary" onClick={()=> {
+                                <button className="btn btn-outline-success allButtons" onClick={()=> {
                                     if (sendRequest===false) {
                                         setAddNote(true)
                                     }
@@ -124,10 +125,10 @@ function ProjectUpdates({projectid, employer, freelancer, ongoing, socket}) {
                     <form className="projectUpdate" onSubmit={reqUpdate}>
                         <div className="projectUpdateContent">
                             <label>Note: (Optional, leave blank if not necessary.) </label>
-                            <input onChange={e => setNote(e.target.value)} value={note} type="text" className="form-control inputStretch" placeholder="Specify the contents of your update request here..." />
+                            <textarea required rows = "3" cols = "60" onChange={e => setNote(e.target.value)} value={note} type="text" className="form-control inputStretch" placeholder="Topic, sketch, draft or any expected output here..." />
                             
                             <div className="btnWrapper">
-                                <button className="btn btn-sm btn-primary">
+                                <button className="btn btn-outline-success allButtons">
                                     Send Request
                                 </button>
                                 <button type="button" className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=> {
@@ -143,34 +144,37 @@ function ProjectUpdates({projectid, employer, freelancer, ongoing, socket}) {
 
             <div>
                 {updates[0] ? 
-                    <div className="searchList">
+                    <div className="projectUpdateList">
                         {updates?.map((a)=>{
                             return (
                                 <div className="theUpdate" key={idPlusKey(a._id, userData.user.id)}>
-                                    <h1>Project Progress #{1+(updates.indexOf(a))}</h1>
-                                    <p>Requested at: {moment(a.createdAt).format("MMM. DD, YYYY")} <br /> {format(a.createdAt)}</p>
+                                    <div className="paragraphSpaceBetweenOthers">
+                                        <div><b>Project Progress #{1+(updates.indexOf(a))}</b></div> 
+                                        <div className="rightText"><p className="text-muted small">Requested at {moment(a.createdAt).format("MMM. DD, YYYY")} | {format(a.createdAt)}</p></div>
+                                    </div>
+                                    
                                     {a.note!=="" ?
                                         <p>Note: {a.note}</p>
                                     :<></>}
-                                    
+                                    <div className="projectUpdateContent">
                                     <div className="projectUpdatePhoto">
-                                        <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.image}.jpg` : "/fallback.png"} alt={`${a.title} named ${a.title}`}></img>
+                                        <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${a.image}.jpg` : "/fallback.png"} alt={`${a.title} named ${a.title}`}></img>
                                     </div>
+                                    <div>
                                     <p>Title: {a.title!== "" ? a.title : "Waiting for project update."}<br />
-                                    Description: {a.description!== "" ? a.description : "Waiting for project update."}</p>
+                                    Description: <br/>
+                                    {a.description!== "" ? a.description : "Waiting for project update."}</p>
                                     {a.uploadedby && (
                                         <div>
-                                            <p>Uploaded by: {selectedFree.firstname} {selectedFree.middlename ? selectedFree.middlename?.charAt(0).toUpperCase() + "." : ""} {selectedFree.lastname}<br />
-                                            Edited at: {moment(a.updatedAt).format("MMM. DD, YYYY")} <br></br>({format(a.updatedAt)})</p>
+                                            <p className="text-muted small">Uploaded by {selectedFree.firstname} {selectedFree.middlename ? selectedFree.middlename?.charAt(0).toUpperCase() + "." : ""} {selectedFree.lastname}<br />
+                                            Edited at {moment(a.updatedAt).format("MMM. DD, YYYY")} | ({format(a.updatedAt)})</p>
                                         </div>
                                     )}
 
-                                    {ongoing && (
-                                        <div>
-                                            {theFree && (
+                                    {ongoing && theFree && (
                                                 <div>
                                                     <div>
-                                                        <button className="btn btn-sm btn-primary" onClick={()=> {setSendUpdate(true), setSelected(a._id)}}>
+                                                        <button className="btn btn-outline-success allButtons" onClick={()=> {setSendUpdate(true), setSelected(a._id)}}>
                                                             Send Project Update
                                                         </button>
                                                         {sendUpdate && (
@@ -196,9 +200,9 @@ function ProjectUpdates({projectid, employer, freelancer, ongoing, socket}) {
                                                         )}
                                                     </div>
                                                 </div>
-                                            )}
-                                        </div>
                                     )}
+                                    </div>
+                                    </div>
                                 </div>
                             )
                         })}

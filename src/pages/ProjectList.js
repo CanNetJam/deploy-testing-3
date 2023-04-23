@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react"
 import { UserContext } from "../home"
 import Axios from "axios"
 import { useNavigate } from "react-router-dom"
-import moment from "moment"
+import {format} from "timeago.js"
 
 function ProjectList() {
     const { userData, setUserData } = useContext(UserContext)
@@ -19,16 +19,16 @@ function ProjectList() {
     
     return (
       <div className="projects">
-        <div className="projectsTop">
-          <h2>Job/Project List ({tab})</h2>
+        <div className="projectsTop contentTitle">
+          <label><b>Job/Project List</b> (<i>{tab}</i>)</label>
           <div className="projectsTopBtn">
-            <button className="btn btn-sm btn-primary" onClick={()=>{setTab("Hiring")}}>
+            <button className="btn btn-outline-success allButtons" onClick={()=>{setTab("Hiring")}}>
               Hiring
             </button>
-            <button className="btn btn-sm btn-primary" onClick={()=>{setTab("Ongoing")}}>
+            <button className="btn btn-outline-success allButtons" onClick={()=>{setTab("Ongoing")}}>
               Ongoing
             </button>
-            <button className="btn btn-sm btn-primary" onClick={()=>{setTab("Concluded")}}>
+            <button className="btn btn-outline-success allButtons" onClick={()=>{setTab("Concluded")}}>
               Concluded
             </button>
           </div>
@@ -53,6 +53,8 @@ function ProjectList() {
                       image={Projects.image}
                       employer={Projects.employer}
                       candidate={Projects.candidate}
+                      tempcandidate={Projects.tempcandidate}
+                      employeelist={Projects.employeelist}
                       approvaldate={Projects.approvaldate}
                       completiondate={Projects.completiondate} />
                   </div>
@@ -73,23 +75,19 @@ function EachProject(props) {
     return (
       <div className="projectListCard" onClick={(e)=>{navigate("/project", {state: {_id: props._id}})}}>
         <div className="projectListPhoto">
-          <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_85/${props.image}.jpg` : "/fallback.png"} className="card-img-top projectPhoto" alt={`${props.company} named ${props.title}`}></img>
+          <img className="projectListImage" src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${props.image}.jpg` : "/fallback.png"} alt={`${props.company} named ${props.title}`}></img>
         </div>
         <div className="projectListBot">
-            <h3>{props.employmenttype}: {props.title}</h3>
-            <h4>Type: {props.type}</h4>
-            <p><b>Status: {props.status}</b></p>
-            <p className="text-muted small">Employer: {props?.employer?.firstname} {props.employer.middlename ? props.employer.middlename.charAt(0).toUpperCase() + ". " : "" }{props?.employer?.lastname}<br />
+            <p><b>Status: {props.status}</b><br/>
+            <b>{props.type}</b>: {props.title} (<i>{props.employmenttype}</i>)</p>
+            <p>Employer: {props?.employer?.firstname} {props.employer.middlename ? props.employer.middlename.charAt(0).toUpperCase() + ". " : "" }{props?.employer?.lastname}<br />
             Skill Required: {props.skillrequired}<br />
-            {props.candidate ? 
-              <label>Employee: {props?.candidate?.firstname} {props.candidate.middlename ? props.candidate.middlename.charAt(0).toUpperCase() + ". " : "" }{props?.candidate?.lastname}</label>
-            :<></>}<br />
             {props.company!=="undefined" ?
-              <label className="text-muted small">Company: {props.company}</label>
+              <label>Company: {props.company}</label>
             :<label>Company: <i>Not specified.</i></label>}<br />
-            Began at: {moment(props.approvaldate).format("MMM. DD, YYYY")}<br />
-            {props.completiondate ? <label>Ended at: {moment(props.completiondate).format("MMM. DD, YYYY")}</label> : <></>}
             </p>
+            <p className="text-muted small">Posted {format(props.approvaldate)}<br/>
+            {props.completiondate ? <label>Ended {format(props.completiondate)}</label> : <></>}</p>
         </div>
       </div>
     )

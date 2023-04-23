@@ -19,6 +19,26 @@ function SendUpdate(props) {
       data.append("title", title)
       if (file) {
         data.append("photo", file)
+        const signatureResponse = await Axios.get("/get-signature")
+
+        const image = new FormData()
+        image.append("file", file)
+        image.append("api_key", api_key)
+        image.append("signature", signatureResponse.data.signature)
+        image.append("timestamp", signatureResponse.data.timestamp)
+      
+        const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: function (e) {
+            console.log(e.loaded / e.total)
+          }
+        })
+        let cloud_image = cloudinaryResponse.data.public_id
+  
+        data.append("image", cloud_image)
+        data.append("public_id", cloudinaryResponse.data.public_id)
+        data.append("version", cloudinaryResponse.data.version)
+        data.append("signature", cloudinaryResponse.data.signature)
       }
       data.append("description", description)
       data.append("uploadedby", uploadedby)
@@ -26,27 +46,6 @@ function SendUpdate(props) {
       setFile("")
       setDescription("")
       setUploadedBy("")
-
-      const signatureResponse = await Axios.get("/get-signature")
-
-      const image = new FormData()
-      image.append("file", file)
-      image.append("api_key", api_key)
-      image.append("signature", signatureResponse.data.signature)
-      image.append("timestamp", signatureResponse.data.timestamp)
-    
-      const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: function (e) {
-          console.log(e.loaded / e.total)
-        }
-      })
-      let cloud_image = cloudinaryResponse.data.public_id
-
-      data.append("image", cloud_image)
-      data.append("public_id", cloudinaryResponse.data.public_id)
-      data.append("version", cloudinaryResponse.data.version)
-      data.append("signature", cloudinaryResponse.data.signature)
 
       CreatePhotoField.current.value = ""
       const res =await Axios.post("/api/project-update/edit", data, { headers: { "Content-Type": "multipart/form-data" } })
@@ -70,8 +69,8 @@ function SendUpdate(props) {
     return (
       <div>
         <form className="projectUpdate" onSubmit={submitHandler}>
-          <h3>Add photo (optional)</h3>
           <div className="mb-2">
+            <label><b>Add photo (optional)</b></label>
             <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
           </div>
           <div className="mb-2">
@@ -80,7 +79,7 @@ function SendUpdate(props) {
           <div className="mb-2">
             <input onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder="A brief description of the project update." />
           </div>
-          <button className="btn btn-sm btn-primary">Complete Project Update</button>
+          <button className="btn btn-outline-success allButtons">Complete Project Update</button>
         </form>
       </div>
     )

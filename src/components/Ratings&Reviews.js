@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from "react"
 import Axios from "axios"
-import moment from "moment"
+import {format} from "timeago.js"
 
 function RatingsAndReviews(props) {
     const cloud_name = "dzjkgjjut"
@@ -26,26 +26,23 @@ function RatingsAndReviews(props) {
     
     return (
         <div className="reviews">
-            <h3><b>Reviews</b></h3>
+            <p className="profileCardName">Reviews</p>
             <p><b>Average Rating: {props?.averagerating ? props.averagerating : "No records yet."}</b> <br></br>({props.ratings?.length}) review(s).</p>
-            <br></br>
+            <br/>
             {reviews[0] ?
                 <div className="reviewList">
                     {reviews.map((a)=> {
                         return (
                             <div className="eachReview" key={idPlusKey(a._id, props.candidate)}>
-                                <p>Rating: <b>{a.rating} star(s)</b></p>
                                 <p>{a.empname}<br />
-                                Date: {moment(a.createdAt).format("MMM. DD, YYYY")}<br />
-                                Description: {a.description}</p>
-                                <div className="eachReviewImage">
-                                    <img src={a.photo ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_85/${a.photo}.jpg` : "/fallback.png"} className="profile-ProfilePhoto" alt={"Rating image"}></img>
-                                </div>
+                                <b>{a.rating} star(s)</b> | {format(a.createdAt)}</p>
+                                <img className="profile-ProfilePhoto" src={a.photo ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_85/${a.photo}.jpg` : "/fallback.png"} alt={"Rating image"}></img>
+                                <p>{a.description}</p>
                             </div>
                         )
                     })}
                 </div>
-            : <span>No reviews yet.</span>}
+            : <div className="reviewList">No reviews yet.</div>}
         </div>
     )
 }

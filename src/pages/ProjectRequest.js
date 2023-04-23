@@ -8,26 +8,26 @@ function ProjectProposal({socket}) {
     let navigate = useNavigate()
     const api_key = "848182664545332"
     const cloud_name = "dzjkgjjut"
-
+    
     const { userData, setUserData } = useContext(UserContext)
     const [ file, setFile ] = useState("")
     const [ requestType, setRequestType ] = useState("")
     const [ employmentType, setEmploymentType ] = useState("")
-    const [ minimumreq, setMinimumReq ] = useState("")
+    const [ minimumreq, setMinimumReq ] = useState([])
     const [ reqSpecified, setReqSpecified ] = useState("")
     const [ title, setTitle ] = useState("")
-    const [ company, setCompany ] = useState(userData.user?.company ? userData.user.company : "Not declared")
+    const [ company, setCompany ] = useState(userData.user?.companyinfo ? userData.user.companyinfo.companyname : "Not declared")
     const [ description, setDescription ] = useState("")
     const [ skillrequired, setSkillRequired ] = useState("")
     const [ employer, setEmployer ] = useState(userData.user.id)
-    const [ sallary, setSallary ] = useState(0)
+    const [ sallary, setSallary ] = useState(0.00)
     const [ duration, setDuration ] = useState(0)
     const [ slots, setSlots ] = useState(1)
     const [ others, setOthers ] = useState("")
     const CreatePhotoField = useRef()
-
+    
     const [ category, setCategory ] = useState([])
-    const [ advSearch, setAdvSearch ] = useState(true)
+    const [ advSearch, setAdvSearch ] = useState(false)
     const [ categoryBy, setCategoryBy ] = useState("")
     const [ categoryPick, setCategoryPick ] = useState(false)
     const [ adminId, setAdminId ] = useState()
@@ -52,14 +52,14 @@ function ProjectProposal({socket}) {
     const [ filteredRegions, setFilteredRegions ] = useState([])
     const [ filteredProvinces, setFilteredProvinces ] = useState([])
     const [ filteredCities, setFilteredCities ] = useState([])
-    const [ selectedRegion, setSelectedRegion ] = useState("")
-    const [ selectedProvince, setSelectedProvince ] = useState("")
-    const [ selectedCity, setSelectedCity ] = useState("")
+    const [ selectedRegion, setSelectedRegion ] = useState(userData.user?.companyinfo ? userData.user.companyinfo.location.region : "Not declared")
+    const [ selectedProvince, setSelectedProvince ] = useState(userData.user?.companyinfo ? userData.user.companyinfo.location.province : "Not declared")
+    const [ selectedCity, setSelectedCity ] = useState(userData.user?.companyinfo ? userData.user.companyinfo.location.city : "Not declared")
     const [ region, setRegion ] = useState("")
     const [ province, setProvince ] = useState("")
     const [ city, setCity ] = useState("")
 
-    const [ steps, setSteps ] = useState([1, 2, 3, 4, 5])
+    const [ steps, setSteps ] = useState([1, 2, 3])
     const [ currentStep, setCurrentStep] = useState(1)
     const [ nextBtn, setNextBtn ] = useState(true)
 
@@ -175,7 +175,9 @@ function ProjectProposal({socket}) {
       }
       data.append("type", requestType)
       data.append("employmenttype", employmentType)
-      data.append("minimumreq", minimumreq)
+      for (let i = 0; i < minimumreq.length; i++) {
+        data.append("minimumreq[]", minimumreq[i])
+      }
       if (reqSpecified) {
         data.append("reqspecified", reqSpecified)
       }
@@ -226,25 +228,33 @@ function ProjectProposal({socket}) {
       const key = a + b 
       return key
     }
-
-    function  step1Check(a, b) {
+    
+    useEffect(() => {
+      if (skillrequired!=="") {
+        step1Check(requestType, employmentType)
+      }
+    }, [skillrequired, minimumreq])
+    
+    function step1Check(a, b) {
       if (a!=="" && b!=="") {
-        return setNextBtn(false)
-      }
-    }
+        if (minimumreq.includes("Others")) {
+          if (reqSpecified!=="") {
+            if (skillrequired!=="") {
+              return setNextBtn(false)
+            }
+          }
+          return setNextBtn(true)
+        }
 
-    function step3Check(props) {
-      if (props!=="Others") {
-        return setNextBtn(false)
-      }
-      if (props==="Others") {
-        setNextBtn(true)
-        if (reqSpecified!=="") {
-          return setNextBtn(false)
+        if ((minimumreq.includes("College Degree") || minimumreq.includes("Technical Vocaltional Training")) && minimumreq!==[]) {
+          if (skillrequired!=="") {
+            return setNextBtn(false)
+          }
         }
       }
+      return setNextBtn(true)
     }
-
+    
     function inputCheck() {
       if (title!=="" && slots!==0 && sallary!==0 && duration!==0 && selectedRegion!=="" && selectedProvince!=="" && selectedCity!=="" && description!=="") {
         return setNextBtn(false)
@@ -257,66 +267,174 @@ function ProjectProposal({socket}) {
       }
     }
 
+    function putMinimumReq(props) {
+      if (minimumreq.includes(props)) {
+        const newArray = minimumreq.filter((a) => a !== props)
+        setMinimumReq(newArray)
+      } else {
+        setMinimumReq(prev => prev.concat([props]))
+      }
+    }
+    
     return (
       <div className="projectRequestApplication">
         <div className="projectRequestFormTop">
-            <h3>Request Form</h3> 
+            <label><b>Request Form</b></label> 
             <button className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=> navigate(-1)}>Cancel</button>
         </div>
         <div>
-          <p>Progress: </p>
           <div className="progressbar">
             {steps.map((a)=> {
               if (a>currentStep) {
-                return <div key={a} className="progress-step" data-title={a==1 ? "Type" : a==2 ? "Skill" : a==3 ? "Minimum" : a==4 ? "Details" : a==5 ? "Questions" : ""}></div>
+                return <div key={a} className="progress-step" data-title={a==1 ? "Setup" : a==2 ? "Details" : a==3 ? "Questions" : ""}></div>
               } else {
-                return <div key={a+"haha"+currentStep} className="progress-step progress-step-active" data-title={a==1 ? "Type" : a==2 ? "Skill" : a==3 ? "Minimum" : a==4 ? "Details" : a==5 ? "Questions" : ""}></div>
+                return <div key={a+"haha"+currentStep} className="progress-step progress-step-active" data-title={a==1 ? "Setup" : a==2 ? "Details" : a==3 ? "Questions" : ""}></div>
               }
             })}
           </div>
         </div>
         <div className="projectRequestFormBot">
           <form className="projectRequestForm" onSubmit={submitHandler}>
+
           {currentStep===1 && (
-            <div className="eachStep">
-              <div className="requiredLabel">
-                <h4><b>Step 1:</b> Select application type.</h4>
-                <p className="requiredAlert"> <b> *</b></p>
+            <div>
+              <div className="centerContent">
+                <label className="contentSubheading"><b>Step 1:</b> Setup your application.</label>
               </div>
-              <br />
-              <div onChange={(e) => {
-                  setRequestType(e.target.value)
-                  if (e.target.value==="Project Request") {
-                    setEmploymentType("Part-time")
-                    let z = "Part-time"
-                    step1Check(e.target.value, z)
-                  }
-                  step1Check(e.target.value, employmentType)
-                }} value={requestType}>
-                  <input type="radio" value="Job Request" name="requestType"/> Job Request<br />
-                  <input type="radio" value="Project Request" name="requestType"/> Project Request<br />
-              </div>
-              <br />
-
-              <div className="eachStep">
-                {requestType!=="Project Request" ?
-                  <div>
-                    <h4> Select Employment status.</h4>
-                    <div onChange={(e) => {
-                      setEmploymentType(e.target.value)
-                      step1Check(requestType, e.target.value)
-                    }} value={employmentType}>
-                      <input type="radio" value="Full-time" name="employmentType" /> Full-time<br />
-                      <input type="radio" value="Part-time" name="employmentType" /> Part-time<br />
-                    </div>
+              <br/>
+              <div className="inputGrid">
+                <div>
+                  <div className="requiredLabel">
+                    <label><b>Select application type.</b><label className="requiredAlert"> <b> *</b></label></label>
                   </div>
-                :<div className="mb-2 eachStep">
-                  <label>Selected Project Request, automatically set to <b>Part-time employment</b>.</label>
-                </div>}
-              </div>
+                  <div onChange={(e) => {
+                      setRequestType(e.target.value)
+                      if (e.target.value==="Project Request") {
+                        setEmploymentType("Part-time")
+                        let z = "Part-time"
+                        step1Check(e.target.value, z)
+                      }
+                      if (e.target.value==="Job Request") {
+                        setEmploymentType("")
+                        let z = ""
+                        step1Check(e.target.value, z)
+                      }
+                      step1Check(e.target.value, employmentType)
+                    }} value={requestType}>
+                      <input type="radio" checked={requestType==="Job Request" ? true : false} value="Job Request" name="requestType"/> Job Request<br />
+                      <input type="radio" checked={requestType==="Project Request" ? true : false} value="Project Request" name="requestType"/> Project Request<br />
+                  </div>
 
+                  <div>
+                    {requestType!=="Project Request" ?
+                      <div>
+                        <label><b>Select Employment status.</b><label className="requiredAlert"> <b> *</b></label></label>
+                        <div onChange={(e) => {
+                          setEmploymentType(e.target.value)
+                          step1Check(requestType, e.target.value)
+                        }} value={employmentType}>
+                          <input type="radio" checked={employmentType==="Full-time" ? true : false} value="Full-time" name="employmentType" /> Full-time<br />
+                          <input type="radio" checked={employmentType==="Part-time" ? true : false} value="Part-time" name="employmentType" /> Part-time<br />
+                        </div>
+                      </div>
+                    :<div>
+                      <br/>
+                      <label>Selected <b>Project Request</b>, automatically set to <b>Part-time employment</b>.</label>
+                    </div>}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="requiredLabel">
+                    <label><b>Select the specific skill required.</b><label className="requiredAlert"> <b> *</b></label>                   
+                      <button type="button" className="btn btn-outline-success allButtons" onClick={()=> {
+                        if (advSearch === false) {
+                          setAdvSearch(true)
+                        }
+                        if (advSearch === true) {
+                          setAdvSearch(false)
+                          setCategoryPick(false)
+                          setCategoryBy("")
+                        }
+                      }}>
+                      Skills List
+                      </button>
+                    </label>
+                  </div>
+                  <label>Selected Skill: <b>{skillrequired ? skillrequired : "None"}</b></label>
+
+                  <div >
+                    {advSearch===true? (
+                      <div className="searchAdv">
+                          {category.map((a)=> {
+                              return (
+                                  <div key={a._id}>
+                                      <label className="selectedCategory" onClick={()=>{
+                                          setCategoryBy(a.name)
+                                          setCategoryPick(true) 
+                                      }}><b>{a.name}</b></label>
+                                      {a.name===categoryBy ? 
+                                          <div>
+                                              {categoryPick && (
+                                                  <div className="searchTabs">
+                                                      {filteredCategory?.map((b)=> {
+                                                          return <div className="tagButton" key={idPlusKey(categoryBy, b)} onClick={()=>{
+                                                                      setSkillRequired(b)
+                                                                      setTitle(b)
+                                                                      setCategoryBy("")
+                                                                      setIsSkill(true)
+                                                                      setCategoryPick(false)
+                                                                      setAdvSearch(false)
+                                                                  }}>{b}</div>
+                                                      })}
+                                                  </div>
+                                              )}
+                                          </div>
+                                      : null}
+                                  </div>
+                              )
+                          })}
+                      </div>
+                  ): null}
+                  </div>
+                  {isSkill===false && (
+                    <label>Please select the skill you are looking for.</label>
+                  )}
+                </div>
+                
+                <div>
+                  <div className="requiredLabel">
+                    <label><b>Indicate minimum qualifications.</b><label className="requiredAlert"> <b> *</b></label></label>
+                  </div>
+                  
+                  <div onChange={e => {
+                    putMinimumReq(e.target.value)
+                    step1Check(requestType, employmentType)
+                  }} value={minimumreq}>
+                    <input type="checkbox" checked={minimumreq.includes("College Degree") ? true : false} value="College Degree" name="minimimreq" /> College Degree<br />
+                    <input type="checkbox" checked={minimumreq.includes("Technical Vocaltional Training") ? true : false} value="Technical Vocaltional Training" name="minimimreq" /> Technical Vocaltional Training<br />
+                    <input type="checkbox" checked={minimumreq.includes("Others") ? true : false} value="Others" name="minimimreq" /> Others<br />
+                  </div>
+                  {minimumreq.includes("Others") ?
+                    <div>
+                    <label>Specify: </label>
+                    <label className="requiredAlert"> <b> *</b></label>
+                    <textarea rows = "3" cols = "60" required onChange={e => {
+                      setReqSpecified(e.target.value)
+                      step1Check(requestType, employmentType)
+                    }} value={reqSpecified} type="text" className="form-control" placeholder="NC I-III passer, High school graduate..."/>
+                    
+                    </div>
+                  :null}
+                  <div className="mb-2"> 
+                    <label>Additional Requirements: (optional)</label>
+                    <textarea rows = "5" cols = "60" onChange={e => setOthers(e.target.value)} value={others} type="text" className="form-control" placeholder="Ex: Years of experience, programming language required, technical trainings..."/>
+                  </div>
+                </div>
+              </div>
+            <br/>
               <div className="nextPageBtn">
-                <button id="nextBtn" type="button" disabled={nextBtn} className="btn btn-sm btn-primary" onClick={()=> {
+                <button id="nextBtn" type="button" disabled={nextBtn} className="btn btn-outline-success allButtons" onClick={()=> {
                   setCurrentStep(prev => prev+1)
                   setNextBtn(true)
                 }}>Next</button>
@@ -326,176 +444,64 @@ function ProjectProposal({socket}) {
 
           {currentStep===2 && (
             <div className="eachStep">
-              <div className="requiredLabel">
-                <h4><b>Step 2:</b> Select the specific skill required.</h4>
-                <p className="requiredAlert"> <b> *</b></p>
+              <div className="centerContent">
+                <label className="contentSubheading"><b>Step 2:</b> Add full {requestType} request details.</label>
               </div>
-              {isSkill===false && (
-                <label>Please select the skill you are looking for.</label>
-              )}
-
-              <div >
-                <button type="button" className="btn btn-sm btn-primary" onClick={()=> {
-                  if (advSearch === false) {
-                    setAdvSearch(true)
-                  }
-                  if (advSearch === true) {
-                    setAdvSearch(false)
-                    setCategoryPick(false)
-                    setCategoryBy("")
-                  }
-                }}>
-                Skills List
-                </button>
-                
-                {advSearch===true? (
-                  <div className="searchAdv">
-                      {category.map((a)=> {
-                          return (
-                              <div key={a._id}>
-                                  <label className="selectedCategory" onClick={()=>{
-                                      setCategoryBy(a.name)
-                                      setCategoryPick(true) 
-                                  }}><b>{a.name}</b></label>
-                                  {a.name===categoryBy ? 
-                                      <div>
-                                          {categoryPick && (
-                                              <div className="searchTabs">
-                                                  {filteredCategory?.map((b)=> {
-                                                      return <div className="tagButton" key={idPlusKey(categoryBy, b)} onClick={()=>{
-                                                                  setSkillRequired(b)
-                                                                  setTitle(b)
-                                                                  setCategoryBy("")
-                                                                  setIsSkill(true)
-                                                                  setCategoryPick(false)
-                                                                  setAdvSearch(false)
-                                                                  setNextBtn(false)
-                                                              }}>{b}</div>
-                                                  })}
-                                              </div>
-                                          )}
-                                      </div>
-                                  : <></>}
-                              </div>
-                          )
-                      })}
-                  </div>
-              ): <></>}
-              </div>
-              <br />
-              <label>Selected Skill: <b>{skillrequired ? skillrequired : "None"}</b></label>
-              <br />
-              <div className="nextPageBtn">
-                <div>
-                  <button className="btn btn-sm btn-outline-secondary cancelBtn" type="button" onClick={()=> {
-                    setIsSkill(false)
-                    setCategoryPick(false)
-                    setAdvSearch(false)
-                    setCurrentStep(prev => prev-1)
-                    setNextBtn(false)
-                  }}>
-                    Back
-                  </button>
-                </div>
-                <div>
-                  <button id="nextBtn" type="button" disabled={nextBtn} className="btn btn-sm btn-primary" onClick={()=> {
-                    setCurrentStep(prev => prev+1)
-                    setNextBtn(true)
-                  }}>Next</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentStep===3 && (
-            <div className="eachStep">
-              <div className="requiredLabel">
-                <h4><b>Step 3:</b> Indicate minimum qualifications. </h4>
-                <p className="requiredAlert"> <b> *</b></p>
-              </div>
-              
-              <br />
-              <div onChange={e => {
-                setMinimumReq(e.target.value)
-                step3Check(e.target.value)
-              }} value={minimumreq}>
-                <input type="radio" value="College Degree" name="minimimreq" /> College Degree<br />
-                <input type="radio" value="Technical Vocaltional Training" name="minimimreq" /> Technical Vocaltional Training<br />
-                <input type="radio" value="Others" name="minimimreq" /> Others<br />
-              </div>
-              {minimumreq==="Others" ?
-                <div>
-                <label>Specify: </label>
-                <input required onChange={e => {
-                  setReqSpecified(e.target.value)
-                  step3Check(e.target.value)
-                }} value={reqSpecified} type="text" className="form-control" placeholder="NC I-III passer, High school graduate..."/>
-                <p className="requiredAlert"> <b> *</b></p>
-                </div>
-              :<></>}
-              <br />
-              <div className="nextPageBtn">
-                <div>
-                  <button className="btn btn-sm btn-outline-secondary cancelBtn" type="button" onClick={()=> {
-                    setCurrentStep(prev => prev-1)
-                    setNextBtn(false)
-                  }}>
-                    Back
-                  </button>
-                </div>
-                <div>
-                  <button id="nextBtn" type="button" disabled={nextBtn} className="btn btn-sm btn-primary" onClick={()=> {
-                    setCurrentStep(prev => prev+1)
-                    setNextBtn(true)
-                  }}>Next</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentStep===4 && (
-            <div className="eachStep">
-              <div className="requiredLabel">
-                <h4><b>Step 4:</b> Add full {requestType} request details.</h4>
-                <p className="requiredAlert"> <b> *</b></p>
-              </div>
+              <br/>
               <div className="mb-2">
                 <div className="requiredLabel">
-                  <label>{requestType} Title:</label>
-                  <p className="requiredAlert"> <b> *</b></p>
+                  <label>{requestType} Title:<label className="requiredAlert"> <b> *</b></label></label>
                 </div>
                 <input required onChange={e => {
                   setTitle(e.target.value) 
                   inputCheck()
                 }} value={title} type="text" className="form-control" />
               </div>
-              <div className="mb-2">
-                <div className="requiredLabel">
-                  <label>Expected Sallary (in Philippine Pesos):</label>
-                  <p className="requiredAlert"> <b> *</b></p>
-                </div>
-                <input required onChange={e => {
-                  setSallary(e.target.value)
-                  inputCheck()
-                }} value={sallary} type="number" className="form-control" />
-              </div>
-              <div className="mb-2"> 
-                <div className="requiredLabel">
-                  <label>{requestType} Duration (in Months):</label>
-                  <p className="requiredAlert"> <b> *</b></p>
-                </div>
-                <input required onChange={e => {
-                  setDuration(e.target.value)
-                  inputCheck()
-                }} value={duration} type="number" className="form-control" />
-              </div>
-
-              <div className="locationWrapper"> 
-                <label>Location:</label>
-                <div className="location">
+              
+              <div className="inputGrid">
+                {requestType==="Job Request" ?
+                  <div className="mb-2">
                     <div className="requiredLabel">
-                      <label>Region:</label>
-                      <p className="requiredAlert"> <b> *</b></p>
+                      <label>Available slots for hiring:<label className="requiredAlert"> <b> *</b></label></label>
+                    </div>
+                    <input required onChange={e => {
+                      setSlots(e.target.value)
+                      inputCheck()
+                    }} value={slots} type="number" className="form-control" />
+                  </div>
+                :
+                <div className="mb-2">
+                  <div className="requiredLabel">
+                    <label>Available slots for hiring:<label className="requiredAlert"> <b> *</b></label></label>
+                  </div>
+                  <label><b>1</b><i>default for project requests</i></label>
+                </div>}
+
+                <div className="mb-2">
+                  <div className="requiredLabel">
+                    <label>Expected Sallary (in Philippine Pesos):<label className="requiredAlert"> <b> *</b></label></label>
+                  </div>
+                  <input required onChange={e => {
+                    setSallary(e.target.value)
+                    inputCheck()
+                  }} value={sallary} type="number" min="0.00" max="100000000.00" step="1000.00" placeholder='0.00' className="form-control" />
+                </div>
+                <div className="mb-2"> 
+                  <div className="requiredLabel">
+                    <label>{requestType} Duration (in Months):<label className="requiredAlert"> <b> *</b></label></label>
+                  </div>
+                  <input required onChange={e => {
+                    setDuration(e.target.value)
+                    inputCheck()
+                  }} value={duration} type="number" className="form-control" />
+                </div>
+              </div>
+              <br/>
+              <label>Work Location</label>
+              <div className="inputGrid"> 
+                <div className="centerLabel location">
+                    <div className="requiredLabel">
+                      <label>Region:<label className="requiredAlert"> <b> *</b></label></label>
                     </div>
 
                     <input required onChange={e => {
@@ -519,10 +525,9 @@ function ProjectProposal({socket}) {
                   )}
                 </div>
 
-                <div className="location">
+                <div className="centerLabel location">
                   <div className="requiredLabel">
-                    <label>Province:</label>
-                    <p className="requiredAlert"> <b> *</b></p>
+                    <label>Province:<label className="requiredAlert"> <b> *</b></label></label>
                   </div>
                   
                   <input required onChange={e => {
@@ -546,10 +551,9 @@ function ProjectProposal({socket}) {
                   )}
                 </div>
 
-                <div className="location">
+                <div className="centerLabel location">
                   <div className="requiredLabel">
-                    <label>City:</label>
-                    <p className="requiredAlert"> <b> *</b></p>
+                    <label>City:<label className="requiredAlert"> <b> *</b></label></label>
                   </div>
                   
                   <input required onChange={e => {
@@ -575,22 +579,17 @@ function ProjectProposal({socket}) {
               </div>
               <br />
               <div className="mb-2">
-                <div className="requiredLabel">
-                  <label>{requestType} Description:</label>
-                  <p className="requiredAlert"> <b> *</b></p>
+                <div>
+                  <label>{requestType} Description:<label className="requiredAlert"> <b> *</b></label></label>
                 </div>
 
-                <input required onChange={e => {
+                <textarea rows = "5" cols = "60" required onChange={e => {
                   setDescription(e.target.value)
                   inputCheck()
                 }} value={description} type="text" className="form-control" placeholder="A brief description of the job responsibilities." />
               </div>
-              <div className="mb-2"> 
-                <label>Additional Requirements: (optional)</label>
-                <input onChange={e => setOthers(e.target.value)} value={others} type="text" className="form-control" placeholder="Ex: Years of experience, programming language required, technical trainings..."/>
-              </div>
 
-              <h5>Add photo (optional)</h5>
+              <label>Add photo (optional)</label>
               <div className="mb-2">
                 <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
               </div>
@@ -605,7 +604,7 @@ function ProjectProposal({socket}) {
                   </button>
                 </div>
                 <div>
-                  <button id="nextBtn" type="button" disabled={nextBtn} className="btn btn-sm btn-primary" onClick={()=> {
+                  <button id="nextBtn" type="button" disabled={nextBtn} className="btn btn-outline-success allButtons" onClick={()=> {
                     setCurrentStep(prev => prev+1)
                     setNextBtn(true)
                   }}>Next</button>
@@ -614,20 +613,23 @@ function ProjectProposal({socket}) {
             </div>
           )}
 
-          {currentStep===5 && (
-            <div className="mb-2 eachStep">
+          {currentStep===3 && (
+            <div className="eachStep">
               <div>
-                <div>
-                  <h4><b>Step 5:</b> Add preliminary questions. </h4>
+                <div className="centerContent">
+                  <label className="contentSubheading"><b>Step 3:</b> Add preliminary questions. </label>
+                </div>
+                <br/>
+                <div className="centerContent">
                   <label>Note: There should be atleast a minimum of 3 preliminary questions, with a maximum of 10.</label>
                 </div>
-                <div>
-                  <button type="button" className="btn btn-sm btn-primary" onClick={()=>{
+                <div className="rightContent">
+                  <button type="button" className="allButtons" onClick={()=>{
                       if (questions<10) {
                         setQuestions(prev=>prev+1)
                       }
                     }}>
-                    Add
+                    Add Question
                   </button>
                   <button type="button" className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=>{
                     if(questions>3) {
@@ -661,8 +663,7 @@ function ProjectProposal({socket}) {
               </div>
               <div>
                 <div className="requiredLabel">
-                  <label>Question #1:</label>
-                  <p className="requiredAlert"> <b> *</b></p>
+                  <label>Question #1:<label className="requiredAlert"> <b> *</b></label></label>
                 </div>
                 
                 <input required onChange={e => {
@@ -672,8 +673,7 @@ function ProjectProposal({socket}) {
               </div>
               <div>
                 <div className="requiredLabel">
-                  <label>Question #2:</label>
-                  <p className="requiredAlert"> <b> *</b></p>
+                  <label>Question #2:<label className="requiredAlert"> <b> *</b></label></label>
                 </div>
 
                 <input required onChange={e => {
@@ -683,8 +683,7 @@ function ProjectProposal({socket}) {
               </div>
               <div>
                 <div className="requiredLabel">
-                  <label>Question #3:</label>
-                  <p className="requiredAlert"> <b> *</b></p>
+                  <label>Question #3:<label className="requiredAlert"> <b> *</b></label></label>
                 </div>
 
                 <input required onChange={e => {
@@ -694,43 +693,64 @@ function ProjectProposal({socket}) {
               </div>
               {questions>=4 ?
                 <div>
-                  <label>Question #4:</label>
+                  <div>
+                    <label>Question #4:</label>
+                  </div>
+                  <br/>
                   <input required onChange={e => setQuestion4(e.target.value)} value={question4} type="text" className="form-control"/>
                 </div>
-              :<></>}
+              :null}
               {questions>=5 ?
                 <div>
-                  <label>Question #5:</label>
+                  <div>
+                    <label>Question #5:</label>
+                  </div>
+                  <br/>
                   <input required onChange={e => setQuestion5(e.target.value)} value={question5} type="text" className="form-control"/>
                 </div>
               :<></>}
               {questions>=6 ?
                 <div>
-                  <label>Question #6:</label>
+                  <div>
+                    <label>Question #6:</label>
+                  </div>
+                  <br />
                   <input required onChange={e => setQuestion6(e.target.value)} value={question6} type="text" className="form-control"/>
                 </div>
               :<></>}
               {questions>=7 ?
                 <div>
-                  <label>Question #7:</label>
+                  <div>
+                    <label>Question #7:</label>
+                  </div>
+                  <br />
                   <input required onChange={e => setQuestion7(e.target.value)} value={question7} type="text" className="form-control"/>
                 </div>
               :<></>}
               {questions>=8 ?
                 <div>
-                  <label>Question #8:</label>
+                  <div>
+                    <label>Question #8:</label>
+                  </div>
+                  <br />
                   <input required onChange={e => setQuestion8(e.target.value)} value={question8} type="text" className="form-control"/>
                 </div>
               :<></>}
               {questions>=9 ?
                 <div>
-                  <label>Question #9:</label>
+                  <div>
+                    <label>Question #9:</label>
+                  </div>
+                  <br />
                   <input required onChange={e => setQuestion9(e.target.value)} value={question9} type="text" className="form-control"/>
                 </div>
               :<></>}
               {questions>=10 ?
                 <div>
-                  <label>Question #10:</label>
+                  <div>
+                    <label>Question #10:</label>
+                  </div>
+                  <br />
                   <input required onChange={e => setQuestion10(e.target.value)} value={question10} type="text" className="form-control"/>
                 </div>
               :<></>}
@@ -739,6 +759,7 @@ function ProjectProposal({socket}) {
                   <label>Maximum of 10 questions only!</label>
                 </div>
               :<></>}
+              <br />
               <div className="nextPageBtn">
                 <div>
                   <button className="btn btn-sm btn-outline-secondary cancelBtn" type="button" onClick={()=> {
@@ -749,7 +770,7 @@ function ProjectProposal({socket}) {
                   </button>
                 </div>
                 <div>
-                  <button id="nextBtn" disabled={nextBtn} className="btn btn-sm btn-primary">Complete Job Request Application</button>
+                  <button id="nextBtn" disabled={nextBtn} className="btn btn-outline-success allButtons">Complete Job Request Application</button>
                 </div>
               </div>
             </div>
@@ -761,14 +782,3 @@ function ProjectProposal({socket}) {
   }
 
 export default ProjectProposal
-
-/*              <div className="mb-2">
-                <div className="requiredLabel">
-                  <label>Available slots for hiring:</label>
-                  <p className="requiredAlert"> <b> *</b></p>
-                </div>
-                <input required onChange={e => {
-                  setSlots(e.target.value)
-                  inputCheck()
-                }} value={slots} type="number" className="form-control" />
-              </div>*/

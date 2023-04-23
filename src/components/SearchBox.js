@@ -27,7 +27,7 @@ function SearchBox({projectid, projecttype}) {
 
     let length = accounts.length
     let index = 0
-
+    
     useEffect(() => {
         let isCancelled = false
         const getAccounts = async () => {
@@ -99,7 +99,7 @@ function SearchBox({projectid, projecttype}) {
         <div className="searchComponent">
             <div className="searchTop">
                 <div className="quickSearch">
-                    <button className="btn btn-sm btn-primary" onClick={()=> {
+                    <button className="btn btn-outline-success allButtons" onClick={()=> {
                                 if (advSearch === false) {
                                     setAdvSearch(true)
                                 }
@@ -123,7 +123,7 @@ function SearchBox({projectid, projecttype}) {
                 </div>
                 <div className="testing">
                     <div className="searchKey">
-                        <button className="btn btn-sm btn-primary" onClick={()=> {
+                        <button className="btn btn-outline-success allButtons" onClick={()=> {
                             if (keySearch === false) {
                                 setKeySearch(true)
                             }
@@ -141,10 +141,10 @@ function SearchBox({projectid, projecttype}) {
                                 <div>
                                     <h4>Search by:</h4>
                                     <div className="searchAdvWrapper">
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Skill")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSearchBy("Skill")}}>
                                             <b>Skill</b>
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{
                                             setBtnSearchBy("Name")
                                             setQuery("")
                                             }}>
@@ -155,22 +155,22 @@ function SearchBox({projectid, projecttype}) {
                                 <div>
                                     <h4>Sort by:</h4>
                                     <div className="searchAdvWrapper">
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Highest Rating")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Highest Rating")}}>
                                             Highest Rating
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Lowest Rating")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Lowest Rating")}}>
                                             Lowest Rating
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("A-Z (First Name)")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("A-Z (First Name)")}}>
                                             A-Z (First Name)
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Z-A (First Name)")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Z-A (First Name)")}}>
                                             Z-A (First Name)
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("A-Z (Last Name)")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("A-Z (Last Name)")}}>
                                             A-Z (Last Name)
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Z-A (Last Name)")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Z-A (Last Name)")}}>
                                             Z-A (Last Name)
                                         </button>
                                     </div>
@@ -178,23 +178,23 @@ function SearchBox({projectid, projecttype}) {
                                 <div>
                                     <h4>Show results by:</h4>
                                     <div className="searchAlign centerContent">
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(5)}}>
+                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(5)}}>
                                             5
                                         </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(10)}}>
+                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(10)}}>
                                             10
                                         </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
+                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(50)}}>
                                             25
                                         </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
+                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(50)}}>
                                             50
                                         </button>
                                     </div>
                                 </div>
                                 <br />    
                                 <div className="centerContent">
-                                    <button className="btn btn-sm btn-primary" onClick={()=> {
+                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
                                         if (btnSearchBy!=="") {
                                             setSearchBy(btnSearchBy)
                                         }
@@ -207,7 +207,7 @@ function SearchBox({projectid, projecttype}) {
                                         setPage(0)
                                         setKeySearch(false)
                                     }}>
-                                        Confirm
+                                        Apply
                                     </button>
                                 </div>
                             </div>
@@ -230,7 +230,7 @@ function SearchBox({projectid, projecttype}) {
                                         {categoryPick && (
                                             <div className="searchTabs">
                                                 {filteredCategory?.map((b)=> {
-                                                    return <button className="btn btn-sm btn-primary" key={idPlusKey(categoryBy, b)} onClick={()=>{
+                                                    return <button className="btn btn-outline-success allButtons" key={idPlusKey(categoryBy, b)} onClick={()=>{
                                                                 setQuery(b),
                                                                 setCategoryBy("")
                                                                 setCategoryPick(false)
@@ -296,7 +296,7 @@ function SearchBox({projectid, projecttype}) {
                     {result?.map((a)=>{
                         return (
                             <div key={result?.indexOf(a)}>
-                                <button className="btn btn-sm btn-primary" onClick={()=>setPage(result?.indexOf(a))}>
+                                <button className="btn btn-outline-success allButtons" onClick={()=>setPage(result?.indexOf(a))}>
                                     {"Page "+((result?.indexOf(a))+1)}
                                 </button>
                             </div>

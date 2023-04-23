@@ -8,6 +8,10 @@ import Review from "./Review"
 import ApplicantList from "./ApplicantList"
 import moment from "moment"
 import Questions from "./Questions"
+import EmployeeList from "./EmployeeList"
+import EndContractModal from "./EndContractModal"
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function Project({socket}) {
     const location = useLocation()
@@ -31,7 +35,6 @@ function Project({socket}) {
     const [ ending, setEnding ] = useState(false)
     const [ end, setEnd ] = useState("")
     const [ done, setDone ] = useState("")
-    const [ reviewed, setReviewed ] = useState(false)
     const [ applied, setApplied ] = useState(false)
     const [ aJob, setAJob ] = useState(false)
     const [ waiting, setWaiting ] = useState(false)
@@ -39,49 +42,70 @@ function Project({socket}) {
     const [ note, setNote ] = useState("")
     const [ reload, setReload ] = useState("")
     const [ toApply, setToApply ] = useState(false)
-
+    const [ openApplicants, setOpenApplicants ] = useState(false)
+    const [ openEmployees, setOpenEmployees ] = useState(false)
+    const [ modalOpen, setModalOpen ] = useState(false)
+    const [ toEndContract, setToEndContract ] = useState()
+    const [ statusToReview, setStatusToReview ] = useState()
+    
     useEffect(() => {
         const projectid = location.state._id
         const getProject = async () => {
           try {
             const res = await Axios.get(`/api/search-project/${projectid}`)
             setProjectInfo(res.data)
-            if (!res.data.tempfree) {
+            if (!res.data.slots<=0) {
               setIsFree(true)
-              setFreeInfo()
+              setFreeInfo(false)
             }
-            if (res.data?.tempfree) {
-              if (res.data.tempfree===userData.user?.id) {
-                setTheFree(true)
-                setApplied(true)
+            if (res.data?.tempcandidate) {
+              let data = res.data?.tempcandidate ?  res.data.tempcandidate : []
+              let length = data.length
+              for (let i = 0; i<length; i++ ) {
+                if (data[i].applicantid._id===userData.user?.id) {
+                  setTheFree(true)
+                  setApplied(true)
+                }
               }
             }
-            if (res.data?.tempfree) {
-              if (res.data.tempfree!=="") {
-                setWaiting(true)
+            if (res.data?.employeelist) {
+              let data = res.data?.employeelist ?  res.data.employeelist : []
+              let length = data.length
+              for (let i = 0; i<length; i++ ) {
+                if (data[i].employeeid._id===userData.user?.id) {
+                  setTheFree(true)
+                  setApplied(true)
+                }
               }
             }
+
+            if (res.data?.type==="Project"){
+              if (res.data.employeelist.length !==0) {
+                setAccepted(true)
+              }
+            }
+
+            if (res.data?.employeelist.length !==0){
+              let data = res.data?.employeelist ?  res.data.employeelist : []
+              let length = data.length
+              for (let i = 0; i<length; i++ ) {
+                if (data[i].employmentstatus==="Ongoing") {
+                  setOngoing(true)
+                }
+              }
+            }
+            
             if (res.data.employer._id===userData.user?.id) {
               setTheEmp(true)
             }
-            if (res.data.accepted==="No") {
-              setAccepted(false)
-            }
-            if (res.data.accepted==="Yes") {
-              setAccepted(true)
-            }
             if (res.data.status==="Hiring") {
               setHiring(true)
-            }
-            if (res.data.status==="Ongoing") {
               setOngoing(true)
             }
+
             if (res.data.status==="Concluded" || res.data.requeststatus==="Denied") {
               setOngoing(false)
               setHiring(false)
-            }
-            if (res.data.candidate) {
-              setFreeInfo(true)
             }
             if (res.data.type==="Job") {
               setAJob(true)
@@ -102,13 +126,12 @@ function Project({socket}) {
     }, [accepted, rejected, done, applied, reload])
 
     async function startConversation() {
-      const members = [projectInfo?.candidate._id, projectInfo?.employer._id]
+      const members = [userData.user?.id, projectInfo?.employer._id]
       try {
           const prevConvo = await Axios.get("/api/get-conversation/", {params: {
-              member1: projectInfo?.candidate._id,
+              member1: userData.user?.id,
               member2: projectInfo?.employer._id
           }})
-          console.log(prevConvo.data)
           if (prevConvo.data) {
               navigate("/messages", {state: {_id: prevConvo.data}})
           }
@@ -117,7 +140,7 @@ function Project({socket}) {
               navigate("/messages", {state: {_id: createConvo.data}})
           }
       }catch (err) {
-          console.log(err)
+        console.log(err)
       }
     }
 
@@ -132,27 +155,14 @@ function Project({socket}) {
       }
       getAdmin()
     }, [])
-
-    useEffect(() => {
-        const projectid = projectInfo?._id
-        const candidate = projectInfo?.candidate?._id 
-        const getReviewData = async () => {
-        try {
-          const res = await Axios.get(`/api/reviews/${projectid}/${candidate}`)
-          setReviewed(res.data)
-        } catch (err) {
-          console.log(err)
-        }
-      }
-      getReviewData()
-    }, [projectInfo])
     
     async function acceptedYes() {
       const projectid = location.state._id
-      const tempfree = projectInfo.tempfree
+      const tempfree = userData.user?.id
       const toHire = "Yes"
       try {
         const res = await Axios.post(`/api/update-project/accepted/${projectid}/${tempfree}/${toHire}`)
+        setReload(res.data)
         const subject = res.data._id
         const type = `${projectInfo?.type} Request`
         const action = "accepted your"
@@ -206,10 +216,12 @@ function Project({socket}) {
         setDone(theEnd.data)
         if (theAdmin) {
           //notif for employer
+          let logType = "CONCLUDE"
           const subject = theEnd.data._id
           const type = projectInfo?.type
           const action = "concluded your"
           await Axios.post(`/api/send-notifications/${userData.user.id}/${projectInfo?.employer?._id}/${action}/${type}/${subject}`)
+          await Axios.post(`/api/admin-logs/${userData.user.id}/${projectInfo?.employer?._id}/${subject}/${logType}`)
           socket.emit("sendNotification", {
             senderId: userData.user.id,
             receiverId: projectInfo?.employer?._id,
@@ -217,17 +229,20 @@ function Project({socket}) {
             type: type,
             action: action,
           })
-          //notif for candidate
-          if (accepted) {
-            await Axios.post(`/api/send-notifications/${userData.user.id}/${projectInfo?.candidate?._id  ? projectInfo.candidate._id  : ""}/${action}/${type}/${subject}`)
-            socket.emit("sendNotification", {
-              senderId: userData.user.id,
-              receiverId: projectInfo?.candidate?._id,
-              subject: subject,
-              type: type,
-              action: action,
-            })
-          }
+          //notif for all non-concluded hired candidate
+          projectInfo.employeelist?.map(async (a)=> {
+            if (a.employmentstatus !== "Concluded") {
+              await Axios.post(`/api/send-notifications/${userData.user.id}/${a.employeeid._id}/${action}/${type}/${subject}`)
+                
+              socket.emit("sendNotification", {
+                senderId: userData.user.id,
+                receiverId: a.employeeid._id,
+                subject: subject,
+                type: type,
+                action: action,
+              })
+            }
+          })
         }
         if (!theAdmin) {
           //notif for admin
@@ -242,20 +257,23 @@ function Project({socket}) {
             type: type,
             action: action,
           })
-          //notif for candidate
-          if (accepted) {
-            await Axios.post(`/api/send-notifications/${userData.user.id}/${projectInfo?.candidate?._id  ? projectInfo.candidate._id  : ""}/${action}/${type}/${subject}`)
-            socket.emit("sendNotification", {
-              senderId: userData.user.id,
-              receiverId: projectInfo?.candidate?._id,
-              subject: subject,
-              type: type,
-              action: action,
-            })
-          }
+          //notif for all non-concluded hired candidate
+          projectInfo.employeelist?.map(async (a)=> {
+            if (a.employmentstatus !== "Concluded") {
+              await Axios.post(`/api/send-notifications/${userData.user.id}/${a.employeeid._id}/${action}/${type}/${subject}`)
+                
+              socket.emit("sendNotification", {
+                senderId: userData.user.id,
+                receiverId: a.employeeid._id,
+                subject: subject,
+                type: type,
+                action: action,
+              })
+            }
+          })
         }
       } else {
-        alert("Please eneter the specific word required.")
+        toastErrorNotification()
       }
     } 
 
@@ -264,7 +282,7 @@ function Project({socket}) {
         const res = await Axios.post(`/api/update-project/read-note/${a}/${b}`)
         setReload(res.data)
       } catch (err) {
-          console.log(err)
+        console.log(err)
       }
     }
 
@@ -302,98 +320,226 @@ function Project({socket}) {
       const key = a + b 
       return key
     }
+
+    function daysRemaining(props) {
+      var eventdate = moment(props)
+      var todaysdate = moment()
+      return eventdate.diff(todaysdate, 'days')
+    }
     
+    function toastWarningNotification() {
+      toast.warn('Please login to continue.', {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      })
+    }
+
+    function toastErrorNotification() {
+      toast.error('Please enter the specific word required!', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      })
+    }
+
     return (
         <div className="projects">
+            {modalOpen && <EndContractModal setOpenModal={setModalOpen} projectInfo={projectInfo} toEndContract={toEndContract} setReload={setReload}/>}
             {projectInfo && (
                   <div className="projectCard">
+                    <div className="contentTitle sideContent">
+                      <label><b>{projectInfo.type}</b></label>
+                      <label>{projectInfo.status!=="" ? <b>{projectInfo.status}</b> : "Not approved."}</label>
+                    </div>
+                    <br/>
+                    <p className="profileCardName">{projectInfo.title}</p>
                     <div className="projectCardTop">
-                      <div>
-                        <div>
-                          <img src={projectInfo.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${projectInfo.image}.jpg` : "/fallback.png"} className="card-img-top projectPhoto" alt={`${projectInfo.company} named ${projectInfo.title}`}></img>
-                        </div>
-                        <br />
 
+                      <div className="projectCardTopDetails">
+                        {projectInfo.status==="Hiring" ?
+                          <div className="paragraphSpaceBetween">
+                            <p>Hiring <b>{projectInfo.slots ? projectInfo.slots : "unspecified"}</b> people.</p>
+                            <p><b>{projectInfo.expirationdate ? daysRemaining(projectInfo.expirationdate) : "unspecified"}</b> days before post expires.</p>
+                          </div>
+                        :<></>}
+                        <div className="paragraphSpaceBetween">
+                          <div>Skill Required</div> 
+                          <div className="rightText">{projectInfo.skillrequired}</div>
+                        </div>
+                        <div className="paragraphSpaceBetween">
+                          <div>Employment type</div> 
+                          <div className="rightText">{projectInfo.employmenttype}</div>
+                        </div>
+                        {projectInfo.company!=="undefined" ?
+                          <div className="paragraphSpaceBetween">
+                            <div>Company</div> 
+                            <div className="rightText companyLink" onClick={()=> navigate("/company-profile", {state: {companyinfo: projectInfo.employer?.companyinfo, employer: projectInfo.employer._id}})}><u>{projectInfo.employer?.companyinfo?.companyname}</u></div>
+                          </div>
+                        : 
+                        <div className="paragraphSpaceBetween">
+                          <div>Company</div> 
+                          <div className="rightText"><i>Not specified.</i></div>
+                        </div>
+                        }
+                        <div className="paragraphSpaceBetween">
+                          <div>Sallary</div> 
+                          <div className="rightText">₱ {new Intl.NumberFormat().format(projectInfo.sallary.toFixed(2))}
+                          </div>
+                        </div>
+                        <div className="paragraphSpaceBetween">
+                          <div>Duration</div> 
+                          <div className="rightText">{projectInfo.duration} months</div>
+                        </div>
+                        <div className="paragraphSpaceBetween">
+                          <div>Location</div> 
+                          <div className="rightText">
+                            {projectInfo.location?.city}, {projectInfo.location?.province}, <br/>
+                            {projectInfo.location?.region}
+                          </div>
+                        </div>
+                        <div className="paragraphSpaceBetween">
+                          <div>Minimum requirements</div> 
+                          <div className="rightText">
+                            {projectInfo.minimumreq.map((a)=> {
+                              if (a.what==="Others") {
+                                return <><label>{a.note}</label><br/></>
+                              } else {
+                                return <><label>{a.what}</label><br/></>
+                              }
+                            })}
+                          </div>
+                        </div>
                         <div>
-                          {hiring ? 
-                            <div>
-                              {isFree && (
-                                <div>
-                                  {theEmp && (
-                                    <div className="actionButtonWrapper">
-                                      <button className="btn btn-sm btn-primary actionButton" onClick={()=> {
-                                        if (searchOn) {
-                                          setSearchOn(false)
-                                        }
-                                        if (!searchOn) {
-                                          setSearchOn(true)
-                                        }
-                                      }}>
-                                        Hire Now!
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
+                          <label>Description:</label>
+                          <div className="fromTextAreaContainer">
+                          <p className="fromTextArea">{projectInfo.description}</p>
+                          </div>
+                        </div>
+                        {accepted ? 
+                          <>
+                            <div className="paragraphSpaceBetween">
+                              <div>Start</div> 
+                              <div className="rightText">{moment(projectInfo.acceptdate).format("MMM. DD, YYYY")}</div>
                             </div>
-                          :<></>}
+                            <div className="paragraphSpaceBetween">
+                              <div>Expected end</div> 
+                              <div className="rightText">{moment(expectedDate).format("MMM. YYYY")}</div>
+                            </div>
+                          </>
+                        :<></>}
+                        {!ongoing && !hiring ? 
+                          <div className="paragraphSpaceBetween">
+                            <div>Date concluded</div> 
+                            <div className="rightText">{moment(projectInfo.completiondate).format("MMM. DD, YYYY")}</div>
+                          </div>
+                        :<></>}
+                      </div>
+                      <div className="projectCardTopPhoto">
+                        <img src={projectInfo.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${projectInfo.image}.jpg` : "/fallback.png"} className="projectPhoto" alt={`${projectInfo.company} named ${projectInfo.title}`}></img>
+                      </div> 
+                    </div>
+                    <br/>
+                    <div className="projectCardMid">
+                      {hiring && isFree && theEmp ?
+                        <div className="actionButtonWrapper">
+                          <button className="btn btn-outline-success allButtons" onClick={()=> {
+                            if (searchOn) {
+                              setSearchOn(false)
+                            }
+                            if (!searchOn) {
+                              setSearchOn(true)
+                            }
+                          }}>
+                            Hire Now!
+                          </button>
                         </div>
-                        <br />
+                      :<></>}
 
-                        <div>
-                            {!aJob ? 
-                              <div>
-                                {ongoing || !ongoing ? 
-                                  <div>
-                                    {accepted && (
-                                      <div className="actionButtonWrapper">
-                                        <button className="btn btn-sm btn-primary actionButton" onClick={()=>{
-                                          if (openProgress===false) {
-                                            setOpenProgress(true)
-                                          }
-                                          if (openProgress===true) {
-                                            setOpenProgress(false)
-                                          }
-                                        }}>
-                                          View Project Progress
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
-                                :<></>}
-                              </div>
-                            :<></>}
+                      {(ongoing || !ongoing) && (theEmp || theAdmin) ? 
+                        <div className="actionButtonWrapper">
+                          <button className="btn btn-outline-success allButtons" onClick={()=>{
+                            if (openApplicants===false) {
+                              setOpenApplicants(true)
+                            }
+                            if (openApplicants===true) {
+                              setOpenApplicants(false)
+                            }
+                          }}>
+                            Applicant(s)
+                          </button>
                         </div>
-                        <br />
-                        <div>
-                          {ongoing && (
-                            <div>
-                              {theEmp && (
-                              <div className="actionButtonWrapper">
-                                <button className="btn btn-sm btn-primary actionButton" onClick={()=>{
-                                  if (ending===false) {
-                                    setEnding(true)
-                                  }
-                                  if (ending===true) {
-                                    setEnding(false)
-                                  }
-                                }}>Accomplish {projectInfo.type}</button>
-                                {ending && (
+                      :<></>}
+                    
+                      {(ongoing || !ongoing) && (theEmp || theAdmin) ? 
+                        <div className="actionButtonWrapper">
+                          <button className="btn btn-outline-success allButtons" onClick={()=>{
+                            if (openEmployees===false) {
+                              setOpenEmployees(true)
+                            }
+                            if (openEmployees===true) {
+                              setOpenEmployees(false)
+                            }
+                          }}>
+                            Employee(s)
+                          </button>
+                        </div>
+                      :<></>}
+                  
+                      {!aJob && (ongoing || !ongoing) && accepted ?
+                        <div className="actionButtonWrapper">
+                          <button className="btn btn-outline-success allButtons" onClick={()=>{
+                            if (openProgress===false) {
+                              setOpenProgress(true)
+                            }
+                            if (openProgress===true) {
+                              setOpenProgress(false)
+                            }
+                          }}>
+                            Project Progress
+                          </button>
+                        </div>
+                      :<></>}
+
+                      {ongoing && theEmp && (
+                        <div className="actionButtonWrapper">
+                          <button className="btn btn-outline-success allButtons" onClick={()=>{
+                            if (ending===false) {
+                              setEnding(true)
+                            }
+                            if (ending===true) {
+                              setEnding(false)
+                            }
+                          }}>
+                            Accomplish {projectInfo.type}
+                          </button>
+                          {ending && (
                                   <form onSubmit={endProject}>
                                     <div>
                                       <p>Please type "Accomplished" to proceed.</p>
                                       <input onChange={e => setEnd(e.target.value)} value={end} type="text"/>
                                     </div>
                                     <div>
-                                      <button className="btn btn-sm btn-primary">Confirm</button>
+                                      <button className="allButtons">Confirm</button>
                                     </div>
                                   </form>
                                 )}
                               </div>
                               )}
-                            {theAdmin && (
+
+                            {ongoing && theAdmin && (
                               <div className="actionButtonWrapper">
-                                <button className="btn btn-sm btn-primary actionButton" onClick={()=>{
+                                <button className="allButtons actionButton" onClick={()=>{
                                   if (ending===false) {
                                     setEnding(true)
                                   }
@@ -405,181 +551,72 @@ function Project({socket}) {
                                   <form onSubmit={endProject}>
                                     <p>Please type "Accomplished" to proceed.</p>
                                     <input onChange={e => setEnd(e.target.value)} value={end} type="text"/>
-                                    <button className="btn btn-sm btn-primary">Confirm</button>
+                                    <button className="allButtons">Confirm</button>
                                   </form>
                                 )}
                               </div>
                             )}
-                          </div>
-                          )}
-                        </div>
-                        <br />
-                        <div>
-                          {theEmp ?
-                            <div>
-                              {!ongoing ?
-                                <div>
-                                  {hiring ?
-                                    <div>
-                                      {waiting ?
-                                        <div className="actionButtonWrapper">
-                                          <div>
-                                            <label>Waiting for candidate's response. </label>
-                                          </div>
-                                          <button className="btn btn-sm btn-primary actionButton" onClick={()=> acceptedNo()}>
-                                            Cancel {projectInfo.type} Request
-                                          </button>
-                                          <br />
-                                        </div>
-                                      :<></>}
-                                    </div>
-                                  :<></>}
-                                </div>
-                              :<></>}
-                            </div>
-                          :<></>}
-                        </div>
                         
-                        {ongoing ?
-                          <div>
-                            {userData.user?.id === projectInfo.employer._id || userData.user?.id === projectInfo?.candidate?._id ?
-                              <div className="actionButtonWrapper">
-                                <button className="btn btn-sm btn-primary actionButton" onClick={()=>{
-                                    if (userData.token === undefined) {
-                                        alert("Please login to continue.")
-                                        navigate("/login", {})
-                                    } else {
-                                        startConversation()
-                                    }
-                                }}>Chat</button>
-                              </div>
-                            :<></>}
+                        
+                        {ongoing && theFree ?
+                          <div className="actionButtonWrapper">
+                            <button className="allButtons actionButton" onClick={()=>{
+                              if (userData.token === undefined) {
+                                toastWarningNotification(),
+                                window.setTimeout(()=>navigate("/login", {}), 3000)
+                              } else {
+                                startConversation()
+                              }
+                            }}>
+                              Chat Employer
+                            </button>
                           </div>
                         : <></>}
-                        <br />
-
-                        <div>
-                          {!ongoing && (
-                            <div>
-                              {!isFree && (
-                                <div>
-                                  {!reviewed && (
-                                    <div>
-                                      {accepted && (
-                                        <div>
-                                          {theEmp && (
-                                            <div className="actionButtonWrapper">
-                                              <button className="btn btn-sm btn-primary actionButton" onClick={()=> {
-                                                if(writeReview===false) {
-                                                  setWriteReview(true)
-                                                }
-                                                if(writeReview===true) {
-                                                  setWriteReview(false)
-                                                }
-                                              }}>
-                                                Write an Employee Review
-                                              </button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        <div>
-                          {hiring ?
-                            <div>
-                              {!accepted && (
-                                <div>
-                                  {!rejected && (
-                                    <div>
-                                      {theFree && (
-                                        <div>
-                                          <p>Decide what happens to the offer: </p>
-                                          <button className="btn btn-sm btn-primary" onClick={()=> {acceptedYes(), setAccepted(true)}}>
-                                            Accept {projectInfo.type}
-                                          </button>
-                                          <button className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=> setToCancel(true)}>
-                                            Reject {projectInfo.type}
-                                          </button>
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          :<></>}
-                        </div>
-                      </div>
-                      <div className="profileCardTextWrapper profileCardText">
-                        <p><b>Status: {projectInfo.status}</b></p>
-                        <h3>{projectInfo.employmenttype}: {projectInfo.title}</h3>
-                        {projectInfo.company!=="undefined" ?
-                          <p className="text-muted small">Company: {projectInfo.company}</p>
-                        :<p className="text-muted small">Company: <i>Not specified.</i></p>}
-                        <p className="text-muted small">Description: {projectInfo.description}</p>
-                        <p className="text-muted small">Skill Required: {projectInfo.skillrequired}</p>
-                        {projectInfo.minimumreq?.what!=="Others" ?
-                          <p className="text-muted small">Minimum requirements: {projectInfo.minimumreq.what}</p>
-                        :<p className="text-muted small">Minimum requirements: {projectInfo.minimumreq.note}</p>}
-                        <p className="text-muted small">Sallary: ₱ {projectInfo.sallary}</p>
-                        <p className="text-muted small">Duration: {projectInfo.duration} months</p>
-                        <p className="text-muted small">Location: {projectInfo.location?.city}, {projectInfo.location?.province}, {projectInfo.location?.region}</p>
-                        <p className="text-muted small">Other qualifications: {projectInfo.others}</p>
-                        <p className="text-muted small">Employer: {projectInfo?.employer?.firstname} {projectInfo.employer.middlename ? projectInfo.employer.middlename.charAt(0).toUpperCase() + ". " : "" }{projectInfo?.employer?.lastname}</p>
-                        {freeInfo && (
-                          <div>
-                            <p className="text-muted small">Employee: {projectInfo?.candidate?.firstname} {projectInfo.candidate.middlename ? projectInfo.candidate.middlename.charAt(0).toUpperCase() + ". " : "" }{projectInfo?.candidate?.lastname}</p>
-                          </div>
-                        )}
-                        <p className="text-muted small">Date submitted: {moment(projectInfo.creationdate).format("MMM. DD, YYYY")}</p>
-                        <p className="text-muted small">Date approved: {projectInfo?.approvaldate ? moment(projectInfo.approvaldate).format("MMM. DD, YYYY"): "Not approved."}</p>
-                        {accepted ? 
-                          <div>
-                            <p className="text-muted small">Began at: {moment(projectInfo.acceptdate).format("MMM. DD, YYYY")}</p>
-                            <p className="text-muted small">Expected to end at: {moment(expectedDate).format("MMM. YYYY")}</p>
-                          </div>
-                        :<></>}
-                        {!ongoing && !hiring ? 
-                          <p className="text-muted small">Date concluded: {moment(projectInfo.completiondate).format("MMM. DD, YYYY")}</p>
-                        :<></>}
-                      </div>  
                     </div>
 
-                    <div>
-                      {hiring ?
+                    <div className="centerContent">
+                      {hiring && !accepted && !rejected && theFree ?
                         <div>
-                          {toApply===true ?
-                            <div>
-                              <Questions 
-                                setApplied={setApplied}
-                                setToApply={setToApply}
-                                socket={socket}
-                                projectid={location.state._id} 
-                                type={projectInfo?.type} 
-                                questions={projectInfo.questions} 
-                                employer={projectInfo.employer._id}
-                                applicants={projectInfo.applicants}/>
-                            </div>
-                          :<></>}
+                          <p>Looks like you got the attention of {projectInfo.company}, and they want to hire you directly. Decide now what happens to the offer. 
+                          <button className="btn btn-outline-success allButtons" onClick={()=> {acceptedYes(), setAccepted(true)}}>
+                            Accept {projectInfo.type}
+                          </button>
+                          <button className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=> setToCancel(true)}>
+                            Reject {projectInfo.type}
+                          </button>
+                          </p>
+                        </div>
+                      :<></>}
+                    </div>
+
+                    <div className="centerContent">
+                      {toCancel ?
+                        <div className="projectCardTopDetails">
+                          <div>
+                            <label>Please explain why are you declining the offer.</label>
+                          </div>
+                          <div>
+                            <textarea required rows = "5" cols = "40" onChange={e => setNote(e.target.value)} value={note} type="text" className="" placeholder="Your explanation..." />
+                          </div>
+                          <div className="centerContent">
+                            <button className="btn btn-sm btn-outline-success allButtons limitWideButtons" onClick={()=>acceptedNo()}>Confirm</button>
+                          </div>
                         </div>
                       :<></>}
                     </div>
 
                     <div>
-                      {toCancel ?
+                      {hiring && toApply===true ?
                         <div>
-                          <div className="p-3 bg-success bg-opacity-25 mb-5">
-                            <label>Explain why you decline the offer:</label>
-                            <input required onChange={e => setNote(e.target.value)} value={note} type="text" className="form-control" placeholder="Your reason..." />
-                            <button className="btn btn-sm btn-primary" onClick={()=>acceptedNo()}>Confirm</button>
-                          </div>
+                          <Questions 
+                            setApplied={setApplied}
+                            setToApply={setToApply}
+                            socket={socket}
+                            projectid={location.state._id} 
+                            type={projectInfo?.type} 
+                            questions={projectInfo.questions} 
+                            employer={projectInfo.employer._id}
+                            applicants={projectInfo.applicants}/>
                         </div>
                       :<></>}
                     </div>
@@ -600,14 +637,15 @@ function Project({socket}) {
                             </div>  
                             )}
                           </div>
-                          <div>
+
+                          <div className="centerContent">
                             {!applied ? 
                               <div>
                                 {toApply!==true ?
                                   <div>
                                 {userData?.user?.type==="Candidate" ?
                                   <div>
-                                    <button className="btn btn-sm btn-primary" onClick={()=> {setToApply(true)}}>
+                                    <button className="btn btn-sm btn-outline-success applyButton" onClick={()=> {setToApply(true)}}>
                                       Apply Now!
                                     </button>
                                   </div>
@@ -617,12 +655,14 @@ function Project({socket}) {
                               </div>
                             :<></>}
                           </div>
-                          <div>
+
+                          <div className="centerContent">
                             {!userData.token ? 
                               <div>
-                                  <button className="btn btn-sm btn-primary" onClick={()=>{
-                                      alert("Please login to continue."), 
-                                      navigate("/login", {})}}>
+                                  <button className="btn btn-sm btn-outline-success applyButton" onClick={()=>{
+                                      toastWarningNotification(),
+                                      window.setTimeout(()=>navigate("/login", {}), 3000)
+                                  }}>
                                       Apply Now!
                                   </button>
                               </div>
@@ -631,26 +671,33 @@ function Project({socket}) {
                         </div>
                       : <></>} 
                     </div>
-                    {hiring ?
-                      <div>
+
                         {theEmp ?
                           <div>
-                            <h3><b>Current Applications: </b></h3>
-                            {projectInfo?.applicants[0] ? 
-                              <div className="notifList">
-                                  {projectInfo?.applicants.map(function(a) {
-                                      return <ApplicantList 
-                                      _id={a._id}
-                                      key={idPlusKey(a._id, userData.user.id)} 
-                                      questions={projectInfo.questions}
-                                      applicantid ={a.applicantid} 
-                                      applicants ={projectInfo.applicants} 
-                                      appliedAt ={a.appliedAt} 
-                                      employer ={projectInfo?.employer?._id} 
-                                      projectid={location.state._id} />
-                                  })}
+                            {openApplicants==true ?
+                              <div>
+                                <div className="horizontal_line"></div>
+                                <div className="contentTitle">
+                                  <label><b>Current Applications: </b></label>
+                                </div>
+                                <br/>
+                                {projectInfo?.applicants[0] ? 
+                                  <div className="notifList">
+                                      {projectInfo?.applicants.map(function(a) {
+                                          return <ApplicantList 
+                                          _id={a._id}
+                                          key={idPlusKey(a._id, userData.user.id)} 
+                                          questions={projectInfo.questions}
+                                          applicantid ={a.applicantid} 
+                                          applicants ={projectInfo.applicants} 
+                                          appliedAt ={a.appliedAt} 
+                                          employer ={projectInfo?.employer?._id} 
+                                          projectid={location.state._id} />
+                                      })}
+                                  </div>
+                                : <span>No applications at the moment.</span>}
                               </div>
-                            : <span>No applications at the moment.</span>}
+                            :<></>}
                           </div>
                         :<></>}
                         <br />
@@ -660,7 +707,7 @@ function Project({socket}) {
                               {projectInfo?.notes ?
                                 <div>
                                   {projectInfo?.notes.map(function(a) {
-                                    <h3><b>Request refusal:</b></h3>
+                                    <p><b>Request refusal:</b></p>
                                     return (
                                       <div className="notif" key={a._id}>
                                         <div className="notifTop">
@@ -686,68 +733,95 @@ function Project({socket}) {
                             </div>
                           :<></>}
                         </div>
+
+                    {(openEmployees===true) && (theEmp || theAdmin) ?
+                      <div>
+                        <div className="horizontal_line"></div>
+                        <div className="contentTitle">
+                          <label><b>List of Employee(s): </b></label>
+                        </div>
+                        {projectInfo?.employeelist[0] ? 
+                          <div className="notifList">
+                            {projectInfo?.employeelist.map(function(a) {
+                              return <EmployeeList 
+                                      _id={a._id}
+                                      key={idPlusKey(a._id, userData.user.id)} 
+                                      employeeid ={a.employeeid} 
+                                      employer ={projectInfo?.employer?._id} 
+                                      projectid={location.state._id} 
+                                      isFree={isFree}
+                                      employmentstatus={a.employmentstatus}
+                                      setModalOpen={setModalOpen}
+                                      setToEndContract={setToEndContract}
+                                      theEmp={theEmp}
+                                      writeReview={writeReview}
+                                      setWriteReview={setWriteReview}
+                                      setStatusToReview={setStatusToReview}
+                                      />
+                              })}
+                          </div>
+                        : <span>No employee at the moment.</span>}
                       </div>
                     :<></>}
 
-                    {!aJob ? 
+                    {!aJob && (ongoing || !ongoing) && accepted ?
                       <div>
-                        {ongoing || !ongoing ? 
-                          <div>
-                            {accepted && (
-                              <div>
-                                {openProgress && (
-                                  <div className="centerContent">
-                                    <ProjectUpdates 
-                                    projectid={location.state._id} 
-                                    employer={projectInfo?.employer ? projectInfo.employer._id : ""} 
-                                    freelancer={projectInfo?.candidate ? projectInfo.candidate._id : ""}
-                                    ongoing={ongoing}
-                                    socket={socket}/>
-                                  </div>
-                                )}
-                              </div>
-                            )}
+                        {openProgress && (
+                          <div className="centerContent">
+                            <ProjectUpdates 
+                              projectid={location.state._id} 
+                              employer={projectInfo?.employer ? projectInfo.employer._id : ""} 
+                              freelancer={projectInfo?.employeelist[0] ? projectInfo.employeelist[0].employeeid : ""}
+                              ongoing={ongoing}
+                              socket={socket}/>
                           </div>
-                        : <></>}
+                        )}
                       </div>
                     :<></>}
 
                     <div>
-                      {!ongoing && (
-                        <div>
-                          {!isFree && (
-                            <div>
-                              {!reviewed && (
-                                <div>
-                                  {accepted && (
-                                    <div>
-                                      {theEmp && (
-                                        <div>
-                                          {writeReview && (
-                                            <div>
-                                              <Review 
-                                                projectid={location.state._id}  
-                                                candidate={projectInfo?.candidate ? projectInfo.candidate._id : ""}
-                                                setWriteReview={setWriteReview}
-                                                setReviewed={setReviewed}
-                                              />
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      {statusToReview==="Concluded" && theEmp && writeReview ?
+                          <div>
+                            <Review 
+                              projectid={location.state._id}  
+                              toEndContract={toEndContract}
+                              setWriteReview={setWriteReview}
+                            />
+                          </div>
+                      :<></>}
                     </div> 
               </div>
             )}
+            <ToastContainer />
         </div>
     )
 }
 
 export default Project
+
+/*
+                        <div>
+                          {theEmp ?
+                            <div>
+                              {!ongoing ?
+                                <div>
+                                  {hiring ?
+                                    <div>
+                                      {waiting ?
+                                        <div className="actionButtonWrapper">
+                                          <div>
+                                            <label>Waiting for candidate's response. </label>
+                                          </div>
+                                          <button className="btn btn-sm btn-primary actionButton" onClick={()=> acceptedNo()}>
+                                            Cancel {projectInfo.type} Request
+                                          </button>
+                                          <br />
+                                        </div>
+                                      :<></>}
+                                    </div>
+                                  :<></>}
+                                </div>
+                              :<></>}
+                            </div>
+                          :<></>}
+                        </div>*/

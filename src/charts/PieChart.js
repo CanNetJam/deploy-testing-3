@@ -12,7 +12,8 @@ function PieChart({ chartData }) {
             font: {
                 weight: 'bold',
                 size: 24
-            }
+            },
+            formatter: function (value, context) { return value || null;  }
           }
         }
     }}

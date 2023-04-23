@@ -35,7 +35,6 @@ function Messages({socket}) {
 
     useEffect(()=> {
       socket.current.emit("addUser", userData.user.id)
-
     }, [userData])
 
     useEffect(() => {
@@ -121,9 +120,9 @@ function Messages({socket}) {
                         <input placeholder="Search for Partners" className="chatMenuInput" />
                         {conversations.map((c)=>{
                             return (
-                                <div key={c._id} onClick={()=> setCurrentChat(c)}>
-                                    <Conversation  conversation={c} currentUser={userData.user} />
-                                </div>
+                              <div key={c._id} onClick={()=> setCurrentChat(c)}>
+                                <Conversation  conversation={c} currentUser={userData.user} />
+                              </div>
                             )
                         })}
                     </div>
@@ -150,7 +149,7 @@ function Messages({socket}) {
                               </textarea>
                               <button
                                   onClick={handleSubmit} 
-                                  className="btn btn-sm btn-primary">
+                                  className="btn btn-outline-success allButtons">
                                       Send
                               </button>
                           </div>

@@ -19,7 +19,7 @@ function BugReports() {
     }, [])
 
     return (
-        <div>
+        <div className="bugReports">
             <div className="centerContent">
                 <h1>Bug Reports</h1>
             </div>

@@ -22,7 +22,7 @@ function Message({message, own}) {
     return (
         <div className={own? "message own" : "message"}>
             <div className="messageTop">
-                <img src={pic ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${pic}.jpg` : "/fallback.png"} className="messageImg"></img>
+                <img src={pic ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${pic}.jpg` : "/fallback.png"} className="messageImg"></img>
                 <p className="messageText">
                     {message.text}
                 </p>

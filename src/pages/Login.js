@@ -79,7 +79,7 @@ function Login() {
                 </div>
                 <br />
                 <div className="centerContent">
-                  <button className="btn btn-sm btn-primary" variant="success" type="submit">Log In</button>
+                  <button className="allButtons" variant="success" type="submit">Log In</button>
                 </div>
               </form>
             </div>

@@ -65,7 +65,6 @@ function Gallery(props) {
         if (file) {
             const data = new FormData()
             data.append("userId", userData?.user.id) 
-            data.append("username", freeInfo)
             data.append("title", title)
             data.append("photo", file)
             data.append("description", description)
@@ -104,14 +103,14 @@ function Gallery(props) {
     return (
         <div className="gallery">
             <div className="galleryTop">
-                <div>
-                    <h3><b>{(freeFirstName)+"'s "}Gallery</b></h3>
+                <div className="galleryTopTitle">
+                    <p className="profileCardName">{(freeFirstName)+"'s "}Gallery</p>
                 </div>
                 {!props.admin && (
                     <div>
                         {props.candidate===userData?.user?.id && (
                             <div className="toUpload">
-                                <button className="btn btn-sm btn-primary" onClick={()=>{setAddPhoto(true)}}>
+                                <button className="allButtons" onClick={()=>{setAddPhoto(true)}}>
                                     Upload Photo
                                 </button>
                                 {addPhoto && (
@@ -128,25 +127,25 @@ function Gallery(props) {
                     {addPhoto && (
                         <div>
                             <form  onSubmit={submitHandler}>
-                                <h3>Select a photo (Required!)</h3>
+                                <p>Select a photo (Required!)</p>
                                     <div className="mb-2">
                                         <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
                                     </div>
                                     {isPhoto===false ? <div className="alert"><p>Please select a photo to upload!</p></div> : <></>}
                                     <div className="mb-2">
-                                        <input required onChange={e => setTitle(e.target.value)} value={title} type="text" className="form-control" placeholder="Title of your photo..." />
+                                        <input autoFocus required onChange={e => setTitle(e.target.value)} value={title} type="text" className="form-control" placeholder="Title of your photo..." />
                                     </div>
                                     <div className="mb-2">
                                         <input required onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder="A brief description of your photo..." />
                                     </div>
-                                <button className="btn btn-sm btn-primary">Upload Now</button>
+                                <button className="allButtons">Upload Now</button>
                             </form>
                         </div>
                     )}
                 </div>
             <div className="galleryBot">
                 {photos[0] ?
-                    <div className="accounts-grid">
+                    <div className="galleryPhotoList">
                         {photos.map(function(photo) {
                         return <GalleryPhotos 
                         key={photo._id} 
@@ -161,7 +160,7 @@ function Gallery(props) {
                         setPhotos={setPhotos}/>
                         })}
                     </div>
-                : <div className="accounts-grid">No photo available.</div>}
+                : <div className="galleryPhotoList">No photo available.</div>}
             </div>
         </div>  
     )

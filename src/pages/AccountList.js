@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from "react"
 import Axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { UserContext } from "../home"
+import {format} from "timeago.js"
+import moment from "moment"
 
 function AllAccounts(){
     const cloud_name = "dzjkgjjut"
@@ -99,24 +101,42 @@ function AllAccounts(){
         }
     }
 
-
     async function startConversation(props) {
       const members = [userData.user.id, props]
       try {
-          const prevConvo = await Axios.get("/api/get-conversation/", {params: {
-              member1: userData.user.id,
-              member2: props
-          }})
-          if (prevConvo.data) {
-              navigate("/messages", {state: {_id: prevConvo.data}})
-          }
-          if (prevConvo.data === null) {
-              const createConvo = await Axios.post("/api/create-conversation", members)
-              navigate("/messages", {state: {_id: createConvo.data}})
-          }
-      }catch (err) {
-          console.log(err)
-      }
+            const prevConvo = await Axios.get("/api/get-conversation/", {params: {
+                member1: userData.user.id,
+                member2: props
+            }})
+            if (prevConvo.data) {
+                navigate("/messages", {state: {_id: prevConvo.data}})
+            }
+            if (prevConvo.data === null) {
+                const createConvo = await Axios.post("/api/create-conversation", members)
+                navigate("/messages", {state: {_id: createConvo.data}})
+            }
+        }catch (err) {
+            console.log(err)
+        }
+    }
+
+    async function deactivateAccount (props) {
+        let data
+        try {
+            const res = await Axios.post(`/api/deactivate-account/${props}`, data, {headers: {'auth-token': userData.token}})
+            setAccounts(prev=>
+                prev.map(function(account){
+                    if (account._id==res.data._id) {
+                        return {
+                            ...account, skill: []
+                        }
+                    }
+                    return account
+                })
+            )
+        } catch (err) {
+            console.log(err)
+        }
     }
 
     async function AdminEdit(props) {
@@ -125,13 +145,13 @@ function AllAccounts(){
     
     return(
       <div className="accountsList">
-        <div className="centerContent">
-          <h3>List of Accounts</h3>
+        <div className="contentTitle">
+            <label><b>List of Accounts</b></label>
         </div>
-
+        <br/>
         <div className="searchTop">
                 <div className="quickSearch">
-                    <button className="btn btn-sm btn-primary" onClick={()=> {
+                    <button className="btn btn-outline-success allButtons" onClick={()=> {
                                 if (advSearch === false) {
                                     setAdvSearch(true)
                                 }
@@ -155,7 +175,7 @@ function AllAccounts(){
                 </div>
                 <div className="testing">
                     <div className="searchKey">
-                        <button className="btn btn-sm btn-primary" onClick={()=> {
+                        <button className="btn btn-outline-success allButtons" onClick={()=> {
                             if (keySearch === false) {
                                 setKeySearch(true)
                             }
@@ -285,9 +305,11 @@ function AllAccounts(){
                         <th>First Name</th>
                         <th>Middle Name</th>
                         <th>Last Name</th>
+                        <th>Email</th>
                         <th>Age</th>
                         <th>Adress</th>
                         <th>Skill(s)</th>
+                        <th>Last Activity</th>
                         
                         <th>Profile</th>
                         <th>Actions</th>
@@ -305,6 +327,7 @@ function AllAccounts(){
                                 <td>{acc.firstname}</td>
                                 <td>{acc.middlename ? acc.middlename : "-"}</td>
                                 <td>{acc.lastname}</td>
+                                <td>{acc.email}</td>
                                 <td>{acc.age}</td>
                                 <td>{acc.location?.city}, {acc.location?.province}, {acc.location?.region}</td>
 
@@ -323,22 +346,35 @@ function AllAccounts(){
                                 </td>
 
                                 <td>
-                                    <button className="btn btn-sm btn-primary" onClick={()=> {
+                                    {acc.lastactive ? moment(acc.lastactive).format("MMM. DD, YYYY"): "No data."}<br />
+                                    ({format(acc.lastactive ? acc.lastactive : "No data.")})
+                                </td>
+
+                                <td>
+                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
                                         navigate("/search-profile", {state: {_id: acc._id, projectid: ""}})
                                     }}>
                                         Profile
                                     </button>
                                 </td>
                                 <td>
-                                    <button className="btn btn-sm btn-primary" onClick={()=> {
+                                    {acc.type!=="Employer" ? null :
+                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
                                         startConversation(acc._id)
                                     }}>
                                         Chat
                                     </button>
-                                    <button className="btn btn-sm btn-primary" onClick={()=> {
+                                    }
+
+                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
                                         AdminEdit(acc)
                                     }}>
-                                        Edit Profile
+                                        Edit
+                                    </button>
+                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
+                                        deactivateAccount(acc._id)
+                                    }}>
+                                        Deactivate
                                     </button>
                                 </td>
                             </tr>
@@ -354,7 +390,7 @@ function AllAccounts(){
             {result?.map((a)=>{
               return (
                 <div key={result?.indexOf(a)}>
-                  <button className="btn btn-sm btn-primary" onClick={()=>setPage(result?.indexOf(a))}>
+                  <button className="btn btn-outline-success allButtons" onClick={()=>setPage(result?.indexOf(a))}>
                     {"Page "+((result?.indexOf(a))+1)}
                   </button>
                 </div>

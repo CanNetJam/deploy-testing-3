@@ -2,7 +2,7 @@ const mongoose = require("mongoose")
 
 const gallerySchema = new mongoose.Schema({
     userId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId, ref: "accounts",
     },
     username: {
         type: String,

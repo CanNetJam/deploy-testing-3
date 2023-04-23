@@ -30,20 +30,24 @@ function Notif(props) {
             navigate("/messages", {state: {_id: prevConvo.data}})
         }
     }
-
+    let senderName = (props.sender?.firstname) + (props?.sender?.middlename ? props.sender.middlename.charAt(0).toUpperCase() + ". " : "" )+(props.sender?.lastname)
     return (
         <div className="notif" onClick={()=>redirectTo(props)}>
             <div className="notifTop">
                 <div>
-                    <img src={props?.sender?.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/${props.sender.image}.jpg` : "/fallback.png"} className="messageImg" alt={`${props.sender?.firstname}'s image` }></img>
+                    {props.sender._id===userData.user?.id ? 
+                        <img className="messageImg" src={"/WebPhoto/warning.png"}></img>
+                    :
+                        <img src={props?.sender?.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/${props.sender.image}.jpg` : "/fallback.png"} className="messageImg" alt={`${props.sender?.firstname}'s image` }></img>
+                    }
                 </div>
                 <div>
-                    {props.sender?.firstname} {props?.sender?.middlename ? props.sender.middlename.charAt(0).toUpperCase() + ". " : "" }{props.sender?.lastname}
+                    {props.sender._id===userData.user?.id ? <b>System Warning! </b> : senderName}
                     {" "}{props.action}{" "}{props.type}.
                 </div>
             </div>
             <div className="notifBot">
-                {moment(props.createdAt).format("ddd: MMM. DD, YYYY")} <br></br>({format(props.createdAt)})
+                {moment(props.createdAt).format("ddd: MMM. DD, YYYY")} <br />({format(props.createdAt)})
             </div>
         </div>
     )

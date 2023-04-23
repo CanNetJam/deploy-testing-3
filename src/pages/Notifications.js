@@ -79,13 +79,13 @@ function Notifications(props) {
     return (
         <div className="notifications">
             <div className="notificationsTop">
-                <div>
-                    <h2>{userData.user.firstname}'s Notifications</h2>
+                <div className="contentTitle">
+                    <label><b>Notifications</b></label>
                 </div>
                 <div>
                     {unread[0]? 
                         <div>
-                            <button className="btn btn-sm btn-primary" onClick={()=>{
+                            <button className="btn btn-outline-success allButtons" onClick={()=>{
                                 readAll(userData.user.id),
                                 props.setNumber(prev=>prev+1)
                             }}>
@@ -115,7 +115,7 @@ function Notifications(props) {
                         <br />
                         <div className="centerContent">
                             {result[page+1]!==undefined ?
-                                <button className="btn btn-sm btn-primary" onClick={()=> scrollToEnd()}>Load More</button>
+                                <button className="allButtons" onClick={()=> scrollToEnd()}>Load More</button>
                             :<span>End of the list.</span>}
                         </div>
                     </div>

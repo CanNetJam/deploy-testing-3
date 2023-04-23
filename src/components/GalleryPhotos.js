@@ -31,18 +31,18 @@ function GalleryPhotos(props) {
     return (
         <div className="galleryCard">
                 <div className="galleryPicTop">
-                    <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_85/${props.image}.jpg` : "/fallback.png"} className="galleryPic" alt={`${props.description} named ${props.title}`}></img>
+                    <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${props.image}.jpg` : "/fallback.png"} className="galleryPic" alt={`${props.description} named ${props.title}`}></img>
                 </div>
-                <div className="galleryPicBot card-body">
+                <div className="galleryPicBot">
                     {!isEditing && (
                         <div>
-                            <p>{props.username}</p>
-                            <p>Date: {moment(props.createdAt).format("MMM. DD, YYYY")}</p>
-                            <p>Title: {props.title ? props.title : ""}</p>
-                            <p>Description: {props.description ? props.description : ""}</p>
+                            <p>
+                            <b>{props.title}</b><br/>
+                            {moment(props.createdAt).format("MMM. DD, YYYY")}<br/>
+                            Description: {props.description}</p>
                             {userData.user?.id===props.userId && (
                                 <div>
-                                    <button type="button" className="btn btn-sm btn-primary" onClick={()=>{ 
+                                    <button type="button" className="allButtons" onClick={()=>{ 
                                         setIsEditing(true), 
                                         setDraftTitle(props.title), 
                                         setDraftDescription(props.description)}}>
@@ -73,9 +73,9 @@ function GalleryPhotos(props) {
                             </div>
                             <div className="mb-1">
                                 <label>Description:</label>
-                                <input autoFocus onChange={e => setDraftDescription(e.target.value)} type="text" className="form-control form-control-sm" value={draftDescription} placeholder="Edit description..."/>
+                                <input onChange={e => setDraftDescription(e.target.value)} type="text" className="form-control form-control-sm" value={draftDescription} placeholder="Edit description..."/>
                             </div>
-                                <button className="btn btn-sm btn-primary">Confirm</button>
+                                <button className="allButtons">Confirm</button>
                                 <button onClick={() =>{setIsEditing(false)}} className="btn btn-sm btn-outline-secondary cancelBtn">
                                     Cancel
                                 </button>

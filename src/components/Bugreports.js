@@ -56,18 +56,22 @@ function BugReports() {
     return (
         <div>
             <form className="settingsForm" onSubmit={submitHandler}>
-                <label>Select a photo (Required!)</label>
+                <label>Select a photo<label className="requiredAlert"> <b> *</b></label></label>
                 <div className="mb-2">
                     <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
                 </div>
                 {isPhoto===false ? <div className="alert"><p>Please select a photo to upload!</p></div> : <></>}
                 <div className="mb-2">
+                    <label>Bug title: <label className="requiredAlert"> <b> *</b></label></label>
                     <input required onChange={e => setTitle(e.target.value)} value={title} type="text" className="form-control" placeholder="Title of the bug report." />
                 </div>
                 <div className="mb-2">
+                    <label>Bug description: <label className="requiredAlert"> <b> *</b></label></label>
                     <textarea required rows = "5" cols = "60" onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder="Explain how you think the bug happen." />
                 </div>
-                <button className="btn btn-sm btn-primary">Send Report</button>
+                <div className="centerContent">
+                    <button className="btn btn-outline-success allButtons limitWideButtons">Send Report</button>
+                </div>
             </form>
         </div>  
     )

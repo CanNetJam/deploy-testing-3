@@ -5,6 +5,8 @@ import { useReactToPrint } from "react-to-print"
 import { useNavigate } from "react-router-dom"
 import PieChart from "../charts/PieChart"
 import BarChart from "../charts/BarChart"
+import DateRangePickerComp from "../components/DateRangePicker"
+import AllProjectsTable from "../components/AllProjectsTable"
 
 function Reports() {
     const cloud_name = "dzjkgjjut"
@@ -12,20 +14,41 @@ function Reports() {
     let monthNow = moment(Date.now()).format("MMMM")
     let yearNow = moment(Date.now()).format("YYYY")
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-    const theMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026,2027, 2028, 2029, 2030]
-    
+    const [ currentView, setCurrentView] = useState("View Monthly Reports")
+    const [ viewData, setViewData] = useState(true)
     const [ selectedMonth, setSelectedMonth] = useState(monthNow)
     const [ selectedYear, setSelectedYear] = useState(yearNow)
     const [ numMonth, setNumMonth] = useState(moment(Date.now()).format("MM"))
+    const [ dateRange, setDateRange] = useState({
+        startDate: undefined,
+        endDate: undefined
+    })
+    const [ allApprovedRequestData, setAllApprovedRequestData ] = useState([])
+    const [ allDeniedRequestData, setAllDeniedRequestData ] = useState([])
+    const [ allPendingRequestData, setAllPendingRequestData ] = useState([])
+    const [ pie1Total, setPie1Total] = useState(0)
 
+    const [ allAccomplishedJobsData, setAllAccomplishedJobsData ] = useState([])
+    const [ allAccomplishedProjectsData, setAllAccomplishedProjectsData ] = useState([])
+    const [ pie2Total, setPie2Total] = useState(0)
+
+    const [ allOngoingProjectsData, setAllOngoingProjectsData ] = useState([])
+    const [ allOngoingJobsData, setAllOngoingJobsData ] = useState([])
+    const [ pie3Total, setPie3Total] = useState(0)
+
+    const [ allAnnualRequestData, setAllAnnualRequestData ] = useState([])
+    const [ allAnnualApprovedData, setAllAnnualApprovedData ] = useState([])
+    const [ allAnnualDeniedData, setAllAnnualDeniedData ] = useState([])
+    const [ allAnnualAccomplishedData, setAllAnnualAccomplishedData ] = useState([])
+    
     const [ emptyRequest, setEmptyRequest] = useState(false)
     const [ requestData, setRequestData ] = useState({
         labels: "",
         datasets: [{
             label: "",
             data: "",
-        }]
+        }], 
     })
     const [ emptyOngoing, setEmptyOngoing] = useState(false)
     const [ ongoingData, setOngoingData ] = useState({
@@ -101,62 +124,10 @@ function Reports() {
     const componentRef = useRef()
     const handlePrint = useReactToPrint({
         content: () => componentRef.current,
-        documentTitle: "Print Testing",
+        documentTitle: "System Report",
         //onAfterPrint: ()=> alert("Successfully printed a soft copy.")
     })
-    
-    useEffect(() => {
-        const getProject = async () => {
-          try {
-            const res = await Axios.get(`/api/reports/request-reports/${numMonth}/${selectedYear}`)
-            if (res.data.total!==0) {
-                setRequestData({
-                    labels: res.data?.partial.map((data)=> data.type),
-                    datasets: [{
-                        data: res.data?.partial.map((data)=> data.count)
-                    }]
-                })
-                setEmptyRequest(false)
-            }
-            if (res.data.total===0) {
-                setEmptyRequest(true)
-            }
-
-            const res2 = await Axios.get(`/api/reports/accomplished-reports/${numMonth}/${selectedYear}`)
-            if (res2.data.total!==0) {
-                setAccomplishedData({
-                    labels: res2.data?.partial.map((data)=> data.type),
-                    datasets: [{
-                        data: res2.data?.partial.map((data)=> data.count)
-                    }]
-                })
-                setEmptyAccomplished(false)
-            }
-            if (res2.data.total===0) {
-                setEmptyAccomplished(true)
-            }
-
-            const res3 = await Axios.get(`/api/reports/ongoing-projects`)
-
-            if (res3.data.total!==0) {
-                setOngoingData({
-                    labels: res3.data?.partial.map((data)=> data.type),
-                    datasets: [{
-                        data: res3.data?.partial.map((data)=> data.count)
-                    }]
-                })
-                setEmptyOngoing(false)
-            }
-            if (res3.data.total===0) {
-                setEmptyOngoing(true)
-            }
-          } catch (err) {
-            console.log(err)
-          }
-        }
-        getProject()
-    }, [numMonth, selectedYear])
-
+    console.log(allAnnualRequestData)
     useEffect(() => {
         const getRecords = async () => {  
             try {
@@ -168,6 +139,15 @@ function Reports() {
                         data: res1.data?.requestReport.map((data)=> data.count)
                     }]
                 })
+                setAllAnnualRequestData([])
+                res1.data.requestReport.map((a)=> {
+                    if (a.count!==0) {
+                        a.data.map((b)=> {
+                            setAllAnnualRequestData(prev=>prev.concat([b]))
+                        })
+                    }
+                })
+
                 setAnnualApprovedData({
                     labels: res1.data?.approvedReport.map((data)=> months[data.id-1]),
                     datasets: [{
@@ -175,6 +155,15 @@ function Reports() {
                         data: res1.data?.approvedReport.map((data)=> data.count)
                     }]
                 })
+                setAllAnnualApprovedData([])
+                res1.data.approvedReport.map((a)=> {
+                    if (a.count!==0) {
+                        a.data.map((b)=> {
+                            setAllAnnualApprovedData(prev=>prev.concat([b]))
+                        })
+                    }
+                })
+
                 setAnnualDeniedData({
                     labels: res1.data?.deniedReport.map((data)=> months[data.id-1]),
                     datasets: [{
@@ -182,6 +171,15 @@ function Reports() {
                         data: res1.data?.deniedReport.map((data)=> data.count)
                     }]
                 })
+                setAllAnnualDeniedData([])
+                res1.data.deniedReport.map((a)=> {
+                    if (a.count!==0) {
+                        a.data.map((b)=> {
+                            setAllAnnualDeniedData(prev=>prev.concat([b]))
+                        })
+                    }
+                })
+
                 setAnnualAccomplishedData({
                     labels: res1.data?.accomplishedReport.map((data)=> months[data.id-1]),
                     datasets: [{
@@ -189,6 +187,15 @@ function Reports() {
                         data: res1.data?.accomplishedReport.map((data)=> data.count)
                     }]
                 })
+                setAllAnnualAccomplishedData([])
+                res1.data.accomplishedReport.map((a)=> {
+                    if (a.count!==0) {
+                        a.data.map((b)=> {
+                            setAllAnnualAccomplishedData(prev=>prev.concat([b]))
+                        })
+                    }
+                })
+
             } catch (err) {
                 console.log(err)
             }
@@ -313,94 +320,268 @@ function Reports() {
         }
         setMonth()
     }, [selectedMonth])
+
+    useEffect(() => {
+        const getProjectReports = async () => {
+          try {
+            const res = await Axios.get(`/api/reports/all-requests`, {params: {
+                startDate: dateRange.startDate,
+                endDate: dateRange.endDate
+            }})
+            if (res.data.requests.data.length!==0) {
+                setPie1Total(res.data.requests.data.length)
+                setRequestData({
+                    labels: res.data.subtotal.map((data)=> data.type),
+                    datasets: [{
+                        data: res.data.subtotal.map((data)=> data.count)
+                    }]
+                })
+                res.data.subtotal.map((a)=> {
+                    if (a.type==="Approved") {
+                        setAllApprovedRequestData(a.data)
+                    }
+                    if (a.type==="Denied") {
+                        setAllDeniedRequestData(a.data)
+                    }
+                    if (a.type==="Pending") {
+                        setAllPendingRequestData(a.data)
+                    }
+                })
+                setEmptyRequest(false)
+            }
+
+            const res2 = await Axios.get("/api/reports/all-completed-jobs&projects", {params: {
+                startDate: dateRange.startDate,
+                endDate: dateRange.endDate
+            }})
+            if (res2.data.jobs.data.length!==0) {
+                setPie2Total(res2.data.jobs.data.length)
+                setAccomplishedData({
+                    labels: res2.data.subtotal.map((data)=> data.type),
+                    datasets: [{
+                        data: res2.data.subtotal.map((data)=> data.count)
+                    }]
+                })
+                res2.data.subtotal.map((a)=> {
+                    if (a.type==="Project") {
+                        setAllAccomplishedProjectsData(a.data)
+                    }
+                    if (a.type==="Job") {
+                        setAllAccomplishedJobsData(a.data)
+                    }
+                })
+                setEmptyAccomplished(false)
+            }
+
+            const res3 = await Axios.get(`/api/reports/ongoing-projects`)
+            if (res3.data.total!==0) {
+                setOngoingData({
+                    labels: res3.data?.partial.map((data)=> data.type),
+                    datasets: [{
+                        data: res3.data?.partial.map((data)=> data.count)
+                    }]
+                })
+                setPie3Total(res3.data.total)
+                res3.data.partial.map((a)=> {
+                    if (a.type==="Project") {
+                        setAllOngoingProjectsData(a.data)
+                    }
+                    if (a.type==="Job") {
+                        setAllOngoingJobsData(a.data)
+                    }
+                })
+                setEmptyOngoing(false)
+            }
+            if (res3.data.total===0) {
+                setEmptyOngoing(true)
+            }
+          } catch (err) {
+            console.log(err)
+          }
+        }
+        getProjectReports()
+    }, [dateRange])
     
+    useEffect(() => {
+        const setEmptyData = async () => {
+            try {
+                if (requestData===[]) {
+                    setEmptyRequest(true)
+                }
+                if (accomplishedData===[]) {
+                    setEmptyAccomplished(true)
+                }
+            } catch(err) {
+                console.log(err)
+            }
+        }
+        setEmptyData()
+    }, [requestData, accomplishedData])
+
     return (
-        <>  
-            <div className="reports">
+        <div className="reports">
                 <div className="reportsTop">
                     <div className="centerContent">
-                        <h1>System Reports</h1>
+                        <p>System Reports</p>
                     </div>
                     <br />
                     <div className="sideContent">
-                        <div>
-                            <h4>Set Month and Year:</h4>
+                        <div className="leftContent">
                             <div>
                                 <select className="selectCategory" onChange={e => {
-                                    setSelectedMonth(e.target.value)}} 
-                                value={selectedMonth}>
-                                    {months.map((a)=> {
-                                        return <option className="selectedCategory" key={a}>{a}</option>
-                                    })}
+                                    setCurrentView(e.target.value)}} 
+                                value={currentView}>
+                                    <option>View Monthly Reports</option>
+                                    <option>View Annual Reports</option>
                                 </select>
                             </div>
+                            {currentView==="View Annual Reports" && (
+                            <div className="leftContent">
+                                <div>
+                                    <label>Set Year:</label>
+                                </div>
+                                <div>
+                                    <select className="selectCategory" onChange={e => {
+                                        setSelectedYear(e.target.value)
+                                    }} 
+                                    value={selectedYear}>
+                                        {years.map((a)=> {
+                                            return <option className="selectedCategory" key={a}>{a}</option>
+                                        })}
+                                    </select>
+                                </div>
+                            </div>
+                            )}
+                            {currentView==="View Monthly Reports" && (
                             <div>
-                                <select className="selectCategory" onChange={e => {
-                                    setSelectedYear(e.target.value)
-                                }} 
-                                value={selectedYear}>
-                                    {years.map((a)=> {
-                                        return <option className="selectedCategory" key={a}>{a}</option>
-                                    })}
-                                </select>
+                                <DateRangePickerComp setDateRange={setDateRange}/>
                             </div>
+                            )}
                         </div>
                         <div>
-                            <button onClick={handlePrint} className="btn btn-sm btn-primary">Print System Report</button>
-                            <button onClick={()=> navigate("/bug-reports")} className="btn btn-sm btn-primary">
+                            <button onClick={handlePrint} className="btn btn-outline-success allButtons">Print Report</button>
+                            <button onClick={()=> {
+                                if (viewData===true) {
+                                    setViewData(false)
+                                }
+                                if (viewData===false) {
+                                    setViewData(true)
+                                }
+                            }} className="btn btn-outline-success allButtons">
+                                {viewData===true ? "Hide Data" : "View Data"}
+                            </button>
+                            <button onClick={()=> navigate("/bug-reports")} className="btn btn-outline-success allButtons">
                                 View Bug Reports
                             </button>
                         </div>
                     </div>
                 </div>
                 <br />
+                {currentView==="View Monthly Reports" && (
                 <div className="toPrint" ref={componentRef} style={{width: '100%', height: '100%'}}>
                     <div>
-                        <h2>Monthly Report: {selectedMonth}, {selectedYear}</h2>
+                        <p>Monthly Report: {moment(dateRange.startDate).format("MM/DD/YY")} to {moment(dateRange.endDate).format("MM/DD/YY")}</p>
                     </div>
                     <br />
                     <div className="requests-grid">
                         <div className="reportContent">
-                            <h4>Requests </h4>
-                            <label>Reports throughout the month of {selectedMonth}, {selectedYear}</label>
-                            <br />
-
+                            <div className="reportContentTop">
+                                <label clasName="contentSubheading">Requests</label>
+                            </div>
                             {emptyRequest!==true ?
                                 <div style={{ width: 300 }}>
                                     <PieChart chartData={requestData} />
+                                    <br/>
+                                    <p><b>{pie1Total}</b> request recieved.</p>
                                 </div>
                             :<div className="pieChartFiller"><b>No data.</b></div>}
                         </div>
                         
                         <div className="reportContent">
-                            <h4>Accomplished Jobs & Projects</h4>
-                            <label>Reports throughout the month of {selectedMonth}, {selectedYear}</label>
-                            <br />
+                            <div className="reportContentTop">
+                                <label clasName="contentSubheading">Accomplished Jobs & Projects</label>
+                            </div>
                             {emptyAccomplished!==true ?
                                 <div style={{ width: 300 }}>
                                     <PieChart chartData={accomplishedData} />
+                                    <br/>
+                                    <p><b>{pie2Total}</b> accomplished jobs & projects.</p>
                                 </div>
                             :<div className="pieChartFiller"><b>No data.</b></div>}
                         </div>
 
                         <div className="reportContent">
-                            <h4>Ongoing Jobs & Projects </h4>
-                            <label>Reports throughout the month of {selectedMonth}, {selectedYear}</label>
-                            <br />
-
+                            <div className="reportContentTop">
+                                <label clasName="contentSubheading">Ongoing Jobs & Projects </label>
+                            </div>
                             {emptyOngoing!==true ?
                                 <div style={{ width: 300 }}>
                                     <PieChart chartData={ongoingData} />
+                                    <br/>
+                                    <p><b>{pie3Total}</b> ongoing jobs & projects.</p>
                                 </div>
                             :<div className="pieChartFiller"><b>No data.</b></div>}
                         </div>
                     </div>
-                    <br />
-                    <br />
+                    <br/>
+                    {viewData===true && (
+                    <div>
+                        <div className="horizontal_line"></div>
+                        <div>
+                            <div className="centerContent">
+                                <p className="contentSubheading"><b>Request Reports</b></p>
+                            </div>
+                            <div>
+                                <AllProjectsTable tableType={"Approved Requests"} allTableData={allApprovedRequestData}/>
+                            </div>
+                            <br />
+                            <div>
+                                <AllProjectsTable tableType={"Denied Requests"} allTableData={allDeniedRequestData}/>
+                            </div>
+                            <br />
+                            <div>
+                                <AllProjectsTable tableType={"Pending Requests"} allTableData={allPendingRequestData}/>
+                            </div>
+                        </div>
+                        <br/>
+                        <div className="horizontal_line"></div>
+                        <div>
+                            <div className="centerContent">
+                                <p className="contentSubheading"><b>Accomplished Data</b></p>
+                            </div>
+                            <div>
+                                <AllProjectsTable tableType={"Accomplished Jobs"} allTableData={allAccomplishedJobsData}/>
+                            </div>
+                            <br />
+                            <div>
+                                <AllProjectsTable tableType={"Accomplished Projects"} allTableData={allAccomplishedProjectsData}/>
+                            </div>
+                        </div>
+                        <br/>
+                        <div className="horizontal_line"></div>
+                        <div>
+                            <div className="centerContent">
+                                <p className="contentSubheading"><b>Ongoing Data</b></p>
+                            </div>
+                            <div>
+                                <AllProjectsTable tableType={"Ongoing Jobs"} allTableData={allOngoingJobsData}/>
+                            </div>
+                            <br />
+                            <div>
+                                <AllProjectsTable tableType={"Ongoing Projects"} allTableData={allOngoingProjectsData}/>
+                            </div>
+                        </div>
+                    </div>
+                    )}
+                </div>
+                )}
+                {currentView==="View Annual Reports" && (
+                <div className="toPrint" ref={componentRef} style={{width: '100%', height: '100%'}}>
                     <div>
                         <div>
-                            <h2>Annual Report: {selectedYear}</h2>
+                            <p>Annual Report of year {selectedYear}</p>
                         </div>
+                        <br />
                         <div className="annual-report-grid">
                             <div className="reportContentBar" style={{ width: 700 }}>
                                 <BarChart chartData={annualRequestData} />
@@ -415,6 +596,32 @@ function Reports() {
                                 <BarChart chartData={annualAccomplishedData} />
                             </div>
                         </div>
+                        <br />
+                    {viewData===true && (
+                    <div>
+                        <div className="horizontal_line"></div>
+                        <div>
+                            <div className="centerContent">
+                                <p className="contentSubheading"><b>Request Reports</b></p>
+                            </div>
+                            <div>
+                                <AllProjectsTable tableType={"Annual Requests"} allTableData={allAnnualRequestData}/>
+                            </div>
+                            <br />
+                            <div>
+                                <AllProjectsTable tableType={"Approved Requests"} allTableData={allAnnualApprovedData}/>
+                            </div>
+                            <br />
+                            <div>
+                                <AllProjectsTable tableType={"Denied Requests"} allTableData={allAnnualDeniedData}/>
+                            </div>
+                            <br/>
+                            <div>
+                                <AllProjectsTable tableType={"Accomplished Jobs & Projects"} allTableData={allAnnualAccomplishedData}/>
+                            </div>
+                        </div>
+                    </div>
+                    )}
                     </div>
                     <br />
                     <br />
@@ -444,8 +651,8 @@ function Reports() {
                         </div>
                     </div>
                 </div>
-            </div>
-        </>
+                )}
+        </div> 
     )
 }
 

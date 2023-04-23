@@ -26,6 +26,7 @@ const gallery = require("./models/gallery")
 const notifications = require("./models/notifications")
 const answers = require("./models/answers")
 const bugreports = require("./models/bugreports")
+const logs = require("./models/logs")
 
 fse.ensureDirSync(path.join("public", "uploaded-photos"))
 
@@ -247,7 +248,8 @@ app.get("/api/hiring-search", async (req, res)=> {
       {"location.region": new RegExp(location, 'i')}, 
       {"location.city": new RegExp(location, 'i')}]},
 
-      {$and: [{sallary: {$gte: range.b}}, {sallary: {$lte: range.c}}]}
+      {$and: [{sallary: {$gte: range.b}}, {sallary: {$lte: range.c}}]},
+      {expirationdate: {$gte: Date.now()}}
       ]})
 
       .collation({locale:'en',strength: 2})
@@ -326,6 +328,7 @@ app.get("/api/pending-projects/:type", auth, async (req, res) => {
     try {
       const allProjects = await projects.find({type: {$in: ["Job Request", "Project Request"]}, requeststatus: "Pending"})
       .populate({path:"employer", select:["firstname", "middlename", "lastname", "company"]})
+      .sort({creationdate: -1})
       res.status(200).json(allProjects)
     } catch (err) {
       res.status(400).json(err)
@@ -350,7 +353,6 @@ app.get("/api/denied-projects/:type", auth, async (req, res) => {
 })
 
 app.get("/api/all-approved-projects/", auth, async (req, res) => {
-
   const query = req.query.query
   const location = req.query.location 
   const sallary = req.query.sallary
@@ -437,7 +439,7 @@ app.get("/api/all-approved-projects/", auth, async (req, res) => {
   }
   let range = sallaryRange(sallary)
 
-  if(req.query.usertype==="Admin") {
+  if(req.query.usertype==="Admin" || req.query.usertype==="Super Administrator") {
     try {
       const allResults = (await projects.find({$and: [
       {skillrequired: new RegExp(query, 'i'), 
@@ -453,13 +455,22 @@ app.get("/api/all-approved-projects/", auth, async (req, res) => {
 
       .collation({locale:'en',strength: 2})
       .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
-      .populate({path:"candidate", select:["firstname", "middlename", "lastname"]})
+      .populate({path:"employeelist.employeeid", select:["firstname", "middlename", "lastname"]})
       .sort({[sort.b]: [sort.c]}))
 
       res.status(200).json(allResults)
     } catch (err) {
       res.status(500).json(err)
     }
+  }
+})
+
+app.post("/api/deactivate-account/:userid", auth, async (req, res) => {
+  try {
+    const deactivate = await accounts.findByIdAndUpdate({ _id: new ObjectId(req.params.userid) }, {skill: []})
+    res.status(200).json(deactivate)
+  }catch (err) {
+    res.status(500).json(err)
   }
 })
 
@@ -495,7 +506,26 @@ app.post("/api/create-account/:type", upload.single("photo"), auth, registerClea
         password: req.cleanData.password,
         photo: req.cleanData.photo,
         type: req.cleanData.type,
-        sex: req.cleanData.sex
+        sex: req.cleanData.sex,
+        phone: req.body.phone,
+        citizenship: req.body.citizenship,
+        degree: {
+          school: req.body.school,
+          course: req.body.course,
+          degreetitle: req.body.degree
+        },
+        companyinfo: {
+          companyname: "",
+          establishdate: null,
+          details: "",
+          logo: null,
+          companysize: 0,
+          location: {
+              region: "", 
+              province: "",
+              city: ""
+          }
+        }
       }
       await accounts.create(obj, (err, item) => {
         if (err) {
@@ -520,7 +550,26 @@ app.post("/api/create-account/:type", upload.single("photo"), auth, registerClea
         password: req.cleanData.password,
         photo: req.cleanData.photo,
         type: req.cleanData.type,
-        sex: req.cleanData.sex
+        sex: req.cleanData.sex,
+        phone: req.body.phone,
+        citizenship: req.body.citizenship,
+        degree: {
+          school: req.body.school,
+          course: req.body.course,
+          degreetitle: req.body.degree
+        },
+        companyinfo: {
+          companyname: "",
+          establishdate: null,
+          details: "",
+          logo: null,
+          companysize: 0,
+          location: {
+              region: "", 
+              province: "",
+              city: ""
+          }
+        }
       }
       await accounts.create(obj)
       res.status(200).send(true)
@@ -589,7 +638,8 @@ app.get("/profile/user", auth, async (req, res) => {
     currentprojects: user.currentprojects,
     ratings: user.ratings,
     averagerating: user.averagerating,
-    lastactive: user.lastactive
+    lastactive: user.lastactive,
+    companyinfo: user.companyinfo
   });
 })
 
@@ -637,13 +687,16 @@ app.delete("/account/:id", async (req, res) => {
 //Project---------------------------------------------------------------------------------------------
 app.post("/create-project", upload.single("photo"), projectCleanup, async (req, res) => {  
   if (req.file) {
-
     const expectedSignature = cloudinary.utils.api_sign_request({ public_id: req.body.public_id, version: req.body.version }, cloudinaryConfig.api_secret)
     if (expectedSignature === req.body.signature) {
       req.cleanData.image = req.body.image
     }
-
     req.cleanData.photo = req.file.filename
+    let minimumreqList = []
+    for (let i = 0; i <req.body.minimumreq.length; i++){
+      minimumreqList = minimumreqList.concat({what:req.body.minimumreq[i], note: req.body.minimumreq[i]==="Others" ? req.body.reqspecified : ""})
+    }
+
     const obj = {
       title: req.cleanData.title,
       type: req.cleanData.type,
@@ -663,10 +716,7 @@ app.post("/create-project", upload.single("photo"), projectCleanup, async (req, 
       },
       others: req.cleanData.others,
       image: req.cleanData.image,
-      minimumreq: {
-        what: req.body.minimumreq,
-        note: req.body.reqspecified ? req.body.reqspecified : "",
-      },
+      minimumreq: minimumreqList,
       questions: [req.body.question1, req.body.question2, req.body.question3, req.body.question4, req.body.question5, req.body.question6, req.body.question7, req.body.question8, req.body.question9, req.body.question10 ]
     }
     projects.create(obj, (err, item) => {
@@ -678,6 +728,11 @@ app.post("/create-project", upload.single("photo"), projectCleanup, async (req, 
       }
     })
   } else {
+    let minimumreqList = []
+    for (let i = 0; i <req.body.minimumreq.length; i++){
+      minimumreqList = minimumreqList.concat({what:req.body.minimumreq[i], note: req.body.minimumreq[i]==="Others" ? req.body.reqspecified : ""})
+    }
+
     const obj = {
       title: req.cleanData.title,
       type: req.cleanData.type,
@@ -697,10 +752,7 @@ app.post("/create-project", upload.single("photo"), projectCleanup, async (req, 
       },
       others: req.cleanData.others,
       image: req.body.image,
-      minimumreq: {
-        what: req.body.minimumreq,
-        note: req.body.reqspecified ? req.body.reqspecified : "",
-      },
+      minimumreq: minimumreqList,
       questions: [req.body.question1, req.body.question2, req.body.question3, req.body.question4, req.body.question5, req.body.question6, req.body.question7, req.body.question8, req.body.question9, req.body.question10 ]
     }
     const proj = await projects.create(obj)
@@ -709,14 +761,52 @@ app.post("/create-project", upload.single("photo"), projectCleanup, async (req, 
 })
 
 app.post("/update-project", upload.single("photo"), requestCleanup, async (req, res) => {
+  function addDays(date, days) {
+    var result = new Date(date)
+    result.setDate(result.getDate() + days)
+    return result
+  }
   req.cleanData.location = {
     region: req.body.region,
     province: req.body.province,
     city: req.body.city
   } 
+  let expirydate = addDays(req.body.approvaldate, 30)
+
+  req.cleanData.expirationdate = expirydate
   try {
     const request = await projects.findByIdAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: req.cleanData })
     res.status(200).json(request)
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+app.get("/api/all-projects-expiry/:userid", auth, async (req, res) => {
+  try {
+    const allProjects = await projects.find({
+      employer: new ObjectId(req.params.userid),
+      type: ["Job", "Project"],
+      status: "Hiring", 
+      expirationdate: {$lt: Date.now()-5}
+    })
+    res.status(200).json(allProjects)
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+app.get("/api/check-existing-notif/:senderid/:action/:type/:subject", async (req, res) => {
+  try {
+    const data = await notifications.find({
+      senderId: new ObjectId(req.params.senderid), 
+      recieverId: new ObjectId(req.params.senderid), 
+      type: req.params.type,
+      subject: req.params.subject
+    })
+    .populate({path:"senderId", select:["firstname", "middlename", "lastname", "image"]})
+    .sort({createdAt: -1})
+    res.status(200).json(data)
   } catch (err) {
     res.status(500).json(err)
   }
@@ -726,12 +816,14 @@ app.get("/api/projects/:id/:tab", async (req, res) => {
   try {
     if (typeof req.params.id != "string") req.params.id = ""
     const allProjects = await projects.find({$or: [{employer: new ObjectId(req.params.id)},
-      {tempfree: req.params.id}, 
+      {tempcandidate: {$elemMatch: {applicantid: req.params.id}}},
+      {employeelist: {$elemMatch: {employeeid: req.params.id}}},
       {applicants: {$elemMatch: {applicantid: req.params.id}}}], 
       type: ["Job", "Project"], 
       status: req.params.tab})
       .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
-      .populate({path:"candidate", select:["firstname", "middlename", "lastname"]})
+      .populate({path:"tempcandidate", select:["firstname", "middlename", "lastname"]})
+      .populate({path:"employeelist", select:["firstname", "middlename", "lastname"]})
       .sort({approvaldate: -1})
     res.status(200).json(allProjects)
   } catch (err) {
@@ -763,10 +855,11 @@ app.get("/api/pending-requests/:id/:tab", async (req, res) => {
 app.get("/api/search-project/:projectid", async (req, res) => {
     try {
       const allProjects = await projects.findById({_id: req.params.projectid})
-      .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
-      .populate({path:"candidate", select:["firstname", "middlename", "lastname"]})
-      .populate({path:"notes.notesender", select:["firstname", "middlename", "lastname", "photo"]})
-      .populate({path:"applicants.applicantid", select:["firstname", "middlename", "lastname", "photo"]})
+      .populate({path:"employer", select:["firstname", "middlename", "lastname", "companyinfo"]})
+      .populate({path:"notes.notesender", select:["firstname", "middlename", "lastname", "image"]})
+      .populate({path:"applicants.applicantid", select:["firstname", "middlename", "lastname", "image"]})
+      .populate({path:"tempcandidate.applicantid", select:["firstname", "middlename", "lastname", "image"]})
+      .populate({path:"employeelist.employeeid", select:["firstname", "middlename", "lastname", "image"]})
       res.status(200).json(allProjects)
     }catch (err) {
       res.status(500).json(err)
@@ -777,7 +870,7 @@ app.post("/api/add-candidate/:projectid/:candidate", async (req, res) =>{
   const projectid = req.params.projectid
   const candidateid = req.params.candidate
   try {
-    const addCandidate = await projects.findByIdAndUpdate({_id: projectid}, {tempfree: candidateid})
+    const addCandidate = await projects.findByIdAndUpdate({_id: projectid}, {$addToSet: {tempcandidate: {applicantid: candidateid, employmentstatus: "Hiring"}}})
     res.status(200).json(addCandidate)
   }catch (err) {
     res.status(500).json(err)
@@ -786,13 +879,19 @@ app.post("/api/add-candidate/:projectid/:candidate", async (req, res) =>{
 
 app.post("/api/update-project/accepted/:projectid/:candidate/:toHire", async (req, res) => {
   try {
-    const updateAccepted = await projects.findByIdAndUpdate({_id: req.params.projectid}, 
-      {accepted: "Yes", 
-      tempfree: req.params.toHire==="Yes" ? req.params.candidate : "",
-      candidate: req.params.candidate, 
-      acceptdate: Date.now(),
-      status: "Ongoing"})
-    await accounts.findByIdAndUpdate({_id: req.params.candidate}, {$addToSet: {currentprojects: req.params.projectid}})
+    let updateAccepted
+    const checkSlots = await projects.findById({_id: req.params.projectid})
+    if (checkSlots?.slots!==0) {
+      updateAccepted = await projects.findByIdAndUpdate({_id: req.params.projectid}, 
+        {$addToSet: {employeelist: {employeeid: req.params.candidate, employmentstatus: "Ongoing", beganAt: Date.now()}},
+        $pull: {tempcandidate: {applicantid: req.params.candidate}, applicants: {applicantid: req.params.candidate}},
+        $inc: {slots: -1}
+      })
+      if (updateAccepted.slots===1) {
+        await projects.findByIdAndUpdate({_id: req.params.projectid}, {status: "Ongoing"})
+      }
+      await accounts.findByIdAndUpdate({_id: req.params.candidate}, {$addToSet: {currentprojects: req.params.projectid}})
+    }
     res.status(200).json(updateAccepted)
   } catch (err) {
     res.status(500).json(err)
@@ -907,14 +1006,33 @@ app.post("/api/project-update/edit", upload.single("photo"), async (req, res) =>
 })
 
 app.post("/api/end-project/:projectid", async (req, res) => {
-  const projectid = req.params.projectid
-  const date = Date.now()
   const obj = {
     status: "Concluded",
-    completiondate: date
+    completiondate: Date.now()
   }
   try {
-    const info = await projects.findOneAndUpdate({ _id: new ObjectId(projectid)}, { $set: obj  } )
+    const changeStatus = await projects.findOneAndUpdate({ _id: new ObjectId(req.params.projectid)}, { $set: obj  } )
+    const info = await projects.findOneAndUpdate(
+      { _id: new ObjectId(req.params.projectid)},
+      { $set: { "employeelist.$[haha].completiondate": Date.now(), "employeelist.$[haha].employmentstatus": "Concluded"} },
+      { arrayFilters: [ { "haha.employmentstatus":  "Ongoing" } ]}
+    )
+    res.status(200).json(info)
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+app.post("/api/end-contract/:projectid/:employeeid", async (req, res) => {
+  try {
+    const info = await projects.findOneAndUpdate(
+      { _id: new ObjectId(req.params.projectid)},
+      { $set: { "employeelist.$[haha].completiondate": Date.now(), "employeelist.$[haha].employmentstatus": "Concluded"} },
+      { arrayFilters: [ { "haha.employeeid":  req.params.employeeid } ]}
+    )
+    if (info.employeelist.length===1) {
+      await projects.findOneAndUpdate({ _id: new ObjectId(req.params.projectid) }, {$set: {status: "Concluded"}})
+    }
     res.status(200).json(info)
   } catch (err) {
     res.status(500).json(err)
@@ -1063,11 +1181,7 @@ app.get("/api/employee-search", async (req, res)=> {
     }
   }
   /* Capitalize the first letter then add the remaining characters
-  function haha(a) {
-    const tag = a.charAt(0).toUpperCase()+ a.slice(1)
-    return tag
-  }
-  const query = haha(rawquery)*/
+  myStr.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ')*/
 })
 
 app.get("/api/categories", async (req, res)=> {
@@ -1087,6 +1201,49 @@ app.get("/api/categories/tags/", async (req, res)=> {
   }catch(err){
     res.status(500).json(err)
   }
+})
+
+app.post("/api/add-tag/:categoryid/:tag", async (req, res)=>{
+  const tag = req.params.tag.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ')
+  
+  let check = true
+  const checkTag = await categories.findById({_id: req.params.categoryid})
+  checkTag.tags?.map((t)=>{
+    t===tag ? check=false : null
+  })
+  if (check===false) {
+    res.status(200).json("The Tag already exists.")
+  } else if (check===true) {
+    try{
+      await categories.findByIdAndUpdate({_id: req.params.categoryid}, {$addToSet: {tags: tag}})
+      await categories.findOneAndUpdate({_id: req.params.categoryid}, {$inc: { tagscount: 1 }})
+      res.status(200).json("Success!")
+    }catch(err){
+      res.status(500).json(err)
+    }
+  }
+})
+
+app.post("/api/remove-tag/:categoryid/:tag", async (req, res)=>{
+  const tag = req.params.tag.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ')
+
+  let check = false
+  const checkTag = await categories.findById({_id: req.params.categoryid})
+  checkTag.tags?.map((t)=>{
+    t===tag ? check=true : null
+  })
+
+  if (check===true) {
+    try{
+      await categories.findByIdAndUpdate({_id: req.params.categoryid}, {$pull: {tags: tag}})
+      await categories.findOneAndUpdate({_id: req.params.categoryid}, {$inc: { tagscount: -1 }})
+      res.status(200).json(`Successfully removed ${tag}!`)
+    }catch(err){
+      res.status(500).json(err)
+    }
+  } else if (check===false) {
+    res.status(200).json("The Tag does not exists.")
+  } 
 })
 
 //Adding Categories and Tags---------------------------------------------------------------------------------------------
@@ -1157,27 +1314,7 @@ app.get("/api/search-profile/:user", async (req, res) => {
   const userid = req.params.user
   try {
     const user = await accounts.findById(userid).populate({path:"currentprojects", select:["type", "title", "duration", "acceptdate", "status"]})
-    if (user) {
-      res.status(200).json({
-        id: user._id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        middlename: user.middlename,
-        age: user.age,
-        address: user.address,
-        skill: user.skill,
-        about: user.about,
-        photo: user.photo,
-        image: user.image,
-        type: user.type,
-        currentprojects: user.currentprojects,
-        ratings: user.ratings,
-        averagerating: user.averagerating,
-      })
-    }
-    if (!user) {
-      res.status(500).json(err)
-    }
+    res.status(200).json(user)
   }catch (err) {
     res.status(500).json(err)
   }
@@ -1206,13 +1343,12 @@ app.post("/api/reviews/:projectid/:candidate", upload.single("photo"), async (re
           console.log(err)
         }
         else {
-          //res.status(200).json(item)
           console.log("Ok")
         }
       })
+      const removeProject = await accounts.findByIdAndUpdate({_id: new ObjectId(req.params.candidate)}, {$pull: {currentprojects: req.params.projectid}})
     } catch (err) {
-      //res.status(500).json(err)
-      console.log(err)
+      res.status(500).json(err)
     }
   } else {
     // if they are not uploading a photo
@@ -1231,10 +1367,10 @@ app.post("/api/reviews/:projectid/:candidate", upload.single("photo"), async (re
           console.log(err)
         }
         else {
-          //res.status(200).json(item)
           console.log("Ok")
         }
       }) 
+      const removeProject = await accounts.findByIdAndUpdate({_id: new ObjectId(req.params.candidate)}, {$pull: {currentprojects: req.params.projectid}})
     } catch (err) {
       res.status(500).json(err)
     }
@@ -1295,10 +1431,10 @@ app.get("/api/all-reviews/:candidate",  async (req, res) => {
 
 //Gallery---------------------------------------------------------------------------------------------
 app.post("/api/gallery/upload-photo/:userId", upload.single("photo"), async (req, res) => {
+  console.log(req.body)
   if (req.file) {
     const obj = {
       userId: req.body.userId,
-      username: req.body.username,
       title: req.body.title,
       description: req.body.description,
     }
@@ -1505,47 +1641,6 @@ app.post("/api/account-settings/change-password/:userid/:password", async (req, 
 })
 
 //Reports---------------------------------------------------------------------------------------------
-app.get("/api/reports/request-reports/:month/:year", async (req, res) => {
-  let monthNum = Number(req.params.month)
-  let yearNum = Number(req.params.year)
-  const appCount = await projects.aggregate([
-    {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
-    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {requeststatus: "Approved"}]}}
-  ])
-  const denCount = await projects.aggregate([
-    {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
-    {$match: {$and: [ {month: monthNum}, {year: yearNum},  {requeststatus: "Denied"}]}}
-  ])
-  const penCount = await projects.aggregate([
-    {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
-    {$match: {$and: [ {month: monthNum}, {year: yearNum},  {requeststatus: "Pending"}]}}
-  ])
-  const overall = appCount.length + denCount.length + penCount.length
-  const requestReport = [
-    {
-      id: 1,
-      type: "Approved",
-      count: appCount.length
-    },
-    {
-      id: 2,
-      type: "Denied",
-      count: denCount.length
-    },
-    {
-      id: 3,
-      type: "Pending",
-      count: penCount.length
-    }
-  ]
-
-  const result = {
-    total: overall,
-    partial: requestReport
-  }
-  res.status(200).send(result)
-})
-
 app.get("/api/reports/account-reports/:month/:year", async (req, res) => {
   let monthNum = Number(req.params.month)
   let yearNum = Number(req.params.year)
@@ -1590,50 +1685,20 @@ app.get("/api/reports/ongoing-projects", async (req, res) => {
     {
       id: 1,
       type: "Job",
-      count: data1.length
+      count: data1.length,
+      data: data1
     },
     {
       id: 2,
       type: "Project",
-      count: data2.length
+      count: data2.length,
+      data: data2
     }
   ]
 
   const result = {
     total: overall,
     partial: ongoingReport
-  }
-  res.status(200).send(result)
-})
-
-app.get("/api/reports/accomplished-reports/:month/:year", async (req, res) => {
-  let monthNum = Number(req.params.month)
-  let yearNum = Number(req.params.year)
-  const jobCount = await projects.aggregate([
-    {$addFields: { "month" : {$month: '$completiondate'}, "year": { $year: '$completiondate' }}},
-    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {type: "Job"}]}}
-  ])
-  const projectCount = await projects.aggregate([
-    {$addFields: { "month" : {$month: '$completiondate'}, "year": { $year: '$completiondate' }}},
-    {$match: {$and: [ {month: monthNum}, {year: yearNum}, {type: "Project"}]}}
-  ])
-  const overall = jobCount.length + projectCount.length
-  const accomplishedReport = [
-    {
-      id: 1,
-      type: "Job",
-      count: jobCount.length
-    },
-    {
-      id: 2,
-      type: "Project",
-      count: projectCount.length
-    }
-  ]
-
-  const result = {
-    total: overall,
-    partial: accomplishedReport
   }
   res.status(200).send(result)
 })
@@ -1653,25 +1718,37 @@ app.get("/api/reports/annual-reports/:month/:year", async (req, res) => {
       {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
       {$match: {$and: [ {month: i}, {year: yearNum}, {$or: [{type: "Job Request"}, {type: "Project Request"}, {type: "Job"}, {type: "Project"}]} ]}}
     ])
-    allRequest = allRequest.concat(requestCount.length)
+    allRequest = allRequest.concat({
+      count: requestCount.length,
+      data: requestCount
+    })
     
     approvedCount = await projects.aggregate([
       {$addFields: { "month" : {$month: '$approvaldate'}, "year": { $year: '$approvaldate' }}},
       {$match: {$and: [ {month: i}, {year: yearNum}, {$or :[{type: "Job"}, {type: "Project"}]} ]}}
     ])
-    allApproved = allApproved.concat(approvedCount.length)
+    allApproved = allApproved.concat({
+      count: approvedCount.length,
+      data: approvedCount
+    })
 
     deniedCount = await projects.aggregate([
       {$addFields: { "month" : {$month: '$creationdate'}, "year": { $year: '$creationdate' }}},
       {$match: {$and: [ {month: i}, {year: yearNum}, {$or: [{type: "Job Request"}, {type: "Project Request"}]} ]}}
     ])
-    allDenied = allDenied.concat(deniedCount.length)
+    allDenied = allDenied.concat({
+      count: deniedCount.length, 
+      data: deniedCount
+    })
 
     accomplishedCount = await projects.aggregate([
       {$addFields: { "month" : {$month: '$completiondate'}, "year": { $year: '$completiondate' }}},
       {$match: {$and: [ {month: i}, {year: yearNum}, {$or: [{type: "Job"}, {type: "Project"}]} ]}}
     ])
-    allAccomplished = allAccomplished.concat(accomplishedCount.length)
+    allAccomplished = allAccomplished.concat({
+      count: accomplishedCount.length,
+      data: accomplishedCount
+    })
   }
 
   let requestReport = []
@@ -1682,19 +1759,23 @@ app.get("/api/reports/annual-reports/:month/:year", async (req, res) => {
   for (i=0; i<12; i++){
     requestReport = requestReport.concat({
       id: i+1,
-      count: allRequest[i]
+      count: allRequest[i].count,
+      data: allRequest[i].data
     })
     approvedReport = approvedReport.concat({
       id: i+1,
-      count: allApproved[i]
+      count: allApproved[i].count,
+      data: allApproved[i].data
     })
     deniedReport = deniedReport.concat({
       id: i+1,
-      count: allDenied[i]
+      count: allDenied[i].count,
+      data: allDenied[i].data
     })
     accomplishedReport = accomplishedReport.concat({
       id: i+1,
-      count: allAccomplished[i]
+      count: allAccomplished[i].count,
+      data: allAccomplished[i].data
     })
   }
   
@@ -1712,6 +1793,84 @@ app.get("/api/reports/all-projects", async (req, res) => {
   res.status(200).send(data)
 })
 
+app.get("/api/reports/all-requests", async (req, res) => {
+  const startDate = req.query.startDate
+  const endDate = req.query.endDate
+  let data
+  try {
+    const allRequests = await projects.find({creationdate: {$gte: startDate, $lt: endDate}})
+    .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
+    .populate({path:"employeelist.employeeid", select:["firstname", "middlename", "lastname", "image"]})
+
+    const approvedRequests = allRequests?.filter((data) => data.requeststatus === "Approved")
+    const deniedRequests = allRequests?.filter((data) => data.requeststatus === "Denied")
+    const pendingRequests = allRequests?.filter((data) => data.requeststatus === "Pending")
+    data = {
+      requests: {
+        data: allRequests,
+      },
+      subtotal: [
+        {
+          id: 1,
+          type: "Approved",
+          count: approvedRequests.length,
+          data: approvedRequests
+        },
+        {
+          id: 2,
+          type: "Denied",
+          count: deniedRequests.length,
+          data: deniedRequests
+        },
+        {
+          id: 3,
+          type: "Pending",
+          count: pendingRequests.length,
+          data: pendingRequests
+        }
+      ]
+    }
+    res.status(200).send(data)
+  } catch(err) {
+    console.log(err)
+  }
+})
+
+app.get("/api/reports/all-completed-jobs&projects", async (req, res) => {
+  const startDate = req.query.startDate
+  const endDate = req.query.endDate
+  let data
+  try {
+    const allCompleted = await projects.find({completiondate: {
+      $gte: startDate,
+      $lt: endDate 
+    }})
+    const allProjects = allCompleted?.filter((data) => data.type === "Project")
+    const allJobs = allCompleted?.filter((data) => data.type === "Job")
+    data = {
+      jobs: {
+        data: allCompleted,
+      },
+      subtotal: [
+        {
+          id: 1,
+          type: "Project",
+          count: allProjects.length,
+          data: allProjects
+        },
+        {
+          id: 2,
+          type: "Job",
+          count: allJobs.length,
+          data: allJobs
+        }
+      ]
+    }
+    res.status(200).send(data)
+  } catch(err) {
+    console.log(err)
+  }
+})
 //Answers---------------------------------------------------------------------------------------------
 app.post("/api/answers/:userid/:projectid", async (req, res) => {
   obj = {
@@ -1762,6 +1921,80 @@ app.get("/api/all-bug-report",  async (req, res) => {
     res.status(200).send(data)
   } catch (err) {
     res.status(400).send(err)
+  }
+})
+
+//Company---------------------------------------------------------------------------------------------
+app.post("/api/upload/company-details", upload.single("photo"), async (req, res) => {
+  if (req.file) {
+    // if they are uploading a new photo
+    obj = {
+      companyname: req.body.companyname,
+      logo: undefined,
+      companysize: req.body.companysize,
+      details: req.body.companyinfo,
+      establishdate: req.body.establishdate,
+      location: {
+        region: req.body.region, 
+        province: req.body.province,
+        city: req.body.city
+      }
+    }
+    const expectedSignature = cloudinary.utils.api_sign_request({ public_id: req.body.public_id, version: req.body.version }, cloudinaryConfig.api_secret)
+    if (expectedSignature === req.body.signature) {
+      obj.logo = req.body.image
+    }
+
+    const addCompany = await accounts.findOneAndUpdate({ _id: new ObjectId(req.body.employerid) }, { $set: {companyinfo: obj}})
+    if (addCompany.companyinfo.logo) {
+      cloudinary.uploader.destroy(addCompany.companyinfo.logo)
+    }
+    res.status(200).send(addCompany)
+  } else {
+    // if they are not uploading a new photo
+    obj = {
+      companyname: req.body.companyname,
+      logo: "",
+      companysize: req.body.companysize,
+      details: req.body.companyinfo,
+      establishdate: req.body.establishdate,
+      location: {
+        region: req.body.region, 
+        province: req.body.province,
+        city: req.body.city
+      }
+    }
+    const addCompany = await accounts.findOneAndUpdate({ _id: new ObjectId(req.body.employerid) }, { $set: {companyinfo: obj}})
+    res.status(200).send(addCompany)
+  }
+})
+
+//Admin Logs---------------------------------------------------------------------------------------------
+app.post("/api/admin-logs/:adminId/:userId/:projectId/:type", async (req, res)=> {
+  const obj = {
+    adminId: req.params.adminId,
+    userId: req.params.userId,
+    projectId: req.params.projectId,
+    type: req.params.type
+  }
+  try {
+    const log = await logs.create(obj)
+    res.status(200).json(log)
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+app.get("/api/all-logs", async (req, res)=> {
+  try {
+    const allLogs = await logs.find()
+    .populate({path:"adminId", select:["firstname", "middlename", "lastname"]})
+    .populate({path:"userId", select:["firstname", "middlename", "lastname"]})
+    .populate({path:"projectId", select:["title"]})
+    .sort({createdAt: -1})
+    res.status(200).json(allLogs)
+  } catch (err) {
+    res.status(500).json(err)
   }
 })
 

@@ -8,7 +8,7 @@ function Home(){
         <div className="homes dashboard">
             <div className="infoCard">
                 <div className="centerContent">
-                    <h2 className="infoCardTitle"><b>Looking for the best applicant for your job opening?</b></h2>
+                    <p className="infoCardTitle"><b>Looking for the best applicant for your job opening?</b></p>
                 </div>                
                 <div className="centerContent topButtons" onClick={()=>{navigate("/search")}}>
                     <img className="infoCardPhoto" src={"/WebPhoto/Employee1.png"} alt={"Employee photo"} />
@@ -19,7 +19,7 @@ function Home(){
             </div>
             <div className="infoCard">
                 <div className="centerContent">
-                    <h2 className="infoCardTitle"><b>Start your professional career with us!</b></h2>
+                    <p className="infoCardTitle"><b>Start your professional career with us!</b></p>
                 </div>              
                 <div className="centerContent topButtons" onClick={()=>{navigate("/hiring")}}>
                     <img className="infoCardPhoto" src={"/WebPhoto/Hiring1.webp"} alt={"Hiring photo"} />

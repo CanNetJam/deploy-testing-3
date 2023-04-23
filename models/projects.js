@@ -44,19 +44,10 @@ const projectSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    photo: {
-        type: String,
-    },
     image: {
         type: String,
     },
     employer: { 
-        type: mongoose.Schema.Types.ObjectId, ref: "accounts",
-    },
-    tempfree: {
-        type: String,
-    },
-    candidate: { 
         type: mongoose.Schema.Types.ObjectId, ref: "accounts",
     },
     slots: {
@@ -66,24 +57,20 @@ const projectSchema = new mongoose.Schema({
     tempcandidate: [{
         applicantid: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
         employmentstatus: {type: String},
-        accepted: { 
-            type: String,
-            default: "No",
-        },
+        hiredAt: {
+            type: Date,
+            immutable: true,
+            default: () => Date.now(),
+        }
     }],
-    candidatelist: [{
-        applicantid: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
+    employeelist: [{
+        employeeid: { type: mongoose.Schema.Types.ObjectId, ref: "accounts" },
         employmentstatus: {type: String},
-        acceptedAt: {type: Date},
-        accepted: { 
-            type: String,
-            default: "No",
-        },
+        beganAt: {type: Date},
+        completiondate: {
+            type: Date,
+        }
     }],
-    accepted: { 
-        type: String,
-        default: "No",
-    },
     gallery: {
         photo: {type: String}, 
         description: {type:String}
@@ -100,9 +87,6 @@ const projectSchema = new mongoose.Schema({
     approvaldate: {
         type: Date,
     },
-    acceptdate: {
-        type: Date,
-    },
     completiondate: {
         type: Date,
     },
@@ -113,13 +97,16 @@ const projectSchema = new mongoose.Schema({
     others:  {
         type: String,
     },
-    minimumreq:  {
+    minimumreq: [{
         what: {type: String},
         note: {type: String}
-    },
+    }],
     questions: [String],
     note: {
         type: String,
+    },
+    expirationdate: {
+        type: Date,
     }
 })
 

@@ -23,16 +23,16 @@ function MyRequests() {
 
     return (
         <div className="projectRequest">
-            <div className="projectRequestTop">
-                <h2>Requests ({tab})</h2>
+            <div className="projectRequestTop contentTitle">
+                <label><b>Requests</b> (<i>{tab}</i>)</label>
                 <div className="projectRequestBtn">
                     <div>
-                        <button className="btn btn-sm btn-primary" onClick={()=>setTab("Pending")}>
+                        <button className="btn btn-outline-success allButtons" onClick={()=>setTab("Pending")}>
                             Pending
                         </button>
                     </div>
                     <div>
-                        <button className="btn btn-sm btn-primary" onClick={()=>setTab("Denied")}>
+                        <button className="btn btn-outline-success allButtons" onClick={()=>setTab("Denied")}>
                             Denied
                         </button>
                     </div>
@@ -41,23 +41,23 @@ function MyRequests() {
             <div className="projectRequestBot">
                 {requests[0] ? 
                     <div className="projects-grid">
-                        <label>My {tab} Requests: </label>
                         {requests.map((a)=> {
                             return (
-                                <div className="card" key={idPlusKey(a._id, userData.user.id)}>
-                                    <div className="our-project-card-top">
-                                        <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.image}.jpg` : "/fallback.png"} className="card-img-top" alt={`${a.company} named ${a.title}`}></img>
+                                <div className="projectListCard" key={idPlusKey(a._id, userData.user.id)}>
+                                    <div className="projectListPhoto">
+                                        <img className="projectListImage" src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${a.image}.jpg` : "/fallback.png"} alt={`${a.company} named ${a.title}`}></img>
                                     </div>
-                                    <div className="card-body">
-                                        <h3><b>Type:</b> {a.type}</h3>
-                                        <h3><b>Status:</b> {a.requeststatus}</h3>
-                                        <h3>Title: {a.title}</h3>
-                                        <p className="text-muted small">Company: {a.company}</p>
-                                        <p className="text-muted small">Skill Required: {a.skillrequired}</p>
-                                        <p className="text-muted small">Description: {a.description}</p>
+                                    <div className="projectListBot">
+                                        <p>Status: <b>{a.requeststatus}</b><br/>
+                                        {a.type}: {a.title} (<i>{a.employmenttype}</i>)<br/>
+                                        Company: {a.company}<br/>
+                                        Skill Required: {a.skillrequired}<br/>
+                                        Description: {a.description}</p>
+
                                         {a.requeststatus==="Denied" ? 
-                                            <p className="text-muted small">Disapproval reason: {a.note ? a.note : <i>Not Specified.</i>}</p>
+                                            <p>Disapproval reason: {a.note ? <b>{a.note}</b> : <i>Not Specified.</i>}</p>
                                         :<></>}
+
                                     </div>
                                 </div>
                             )

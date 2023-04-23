@@ -46,6 +46,18 @@ const userSchema = new mongoose.Schema({
     },
     company: String,
     position: String,
+    companyinfo: {
+        companyname: String,
+        establishdate: Number,
+        details: String,
+        logo: String,
+        companysize: Number,
+        location: {
+            region: {type: String}, 
+            province: {type:String},
+            city: {type:String}
+        }
+    },
     currentprojects: [
         { type: mongoose.Schema.Types.ObjectId, ref: "projects" }
     ],
@@ -53,7 +65,14 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: () => Date.now(),
     },
-})
+    phone: Number,
+    degree: {
+        school: String,
+        course: String,
+        degreetitle: String
+    },
+    citizenship: String,
+}, { timestamps: true })
 
 module.exports = mongoose.model("accounts", userSchema)
 

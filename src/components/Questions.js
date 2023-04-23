@@ -1,7 +1,8 @@
 import React, {useState, useEffect, useContext} from "react"
 import Axios from "axios"
-import moment from "moment"
 import {UserContext} from "../home"
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function Questions(props) {
     const { userData, setUserData } = useContext(UserContext)
@@ -75,7 +76,7 @@ function Questions(props) {
             type: type,
             action: action,
           })
-          alert("Sucssfully sent an application request. Wait for the employer's approval.")
+          toastSucessNotification()
           props.setApplied(true)
           props.setToApply(false)
         } catch (err) {
@@ -88,8 +89,22 @@ function Questions(props) {
         return key
     }
 
+    function toastSucessNotification() {
+        toast.success("Sucssfully sent an application request. Wait for the employer's approval.", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+        })
+    }
+
     return (
         <div>
+            <div className="horizontal_line"></div>
             {answerNow==false ?
                 <div>
                     <p>Interview Questions</p>
@@ -106,83 +121,83 @@ function Questions(props) {
             {answerNow===true ?
                 <div>
                     <form className="settingsForm" onSubmit={submitHandler}>
-                        <h2>Write your answers:</h2>
+                        <p>Please answer the questions provided by the employer carefully.</p>
                         
                         <div className="mb-2">
                             <p>Question #1: {props.questions[0]}</p>
-                            <label>Your Answer</label>
+                            <label>Answer:</label>
                             <input required onChange={e => setAnswer1(e.target.value)} value={answer1} type="text" className="form-control"/>
                         </div>
                         <br />
                         <div className="mb-2">
                             <p>Question #2: {props.questions[1]}</p>
-                            <label>Your Answer</label>
+                            <label>Answer:</label>
                             <input required onChange={e => setAnswer2(e.target.value)} value={answer2} type="text" className="form-control"/>
                         </div>
                         <br />
                         <div className="mb-2">
                             <p>Question #3: {props.questions[2]}</p>
-                            <label>Your Answer</label>
+                            <label>Answer:</label>
                             <input required onChange={e => setAnswer3(e.target.value)} value={answer3} type="text" className="form-control"/>
                         </div>
                         <br />
                         {props.questions[3]!=="" ?
                             <div className="mb-2">
                                 <p>Question #4: {props.questions[3]}</p>
-                                <label>Your Answer</label>
+                                <label>Answer:</label>
                                 <input required onChange={e => setAnswer4(e.target.value)} value={answer4} type="text" className="form-control"/>
                             </div>
                         :<></>}
                         {props.questions[4]!=="" ?
                             <div className="mb-2">
                                 <p>Question #5: {props.questions[4]}</p>
-                                <label>Your Answer</label>
+                                <label>Answer:</label>
                                 <input required onChange={e => setAnswer5(e.target.value)} value={answer5} type="text" className="form-control"/>
                             </div>
                         :<></>}
                         {props.questions[5]!=="" ?
                             <div className="mb-2">
                                 <p>Question #6: {props.questions[5]}</p>
-                                <label>Your Answer</label>
+                                <label>Answer:</label>
                                 <input required onChange={e => setAnswer6(e.target.value)} value={answer6} type="text" className="form-control"/>
                             </div>
                         :<></>}
                         {props.questions[6]!=="" ?
                             <div className="mb-2">
                                 <p>Question #7: {props.questions[6]}</p>
-                                <label>Your Answer</label>
+                                <label>Answer:</label>
                                 <input required onChange={e => setAnswer7(e.target.value)} value={answer7} type="text" className="form-control"/>
                             </div>
                         :<></>}
                         {props.questions[7]!=="" ?
                             <div className="mb-2">
                                 <p>Question #8: {props.questions[7]}</p>
-                                <label>Your Answer</label>
+                                <label>Answer:</label>
                                 <input required onChange={e => setAnswer8(e.target.value)} value={answer8} type="text" className="form-control"/>
                             </div>
                         :<></>}
                         {props.questions[8]!=="" ?
                             <div className="mb-2">
                                 <p>Question #9: {props.questions[8]}</p>
-                                <label>Your Answer</label>
+                                <label>Answer:</label>
                                 <input required onChange={e => setAnswer9(e.target.value)} value={answer9} type="text" className="form-control"/>
                             </div>
                         :<></>}
                         {props.questions[9]!=="" ?
                             <div className="mb-2">
                                 <p>Question #10: {props.questions[9]}</p>
-                                <label>Your Answer</label>
+                                <label>Answer:</label>
                                 <input required onChange={e => setAnswer10(e.target.value)} value={answer10} type="text" className="form-control"/>
                             </div>
                         :<></>}
                         <div>
-                            <button onClick={()=> applyNow()} className="btn btn-sm btn-primary">Send Application</button>
+                            <button onClick={()=> applyNow()} className="btn btn-sm btn-outline-success allButtons">Send Application</button>
                             <button onClick={()=> props.setToApply(false)} type="button" className="btn btn-sm btn-outline-secondary cancelBtn">Cancel</button>
                         </div>
                     </form>
                 </div>
             :<></>}
-
+            <ToastContainer />
         </div>
     )
 }

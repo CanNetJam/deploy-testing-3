@@ -31,7 +31,7 @@ function Review(props) {
     }, [])
 
     useEffect(() => {
-      const user = props?.candidate
+      const user = props?.toEndContract._id
       const getFreeData = async () => {
         try {
           const res = await Axios.get(`/api/search-profile/${user}`)
@@ -50,7 +50,7 @@ function Review(props) {
       }
       if (rating) {
       const projectid = props.projectid
-      const candidate = props.candidate
+      const candidate = props.toEndContract._id
       const empname = (empInfo?.firstname)+" "+(empInfo?.middlename ? (empInfo.middlename).charAt(0).toUpperCase()+", ": "")+(empInfo?.lastname)
       const freename = (freeInfo?.firstname)+" "+(freeInfo?.middlename ? (freeInfo.middlename).charAt(0).toUpperCase()+", ": "")+(freeInfo?.lastname)
       
@@ -96,7 +96,6 @@ function Review(props) {
 
       await Axios.post(`/api/reviews/${projectid}/${candidate}`, data, { headers: { "Content-Type": "multipart/form-data" } })
       props.setWriteReview(false)
-      props.setReviewed(true)
       }
     }
     
@@ -107,24 +106,26 @@ function Review(props) {
 
     return (
       <div>
-        <form className="settingsForm" onSubmit={submitHandler}>
-            <h2>Writing a review about {freeInfo?.firstname} { freeInfo?.middlename ? freeInfo?.middlename?.charAt(0).toUpperCase() + "." : ""} {freeInfo?.lastname}...</h2>
-            <div className="mb-2">
-                <input required onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder="Write what you think about your partner's work performance." />
-            </div>
-
-            <h4>Add photo (optional)</h4>
-            <div className="mb-2">
-                <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
-            </div>
-
-            <p>Rate your Employee. (5 is the Highest...1 is the Lowest)</p>
+        <form className="reviewForm" onSubmit={submitHandler}>
+          <div>
+            <label className="contentSubheading">Reviewing <b>{freeInfo?.firstname} { freeInfo?.middlename ? freeInfo?.middlename?.charAt(0).toUpperCase() + "." : ""} {freeInfo?.lastname}</b>...</label>
+            <textarea required rows = "5" cols = "40" autofocus onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder={`Write something about ${freeInfo?.firstname} attitude or perforance while working with you,`} />
+          </div>
+          <br/>
+          <div>
+            <label>Add photo (optional)</label>
+            <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
+          </div>
+          <br/>
+          <div>
+            <label>Rate your Employee. (5 is the Highest...1 is the Lowest)</label><br/>
             {isRated===false && <label>Please select a rating below!</label>}
             <div>
                 {ratings.map((a)=> {
-                    return <button type="button" className="btn btn-sm btn-primary" key={idPlusKey(a, userData.user.id)} onClick={()=> {setRating(a), setIsRated(true)}}>{a}</button>
+                    return <button type="button" className="btn btn-outline-success allButtons" key={idPlusKey(a, userData.user.id)} onClick={()=> {setRating(a), setIsRated(true)}}>{a}</button>
                 })}
             </div>
+            <br/>
             <div>
               {rating && (
                 <div>
@@ -137,7 +138,10 @@ function Review(props) {
                 </div>
               )}
             </div>
-            <button className="btn btn-sm btn-primary">Confirm</button>
+          </div>
+          <div className="centerContent">
+            <button className="btn btn-outline-success allButtons">Confirm</button>
+          </div>
         </form>
       </div>
     )

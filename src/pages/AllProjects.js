@@ -14,7 +14,7 @@ function AllProjects(){
     const [querySallary, setQuerySallary] = useState("")
     const [keySearch, setKeySearch] = useState(false)
     const [searchBy, setSearchBy] = useState("")
-    const [sortBy, setSortBy] = useState("A-Z")
+    const [sortBy, setSortBy] = useState("Latest")
     const [result, setResult] = useState([])
     const [page, setPage] = useState(0)
     const [searchCount, setSearchCount] = useState(10)
@@ -44,17 +44,17 @@ function AllProjects(){
     async function getProjects() {
         try {
             const res = await Axios.get(`/api/all-approved-projects/`, {
-              params: {
-                usertype: userData.user.type,
-                query: query,
-                location: queryLocation,
-                key: searchBy,
-                sort: sortBy,
-                sallary: querySallary,
-              },
-                headers: {
-                'auth-token': userData.token
-              }
+                params: {
+                    usertype: userData.user.type,
+                    query: query,
+                    location: queryLocation,
+                    key: searchBy,
+                    sort: sortBy,
+                    sallary: querySallary,
+                },
+                    headers: {
+                    'auth-token': userData.token
+                }
             })
             setProjects(res.data)
         } catch (err) {
@@ -72,11 +72,11 @@ function AllProjects(){
     
     return(
         <div className="projectsList">
-          <div className="centerContent">
-            <h3>List of Approved Jobs & Projects</h3>
-          </div>
-
-          <div className="searchTop">
+            <div className="contentTitle">
+                <label><b>List of Approved Jobs & Projects</b></label>
+            </div>
+            <br/>
+            <div className="searchTop">
                 <div className="searchBar">
                     <input
                         type="text"
@@ -95,13 +95,13 @@ function AllProjects(){
                 </div>
 
                 <div>
-                    <button onClick={()=> getProjects()} className="btn btn-sm btn-primary">
+                    <button onClick={()=> getProjects()} className="btn btn-outline-success allButtons">
                         Search
                     </button>
                 </div>
                 <div className="testing">
                     <div className="searchKey">
-                        <button className="btn btn-sm btn-primary" onClick={()=> {
+                        <button className="btn btn-outline-success allButtons" onClick={()=> {
                             if (keySearch === false) {
                                 setKeySearch(true)
                             }
@@ -239,74 +239,94 @@ function AllProjects(){
                 </div>
             </div>
 
-          <div className="tableList">
-            <table>
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>Type</th>
-                        <th>Title</th>
-                        <th>Employer</th>
-                        <th>Company</th>
-                        <th>Skill</th>
-                        <th>Sallary</th>
-                        <th>Duration</th>
-                        <th>Location</th>
-                        <th>Employee</th>
-                        <th>Status</th>
-                        <th>Date Requested:</th>
-                        <th>Approval Date:</th>
-                        <th>Completion Date:</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                  {result[0] ? 
-                    <>
-                      {result[page]?.map((prj) => {
-                        return (
-                          <tr key={prj._id}>
-                              <td>{((projects.indexOf(prj))+1)<10 ? "0"+((projects.indexOf(prj))+1) : ((projects.indexOf(prj))+1) }</td>
-                              <td>{prj.type}</td>
-                          
-                              <td>{prj.title}</td>
-                              
-                              <td>{prj?.employer?.firstname} {prj?.employer?.middlename ? prj.employer.middlename.charAt(0).toUpperCase() + ". " : "" }{prj?.employer?.lastname}</td>
-                              <td>{prj.company ? prj.company : ""}</td>
-                              <td>{prj.skillrequired}</td>
-                              <td>₱ {prj.sallary}</td>
-                              <td>{prj?.duration ? prj.duration+ " month(s)" : "-"}</td>
-                              <td>{prj.location?.city}, {prj.location?.province}, {prj.location?.region}</td>
-                              
-                              <td>{prj?.candidate?.firstname} {prj?.candidate?.middlename ? prj.candidate.middlename.charAt(0).toUpperCase() + ". " : "-" }{prj?.candidate?.lastname}</td>
-                              <td>{prj.status}</td>
-                              <td>{moment(prj.creationdate).format("MM/DD/YY")}</td>
-                              <td>{moment(prj.approvaldate).format("MM/DD/YY")}</td>
-                              <td>{prj.completiondate ? moment(prj.completiondate).format("MM/DD/YY") : "-"}</td>
-                              <td>
-                                  <button className="btn btn-sm btn-primary" onClick={(e)=>{navigate("/project", {state: {_id: prj._id}})}}>
-                                      Check {prj.type}
-                                  </button>
-                              </td>
-                          </tr>
-                        )
-                      })}
-                    </>
-                  :<span className="searchList">No Job(s)/Project(s) found.</span>}
-                </tbody>
-            </table>
-          </div>
-          <div className="pageNumber">
-            {result?.map((a)=>{
-              return (
-                <div key={result?.indexOf(a)}>
-                  <button className="btn btn-sm btn-primary" onClick={()=>setPage(result?.indexOf(a))}>
-                    {"Page "+((result?.indexOf(a))+1)}
-                  </button>
-                </div>
-              )
-            })}
-          </div>
+            <div className="tableList">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th><div className="constantHW">Type</div></th>
+                            <th><div className="constantHW">Title</div></th>
+                            <th><div className="constantHW">Employer</div></th>
+                            <th><div className="constantHW">Company</div></th>
+                            <th><div className="constantHW">Skill</div></th>
+                            <th><div className="constantHW">Slots</div></th>
+                            <th><div className="constantHW">Sallary</div></th>
+                            <th><div className="constantHW">Duration</div></th>
+                            <th><div className="constantHW">Location</div></th>
+                            <th><div className="constantHW">Employee</div></th>
+                            <th><div className="constantHW">Status</div></th>
+                            <th><div className="constantHW">Date Requested</div></th>
+                            <th><div className="constantHW">Approval Date</div></th>
+                            <th><div className="constantHW">Completion Date</div></th>
+                            <th><div className="constantHW">Actions</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {result[0] ? 
+                        <>
+                        {result[page]?.map((prj) => {
+                            return (
+                                <tr key={prj._id}>
+                                    <td>{((projects.indexOf(prj))+1)<10 ? "0"+((projects.indexOf(prj))+1) : ((projects.indexOf(prj))+1)}</td>
+                                    <td><div className="constantHW">{prj.type}</div></td>
+                                
+                                    <td><div className="constantHW">{prj.title}</div></td>
+                                    
+                                    <td><div className="constantHW">{prj?.employer?.firstname} {prj?.employer?.middlename ? prj.employer.middlename.charAt(0).toUpperCase() + ". " : "" }{prj?.employer?.lastname}</div></td>
+                                    <td><div className="constantHW">{prj.company ? prj.company : ""}</div></td>
+                                    <td><div className="constantHW">{prj.skillrequired}</div></td>
+                                    <td>
+                                        <div className="constantHW">
+                                            {prj?.slots!==0 ? prj.slots+" left." :"Fully occupied"}
+                                        </div>
+                                    </td>
+                                    <td><div className="constantHW">₱ {prj.sallary}</div></td>
+                                    <td><div className="constantHW">{prj?.duration ? prj.duration+ " month(s)" : "-"}</div></td>
+                                    <td><div className="constantHW">{prj.location?.city}, {prj.location?.province}, {prj.location?.region}</div></td>
+                                    
+                                    <td>
+                                        <div className="constantHW">
+                                            {prj.employeelist.length!==0 ?
+                                                prj.employeelist.map((a)=>{
+                                                    return (
+                                                        <>
+                                                            <label>{a.employeeid?.firstname} {a.employeeid?.middlename ? a.employeeid.middlename.charAt(0).toUpperCase() + ". " : "-" }{a.employeeid?.lastname}</label><br />
+                                                        </>
+                                                    ) 
+                                                })
+                                            : null}
+                                        </div>
+                                    </td>
+                                    <td><div className="constantHW">{prj.status}</div></td>
+                                    <td><div className="constantHW">{moment(prj.creationdate).format("MM/DD/YY")}</div></td>
+                                    <td><div className="constantHW">{moment(prj.approvaldate).format("MM/DD/YY")}</div></td>
+                                    <td><div className="constantHW">{prj.completiondate ? moment(prj.completiondate).format("MM/DD/YY") : "-"}</div></td>
+                                    <td>
+                                        <div className="constantHW">
+                                            <button className="btn btn-outline-success allButtons" onClick={(e)=>{navigate("/project", {state: {_id: prj._id}})}}>
+                                                Check {prj.type}
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                        </>
+                    :<span className="searchList">No Job(s)/Project(s) found.</span>}
+                    </tbody>
+                </table>
+            </div>
+            <div className="pageNumber">
+                {result?.map((a)=>{
+                return (
+                    <div key={result?.indexOf(a)}>
+                    <button className="btn btn-outline-success allButtons" onClick={()=>setPage(result?.indexOf(a))}>
+                        {"Page "+((result?.indexOf(a))+1)}
+                    </button>
+                    </div>
+                )
+                })}
+            </div>
         </div>
     )
 }

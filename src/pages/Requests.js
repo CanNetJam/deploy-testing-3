@@ -8,10 +8,12 @@ function Requests({socket}) {
     return (
         <div className="adminRequests">
             <div className="adminRequestsTop">
-                <h2>Job/Project Requests ({tab})</h2>
+                <div className="contentTitle">
+                    <label><b>Job/Project Requests ({tab})</b></label>
+                </div>
                 <div className="adminRequestsTopBtn">
-                    <button className="btn btn-sm btn-primary" onClick={(e)=>setTab("Pending")}>Pending</button>
-                    <button className="btn btn-sm btn-primary" onClick={(e)=>setTab("Denied")}>Denied</button>
+                    <button className="btn btn-outline-success allButtons" onClick={(e)=>setTab("Pending")}>Pending</button>
+                    <button className="btn btn-outline-success allButtons" onClick={(e)=>setTab("Denied")}>Denied</button>
                 </div>
             </div>
             <br />

@@ -21,31 +21,29 @@ function TopNav({savedNotifications, setNumber}){
         <div className="topnav">
             <div className="topnavLeft">
                 <div className="leftButtons" onClick={()=>{navigate("/")}}>
-                    <p><img className="webIcons" src={"/WebPhoto/webicon4.png"} alt={"website icon"} /></p>
+                    <><img className="webIcons" src={"/WebPhoto/webicon4.png"} alt={"website icon"} /></>
                 </div>
                 <div className="leftButtons hovertext" data-hover="About" onClick={()=>{navigate("/about")}}>
-                    <p><img src={"/WebPhoto/about.png"} alt={"about icon"} /></p>
+                    <><img src={"/WebPhoto/about.png"} alt={"about icon"} /></>
                 </div>
             </div>
-            <div>
                 {userData?.user ? (
-                    <div>
+                    <>
                         {userData?.user?.type==="Candidate" ? 
                             <LeftNavFree savedNotifications={savedNotifications} setNumber={setNumber}/>
                         :<></>}
                         {userData?.user?.type==="Employer" ? 
                             <LeftNavEmp savedNotifications={savedNotifications} setNumber={setNumber}/>
                         :<></>}
-                        {userData?.user?.type==="Admin" ? 
+                        {userData?.user?.type==="Admin" || userData?.user?.type==="Super Administrator" ? 
                             <LeftNavAdmin savedNotifications={savedNotifications} setNumber={setNumber}/>
                         :<></>}
-                    </div>
+                    </>
                 ) : (
-                    <div className="leftButtons" onClick={()=>{ logOut(), navigate("/login")}}>
-                        <p>Login</p>
+                    <div className="topnavRight" onClick={()=>{ logOut(), navigate("/login")}}>
+                        <label className="allButtons">Login</label>
                     </div>
                 )}
-            </div>
         </div>
     )
 }

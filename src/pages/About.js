@@ -78,25 +78,27 @@ function About(){
                 The system was developed as a curricular requirement of two students under the course of Bachelor of Science in Information Technology. The system was established to help fresh graduate student of Cavite State University-Carmona Campus, its main motive was to assist the fresh graduate to get the proper match of work base on their finished course.
             </p>
             <br />
-            <div className="aboutDeveloperCenter">
+            <div className="centerContentGrid">
                 <div className="aboutDeveloper">
                     <img src={"/WebPhoto/About/Kenneth.jpg"} alt={"male-developer icon"} />
-                    <p>
-                    Kenneth John Saracho, was born on May 16, 1999 at called Imus, Cavite and is currently 21 years old. He is the youngest child of Mr. Edwin Saracho and Ms. Jenneth Saracho. He is currently residing at Paliparan I Dasmariñas, Cavite.
-                    He obtained his primary education at Paliparan II Elementary School in 2012. He finished his Secondary education with the K to 12 program at Paliparan II Integrated High School in 2016. In the following year, he enrolled at Cavite State University Carmona Campus for his college education in Bachelor of Science taking Information Technology program. 
+                    <p className="contentSubheading">
+                    <b>Kenneth John Saracho</b><br/>
+                    Full Stack Developer
                     </p>
                 </div>
                 <br />
                 <div className="aboutDeveloper">
-                    <p>
-                    Pamela Lopez, was born on March 02, 2000 in Carmona, Cavite. She is the youngest among the four children of Mr. Pablito B. Alvarez a blinds installer, and Ms. Melia B. Lopez a housewife. She is currently residing at 11521 E. Reyes St. Mabuhay Carmona, Cavite. She obtained her primary education at Mabuhay Elementary School, Carmona, Cavite in year 2012.
-                    She finished her study at Carmona National High School, Carmona, Cavite in 2016 with National Certification in Bread and Pastry Production, and Senior High in Angelo Levardo Loyola Senior High School, Carmona, Cavite in 2018. She is an Animation NCII passer. 
-                    In the following year, she enrolled at Cavite State University Carmona Campus for her college education in Bachelor of Science taking Information Technology program. She obtained her degree in 2022.
-                    </p>
                     <img src={"/WebPhoto/About/Pamela.jpg"} alt={"female-developer icon"} />
+                    <p className="contentSubheading">
+                    <b>Pamela Lopez</b><br/>
+                    Web Designer
+                    </p>
                 </div>
             </div>
         </div>
+        <br/>
+        <br/>
+        <br/>
     </div>
     )
 }

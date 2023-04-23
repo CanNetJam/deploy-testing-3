@@ -59,7 +59,6 @@ function LeftNavAdmin({savedNotifications, setNumber}){
     
     return (
         <div className="topnavRight">
-            
                 <div className="leftButtons hovertext" data-hover="Job/Project Request" onClick={()=>{
                     if (projectNotif.length!==0) {
                         type = "Request" , 
@@ -137,16 +136,16 @@ function LeftNavAdmin({savedNotifications, setNumber}){
                 {openProfile && (
                     <div className="accountPicker">
                         <div className="leftButtons" onClick={()=>{setOpenProfile(false), navigate("/profile/user")}}> 
-                            <p>My Profile</p>
+                            <>My Profile</>
                         </div>
                         <div className="leftButtons" onClick={()=>{setOpenProfile(false), navigate("/settings")}}>
-                            <p><img src={"/WebPhoto/settings.png"} alt={"settings icon"} />Settings</p>
+                            <><img src={"/WebPhoto/settings.png"} alt={"settings icon"} />Settings</>
                         </div>
                         <div className="leftButtons" onClick={()=>{setOpenProfile(false), navigate("/help")}}>
-                            <p><img src={"/WebPhoto/help.png"} alt={"help icon"} />Help</p>
+                            <><img src={"/WebPhoto/help.png"} alt={"help icon"} />Help</>
                         </div>
                         <div className="leftButtons" onClick={()=>{ logOut(), navigate("/")}}>
-                            <p><img src={"/WebPhoto/logout.png"} alt={"logout icon"} />Logout</p>
+                            <><img src={"/WebPhoto/logout.png"} alt={"logout icon"} />Logout</>
                         </div>
                     </div>
                 )}

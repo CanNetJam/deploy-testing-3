@@ -11,8 +11,11 @@ const typicalReact = {
         options: {
           presets: ["@babel/preset-react"]
         },
-        
       }
+    },
+    {
+      test: /\.css$/i,
+      use: ["style-loader", "css-loader"],
     },
   ]
 }

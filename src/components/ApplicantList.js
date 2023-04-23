@@ -7,6 +7,7 @@ import Axios from "axios"
 
 function ApplicantList(props) {
     let navigate = useNavigate()
+    const cloud_name = "dzjkgjjut"
     const { userData, setUserData } = useContext(UserContext)
     const [ answers, setAnswers ] = useState([])
     const [ allAnswers, setAllAnswers ] = useState(false)
@@ -39,44 +40,43 @@ function ApplicantList(props) {
         <div className="notif">
             <div className="notifTop">
                 <div>
-                    <img className="messageImg" src={props.applicantid.photo ? `/uploaded-photos/${props.applicantid.photo}` : "/fallback.png"} alt={`${props.applicantid.lastname}`} />
+                    <img className="messageImg" src={props.applicantid.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${props.applicantid.image}.jpg` : "/fallback.png"} alt={`${props.applicantid.lastname}`}></img>
                 </div>
                 <div>
-                    {props.applicantid?.firstname} {props.applicantid.middlename ? props.applicantid.middlename.charAt(0).toUpperCase() + ". " : "" }{props.applicantid?.lastname}
+                    <b>{props.applicantid?.firstname} {props.applicantid.middlename ? props.applicantid.middlename.charAt(0).toUpperCase() + ". " : "" }{props.applicantid?.lastname}</b>
+                </div>
+                <div>
+                    {moment(props.appliedAt).format("ddd: MMM. DD, YYYY")} | ({format(props.appliedAt)})
                 </div>
             </div>
-            <div>
-                <button type="button" onClick={()=>redirectTo()} className="btn btn-sm btn-primary">
-                    View Profile
-                </button>
-            </div>
-            <div>
-                <button type="button" onClick={()=>{
-                    if (allAnswers===false) {
-                        setAllAnswers(true)
-                    }
-                    if (allAnswers===true) {
-                        setAllAnswers(false)
-                    }
-                }} className="btn btn-sm btn-primary">
-                    View Answers
-                </button>
-            </div>
             <div className="notifBot">
-                {moment(props.appliedAt).format("ddd: MMM. DD, YYYY")} <br></br>({format(props.appliedAt)})
+                <div>
+                    <button type="button" onClick={()=>redirectTo()} className="btn btn-outline-success allButtons">
+                        Profile
+                    </button>
+                    <button type="button" onClick={()=>{
+                        if (allAnswers===false) {
+                            setAllAnswers(true)
+                        }
+                        if (allAnswers===true) {
+                            setAllAnswers(false)
+                        }
+                    }} className="btn btn-outline-success allButtons">
+                        Answers
+                    </button>
+                </div>
             </div>
         </div>
 
         <div>
             {allAnswers ?
-                <div>
-                    <p>{props.applicantid?.firstname}'s Answers:</p>
+                <div className="currentProjectList">
                     {answers[0]?.answers.map((a)=> {
                         if (a!=="") {
                             return (
-                                <div key={idPlusKey(a , props.applicantid?._id)}>
-                                    <label>Question #{1+(props.questions.indexOf(props.questions[answers[0].answers.indexOf(a)]))}: {props.questions[answers[0].answers.indexOf(a)]}</label>
-                                    <p> Ans: {a}</p>
+                                <div className="currentProject" key={idPlusKey(a , props.applicantid?._id)}>
+                                    <label>Question {1+(props.questions.indexOf(props.questions[answers[0].answers.indexOf(a)]))}: {props.questions[answers[0].answers.indexOf(a)]}</label>
+                                    <p>{props.applicantid?.firstname}: {a}</p>
                                 </div>
                             )
                         }

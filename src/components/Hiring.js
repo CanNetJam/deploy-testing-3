@@ -95,7 +95,7 @@ function Hiring() {
         <div className="searchComponent">
             <div className="searchTop">
                 <div className="quickSearch">
-                    <button className="btn btn-sm btn-primary" onClick={()=> {
+                    <button className="btn btn-outline-success allButtons" onClick={()=> {
                                 if (advSearch === false) {
                                     setAdvSearch(true)
                                 }
@@ -114,6 +114,7 @@ function Hiring() {
                         type="text"
                         className="searchBox"
                         placeholder={"Skill required or Job title"}
+                        value={query}
                         onChange={(e) => setQuery(e.target.value)}
                     />
                 </div>
@@ -127,13 +128,13 @@ function Hiring() {
                 </div>
 
                 <div>
-                    <button onClick={()=> getProjects()} className="btn btn-sm btn-primary">
+                    <button onClick={()=> getProjects()} className="btn btn-outline-success allButtons">
                         Search
                     </button>
                 </div>
                 <div className="testing">
                     <div className="searchKey">
-                        <button className="btn btn-sm btn-primary" onClick={()=> {
+                        <button className="btn btn-outline-success allButtons" onClick={()=> {
                             if (keySearch === false) {
                                 setKeySearch(true)
                             }
@@ -153,17 +154,17 @@ function Hiring() {
                                     <div className="searchAdvWrapper">
                                         <label>Type: <b>{btnSearchBy}</b></label>
                                         {searchBy==="" ? 
-                                            <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Job Hiring")}}>
+                                            <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSearchBy("Job Hiring")}}>
                                                 <b>Job Hiring</b>
                                             </button>
                                         :<></>}
                                         {searchBy==="" ? 
-                                            <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Project Hiring")}}>
+                                            <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSearchBy("Project Hiring")}}>
                                                 <b>Project Hiring</b>
                                             </button>
                                         :<></>}
                                         {searchBy!=="" ? 
-                                            <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("")}}>
+                                            <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSearchBy("")}}>
                                                 <b>Remove type filter</b>
                                             </button>
                                         :<></>}
@@ -172,31 +173,31 @@ function Hiring() {
                                         <label>Sallary range: <b>{sortSallaryText}</b></label>
                                         {querySallary==="" ? 
                                         <>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{
                                             setBtnFilterSallary("1")
                                             setSortSallaryText("less than ₱ 10, 001")
                                         }}>
                                             <b>less than ₱10,001</b>
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{
                                             setBtnFilterSallary("2")
                                             setSortSallaryText("₱ 10, 001 to ₱ 25, 000")
                                         }}>
                                             <b>₱10,001 to ₱25,000</b>
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{
                                             setBtnFilterSallary("3")
                                             setSortSallaryText("₱ 25, 001 to ₱ 50, 000")
                                         }}>
                                             <b>₱25,001 to ₱50,000</b>
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{
                                             setBtnFilterSallary("4")
                                             setSortSallaryText("₱ 50, 001 to ₱ 100, 000")
                                         }}>
                                             <b>₱50,001 to ₱100,000</b>
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{
                                             setBtnFilterSallary("5")
                                             setSortSallaryText("more than ₱ 100, 000")
                                         }}>
@@ -205,7 +206,7 @@ function Hiring() {
                                         </>
                                         :<></>}
                                         {querySallary!=="" ? 
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{
                                             setBtnFilterSallary("")
                                             setSortSallaryText("")
                                         }}>
@@ -217,16 +218,16 @@ function Hiring() {
                                 <div>
                                     <h5>Sort by: {sortBy}</h5>
                                     <div className="searchAdvWrapper">
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Longest Duration")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Longest Duration")}}>
                                             Longest Duration
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Shortest Duration")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Shortest Duration")}}>
                                             Shortest Duration
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("A-Z")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("A-Z")}}>
                                             A-Z
                                         </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Z-A")}}>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Z-A")}}>
                                             Z-A
                                         </button>
                                     </div>
@@ -234,23 +235,23 @@ function Hiring() {
                                 <div>
                                     <h5>Show {searchCount} results</h5>
                                     <div className="searchAlign centerContent">
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(5)}}>
+                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(5)}}>
                                             5
                                         </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(10)}}>
+                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(10)}}>
                                             10
                                         </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
+                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(50)}}>
                                             25
                                         </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
+                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(50)}}>
                                             50
                                         </button>
                                     </div>
                                 </div>
                                 <br />    
                                 <div className="centerContent">
-                                    <button className="btn btn-sm btn-primary" onClick={()=> {
+                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
                                         setSearchBy(btnSearchBy)
                                         if (btnSortBy!=="") {
                                             setSortBy(btnSortBy)
@@ -262,7 +263,7 @@ function Hiring() {
                                         setPage(0)
                                         setKeySearch(false)
                                     }}>
-                                        Confirm
+                                        Apply
                                     </button>
                                 </div>
                             </div>
@@ -285,7 +286,7 @@ function Hiring() {
                                         {categoryPick && (
                                             <div className="searchTabs">
                                                 {filteredCategory?.map((b)=> {
-                                                    return <button className="btn btn-sm btn-primary" key={idPlusKey(categoryBy, b)} onClick={()=>{
+                                                    return <button className="btn btn-outline-success allButtons" key={idPlusKey(categoryBy, b)} onClick={()=>{
                                                                 setQuery(b),
                                                                 setCategoryBy("")
                                                                 setCategoryPick(false)
@@ -321,23 +322,18 @@ function Hiring() {
                                 <div className="searchHiringTop">
                                     <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.image}.jpg` : "/fallback.png"} className="hiringImg" alt={`${a.company} named ${a.title}`}></img>
                                     <div>
-                                        <p>Type: <b>{a.type}</b></p>
-                                        <p>Looking for {a.employmenttype}: {a.skillrequired}</p>
+                                        <p><b>{a.type}</b>: {a.skillrequired} (<i>{a.employmenttype}</i>)</p>
+                                        <p className="text-muted small">Hiring <b>{a?.slots ? a.slots : "unspecified"}</b> people for this position.</p>
                                     </div>
                                 </div>
                                 <br />
                                 <div className="searchHiringBot">
                                     <p className="text-muted small">
-                                        {a?.minimumreq?.what!=="Others" ?
-                                            <label>Minimum Requirements: {a?.minimumreq?.what}</label>
-                                        :<label>Minimum Requirements: {a?.minimumreq?.note}</label>}
-                                        <br />
                                         Company: {a.company!== "undefined" ? a.company : <i>Not specified.</i>}<br />
-                                        Sallary: ₱ {a.sallary}<br />
                                         Location: {a.location?.city ? (a.location?.city+", ") : ""} {a.location?.province ? (a.location?.province+", ") : ""} {a.location?.region}<br />
                                         Duration: {a.duration} month(s)
                                     </p>
-                                    <p className="text-muted small">Posted {format(a.creationdate)}</p>
+                                    <p className="text-muted small">Posted {format(a.approvaldate)}</p>
                                 </div>
                             </div>
                         )
@@ -349,7 +345,7 @@ function Hiring() {
                     {result?.map((a)=>{
                         return (
                             <div key={result?.indexOf(a)}>
-                                <button className="btn btn-sm btn-primary" onClick={()=>setPage(result?.indexOf(a))}>
+                                <button className="btn btn-outline-success allButtons" onClick={()=>setPage(result?.indexOf(a))}>
                                     {"Page "+((result?.indexOf(a))+1)}
                                 </button>
                             </div>

@@ -3,9 +3,7 @@ import {UserContext} from "../home"
 import Axios from "axios"
 import RatingsAndReviews from "../components/Ratings&Reviews"
 import Gallery from "../components/Gallery"
-import { useLocation } from 'react-router-dom'
-import moment from "moment"
-import {format} from "timeago.js"
+import { useLocation, useNavigate } from 'react-router-dom'
 
 function Profile(){
   const location = useLocation()
@@ -15,7 +13,7 @@ function Profile(){
   useEffect(()=> {
     const whatType = async () => {
       if(userData.user.type==="Candidate" || location.state?.account.type==="Candidate") {
-          setTheFree(prev => prev=true)
+        setTheFree(prev => prev=true)
       }
     }
     whatType()
@@ -36,6 +34,7 @@ function Profile(){
           image={Accounts.image} 
           id={location.state?.account ? location.state?.account._id : Accounts.id} 
           about ={Accounts.about} 
+          companyinfo ={Accounts.companyinfo} 
           company ={Accounts.company} 
           position={Accounts.position} 
           type ={Accounts.type} 
@@ -54,6 +53,7 @@ function UserProfile(props) {
   const location = useLocation()
   const api_key = "848182664545332"
   const cloud_name = "dzjkgjjut"
+  let navigate = useNavigate()
   const { userData, setUserData } = useContext(UserContext)
   const [isEditing, setIsEditing] = useState(false)
   const [file, setFile] = useState()
@@ -284,35 +284,6 @@ function UserProfile(props) {
     }
   }
 
-  function expectedMonth(props){
-    let a = Number(moment(props.acceptdate).format("MM"))
-    let c = Number(moment(props.acceptdate).format("YYYY"))
-    let d = props.duration
-    let total = a
-    if (d<12) {
-      for(let i = 0; i<d ; i++){
-        total += 1
-      }
-      if (total>12) {
-        total= total-12,
-        c= c+1
-      }
-      return {
-        month: Number(total-1),
-        year: Number(c)
-      }
-    }
-    if (d>12) {
-      total = d%12
-      let yeartotal = parseInt(d/12)
-      c= c+yeartotal
-      return {
-        month: Number(total-1),
-        year: Number(c)
-      }
-    }
-  }
-
   function idPlusKey(a, b) {
     const key = a + b 
     return key
@@ -320,7 +291,15 @@ function UserProfile(props) {
   
   return (
     <div className="profileCard">
-      <div className="profileCardTop">
+      {userData.user?.type==="Employer" && (
+        <div className="rightContent">
+          <button className="btn btn-outline-success allButtons" onClick={(e)=>{navigate("/company-profile", {state: {companyinfo: props.companyinfo, employer: userData.user?.id}})}}>
+            Company Profile
+          </button>
+        </div>
+      )}
+      <div className="searchProfile">
+      <div className="searchProfileTop">
         <div className="profile-ProfilePhotoWrapper">
           {isEditing && (
             <div className="our-custom-input">
@@ -329,19 +308,20 @@ function UserProfile(props) {
               </div>
             </div>
           )}
-          <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${props.image}.jpg` : "/fallback.png"} className="profile-ProfilePhoto" alt={`${props.company} named ${props.title}`}></img>
+          <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${props.image}.jpg` : "/fallback.png"} className="profile-ProfilePhoto" alt={`${props.company} named ${props.title}`}></img>
         </div>
         
         <div className="profileCardTextWrapper">
           {!isEditing && (
             <div className="profileCardText">
-              <h4><b>{props.type}: </b> {props.firstname} {props.middlename ? props.middlename?.charAt(0).toUpperCase()+". " : " "} {props.lastname} </h4>
-              <p>Active {format(props.lastactive)}.</p>
-              <p>Age: {props.age} <br/>
+
+              <p className="profileCardName">{props.firstname} {props.middlename ? props.middlename?.charAt(0).toUpperCase()+". " : " "} {props.lastname} </p>
+              <p>Designation: {props.type} <br/>
+              Age: {props.age} <br/>
               Address: {props.location?.city ? (props.location?.city+", ") : ""} {props.location?.province ? (props.location?.province+", ") : ""} {props.location?.region}
               {props?.theFree ? 
                 <div> Skill(s): {userSkill.skill?.map((a)=> {
-                return <label key={idPlusKey(props.id, a)}>{a ? (a)+", " : <></>} </label>
+                return <label key={idPlusKey(props.id, a)}>{a ? (a)+", " : null} </label>
                 })} </div>
               :<br />}
               {props.type==="Employer" ? 
@@ -371,51 +351,46 @@ function UserProfile(props) {
                       setDraftPosition(props.position)
                       setFile("")
                     }}
-                    className="btn btn-sm btn-primary"
+                    className="btn btn-outline-success allButtons"
                   >
                     Edit
                   </button>{" "}
                 </>
               )}
-              <div className="profileCardText">
-                {props?.currentprojects[0] ? 
-                  <div>
-                    <p>Currently Occupied!</p>
-                    {props?.currentprojects?.map((a)=> {
-                      return (
-                        <div key={idPlusKey(props?.id, a.title)}>
-                          <p>{a.type}: {a.title}<br />
-                          Duration: {a.duration} month(s)<br />
-                          Began at: {moment(a.acceptdate).format("MMM. DD, YYYY")}<br />
-                          Expected to end at: {moment(expectedMonth(a)).format("MMM. YYYY")}</p>
-                        </div>
-                      )
-                    })}
-                  </div>
-                : <>This user has no ongoing job or projects.</>}
-              </div>
             </div>
           )}
 
           {isEditing && (
-            <form className="settingsForm" onSubmit={submitHandler}>
+            <form className="editProfileForm" onSubmit={submitHandler}>
+              <div className="rightContent">
+                <button onClick={() =>{
+                  setIsEditing(false), 
+                  setRemoveTag(false), 
+                  setAddTagSelected(false),
+                  setCategoryPick(false),
+                  setCategoryBy("Select Category"),
+                  setAdvSearch(false)
+                }} className="btn btn-sm btn-outline-secondary cancelBtn">
+                  Cancel
+                </button>
+              </div>
               <div className="mb-1">
                 <label>First Name:</label>
                 <input autoFocus onChange={e => setDraftFirstName(e.target.value)} type="text" className="form-control form-control-sm" value={draftFirstName} placeholder="firstname" />
               </div>
               <div className="mb-1">
                 <label>Last Name:</label>
-                <input autoFocus onChange={e => setDraftLastName(e.target.value)} type="text" className="form-control form-control-sm" value={draftLastName} placeholder="lastname"/>
+                <input onChange={e => setDraftLastName(e.target.value)} type="text" className="form-control form-control-sm" value={draftLastName} placeholder="lastname"/>
               </div>
               <div className="mb-1">
                 <label>Middle Name: (Optional)</label>
-                <input autoFocus onChange={e => setDraftMiddleName(e.target.value)} type="text" className="form-control form-control-sm" value={draftMiddleName} placeholder="middlename"/>
+                <input onChange={e => setDraftMiddleName(e.target.value)} type="text" className="form-control form-control-sm" value={draftMiddleName} placeholder="middlename"/>
               </div>
               <div className="mb-2">
                 <label>Age:</label>
                 <input onChange={e => setDraftAge(e.target.value)} type="number" className="form-control form-control-sm" value={draftAge} placeholder="age"/>
               </div>
-              <div className="mb-2">
+              <div className="mb-2 location">
                 <label>Region:</label>
                 <input required onChange={e => {
                     setSelectedRegion(e.target.value)
@@ -436,7 +411,7 @@ function UserProfile(props) {
                     </div>
                   )}
               </div>
-              <div className="mb-2">
+              <div className="mb-2 location">
                 <label>Province:</label>
                   <input required onChange={e => {
                     setSelectedProvince(e.target.value)
@@ -457,7 +432,7 @@ function UserProfile(props) {
                     </div>
                   )}
               </div>
-              <div className="mb-2">
+              <div className="mb-2 location">
                 <label>City:</label>
                   <input onChange={e => {
                     setSelectedCity(e.target.value)
@@ -482,19 +457,6 @@ function UserProfile(props) {
                 <label>About:</label>
                 <textarea rows = "5" cols = "60" onChange={e => setDraftAbout(e.target.value)} type="text" className="form-control form-control-sm" value={draftAbout} placeholder="about"/>
               </div>
-
-              {props.type==="Employer" ? 
-                <div>
-                  <div className="mb-1">
-                    <label>Company: </label>
-                    <input autoFocus onChange={e => setDraftCompany(e.target.value)} type="text" className="form-control form-control-sm" value={draftCompany} placeholder="Company Name"/>
-                  </div>
-                  <div className="mb-2">
-                    <label>Current Position:</label>
-                    <input onChange={e => setDraftPosition(e.target.value)} type="text" className="form-control form-control-sm" value={draftPosition} placeholder="Job/Postion at work"/>
-                  </div>
-                </div>
-              :<></>}
 
               {props?.theFree && (
                 <div className="mb-2">
@@ -524,7 +486,7 @@ function UserProfile(props) {
                     )}
                   </div>
 
-                  <button type="button" className="btn btn-sm btn-primary" onClick={()=>{
+                  <button type="button" className="btn btn-outline-success allButtons" onClick={()=>{
                     if (advSearch===false) {
                       setAdvSearch(true)
                     }
@@ -549,7 +511,7 @@ function UserProfile(props) {
                                     <label className="selectedCategory" onClick={()=>{
                                         setCategoryBy(a.name)
                                         setCategoryPick(true) 
-                                    }}>{a.name}</label>
+                                    }}><b>{a.name}</b></label>
                                     {a.name===categoryBy ? 
                                         <div>
                                             {categoryPick && (
@@ -566,38 +528,34 @@ function UserProfile(props) {
                                                 </div>
                                             )}
                                         </div>
-                                    : <></>}
+                                    : null}
                                 </div>
                             )
                         })}
                     </div>
-                  ): <></>}
+                  ): null}
 
                 </div>
               )}
               
-              <button className="btn btn-sm btn-primary">Save</button>{" "}
-              <button onClick={() =>{
-                setIsEditing(false), 
-                setRemoveTag(false), 
-                setAddTagSelected(false),
-                setCategoryPick(false),
-                setCategoryBy("Select Category"),
-                setAdvSearch(false)
-              }} className="btn btn-sm btn-outline-secondary">
-                Cancel
-              </button>
+              <div className="centerContent">
+                <button className="btn btn-outline-success allButtons">Save</button>
+              </div>
             </form>
           )}
         </div>
       </div>
+
       <div className="profileCardMid">
-        <Gallery candidate={props.id} admin={location.state ? location.state : null}/>
+        {props.theFree && (
+          <Gallery candidate={props.id} admin={location.state ? location.state : null}/>
+        )}
       </div>
       <div className="profileCardBot">
         {props.theFree && (
           <RatingsAndReviews ratings={props.ratings} averagerating={props.averagerating} candidate={props.id}/>
         )}
+      </div>
       </div>
     </div>
   )
