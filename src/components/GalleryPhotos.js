@@ -31,7 +31,7 @@ function GalleryPhotos(props) {
     return (
         <div className="galleryCard">
                 <div className="galleryPicTop">
-                    <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${props.image}.jpg` : "/fallback.png"} className="galleryPic" alt={`${props.description} named ${props.title}`}></img>
+                    <img src={props.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_auto:good/${props.image}.jpg` : "/fallback.png"} className="galleryPic" alt={`${props.description} named ${props.title}`}></img>
                 </div>
                 <div className="galleryPicBot">
                     {!isEditing && (

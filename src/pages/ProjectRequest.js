@@ -2,6 +2,8 @@ import React, { useState, useRef, useContext, useEffect } from "react"
 import { UserContext } from "../home"
 import Axios from "axios"
 import { useNavigate, useLocation } from 'react-router-dom'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function ProjectProposal({socket}) {
     const location = useLocation()
@@ -148,6 +150,7 @@ function ProjectProposal({socket}) {
         setIsSkill(false)
       }
       if (skillrequired) {
+        const loadingNotif = async function myPromise() {
       const data = new FormData()
       if (file) {
         data.append("photo", file)
@@ -211,8 +214,11 @@ function ProjectProposal({socket}) {
       const subject = res.data._id
       const type = requestType
       const action = "sent a"
-      await Axios.post(`/api/send-notifications/${userData.user.id}/${adminId}/${action}/${type}/${subject}`)
+      const wait = await Axios.post(`/api/send-notifications/${userData.user.id}/${adminId}/${action}/${type}/${subject}`)
 
+      if (wait) {
+        navigate("/start-project")
+      }
       socket.emit("sendNotification", {
         senderId: userData.user.id,
         receiverId: adminId,
@@ -220,7 +226,15 @@ function ProjectProposal({socket}) {
         type: requestType,
         action: "sent a",
       })
-      navigate("/start-project")
+      }
+      toast.promise(
+        loadingNotif,
+        {
+          pending: 'Uploading image...',
+          success: 'Image uploaded.',
+          error: 'Image upload failed!'
+        }
+      )
       }
     }
 
@@ -777,6 +791,7 @@ function ProjectProposal({socket}) {
           )}
           </form>
         </div>
+        <ToastContainer />
       </div>
     )
   }

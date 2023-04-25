@@ -1,6 +1,8 @@
 import React, { useState, useRef, useContext } from "react"
 import {UserContext} from "../home"
 import Axios from "axios"
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function SendUpdate(props) {
     const api_key = "848182664545332"
@@ -14,6 +16,8 @@ function SendUpdate(props) {
     
     async function submitHandler(e) {
       e.preventDefault()
+
+      const loadingNotif = async function myPromise() {
       const data = new FormData()
       data.append("_id", props.projectid)
       data.append("title", title)
@@ -62,6 +66,15 @@ function SendUpdate(props) {
         type: type,
         action: action,
       })
+      }
+      toast.promise(
+          loadingNotif,
+          {
+            pending: 'Updating project...',
+            success: 'Project updated.',
+            error: 'Project update failed!'
+          }
+      )
       props.setAddUpdate(res.data)
       props.setSendUpdate(false)
     }
@@ -81,6 +94,7 @@ function SendUpdate(props) {
           </div>
           <button className="btn btn-outline-success allButtons">Complete Project Update</button>
         </form>
+        <ToastContainer />
       </div>
     )
   }

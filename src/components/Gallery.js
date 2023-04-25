@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useContext } from "react"
 import { UserContext } from "../home"
 import Axios from "axios"
 import GalleryPhotos from "./GalleryPhotos"
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function Gallery(props) {
     const api_key = "848182664545332"
@@ -59,46 +61,59 @@ function Gallery(props) {
     
     async function submitHandler(e) {
         e.preventDefault()
-        if (!file) {
-            setIsPhoto(false)
-        }
-        if (file) {
-            const data = new FormData()
-            data.append("userId", userData?.user.id) 
-            data.append("title", title)
-            data.append("photo", file)
-            data.append("description", description)
 
-            const signatureResponse = await Axios.get("/get-signature")
-
-            const image = new FormData()
-            image.append("file", file)
-            image.append("api_key", api_key)
-            image.append("signature", signatureResponse.data.signature)
-            image.append("timestamp", signatureResponse.data.timestamp)
-        
-            const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
-            headers: { "Content-Type": "multipart/form-data" },
-            onUploadProgress: function (e) {
-                console.log(e.loaded / e.total)
+        const loadingNotif = async function myPromise() {
+            if (!file) {
+                setIsPhoto(false)
             }
-            })
-            let cloud_image = cloudinaryResponse.data.public_id
-    
-            data.append("image", cloud_image)
-            data.append("public_id", cloudinaryResponse.data.public_id)
-            data.append("version", cloudinaryResponse.data.version)
-            data.append("signature", cloudinaryResponse.data.signature)
+            if (file) {
+                const data = new FormData()
+                data.append("userId", userData?.user.id) 
+                data.append("title", title)
+                data.append("photo", file)
+                data.append("description", description)
 
-            CreatePhotoField.current.value = ""
-            const res = await Axios.post(`/api/gallery/upload-photo/${userData?.user.id}`, data, { headers: { "Content-Type": "multipart/form-data" } })
-            setTitle("")
-            setFile("")
-            setDescription("")
-            setAddPhoto(false)
-            setPhotos(prev => prev.concat([res.data]))
+                const signatureResponse = await Axios.get("/get-signature")
+
+                const image = new FormData()
+                image.append("file", file)
+                image.append("api_key", api_key)
+                image.append("signature", signatureResponse.data.signature)
+                image.append("timestamp", signatureResponse.data.timestamp)
+            
+                const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {headers: { "Content-Type": "multipart/form-data" },
+                
+                onUploadProgress: function (e) {
+                    console.log(e.loaded / e.total)
+                }
+                })
+
+                let cloud_image = cloudinaryResponse.data.public_id
+        
+                data.append("image", cloud_image)
+                data.append("public_id", cloudinaryResponse.data.public_id)
+                data.append("version", cloudinaryResponse.data.version)
+                data.append("signature", cloudinaryResponse.data.signature)
+
+                CreatePhotoField.current.value = ""
+                const res = await Axios.post(`/api/gallery/upload-photo/${userData?.user.id}`, data, { headers: { "Content-Type": "multipart/form-data" } })
+                setTitle("")
+                setFile("")
+                setDescription("")
+                setAddPhoto(false)
+                setPhotos(prev => prev.concat([res.data]))
+            }
         }
+        toast.promise(
+            loadingNotif,
+            {
+              pending: 'Uploading image...',
+              success: 'Image uploaded.',
+              error: 'Image upload failed!'
+            }
+        )
     }
+
     
     return (
         <div className="gallery">
@@ -110,7 +125,7 @@ function Gallery(props) {
                     <div>
                         {props.candidate===userData?.user?.id && (
                             <div className="toUpload">
-                                <button className="allButtons" onClick={()=>{setAddPhoto(true)}}>
+                                <button className="btn btn-outline-success allButtons" onClick={()=>{setAddPhoto(true)}}>
                                     Upload Photo
                                 </button>
                                 {addPhoto && (
@@ -127,7 +142,7 @@ function Gallery(props) {
                     {addPhoto && (
                         <div>
                             <form  onSubmit={submitHandler}>
-                                <p>Select a photo (Required!)</p>
+                                <label>Select a photo<label className="requiredAlert"> <b> *</b></label></label>
                                     <div className="mb-2">
                                         <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
                                     </div>
@@ -138,7 +153,7 @@ function Gallery(props) {
                                     <div className="mb-2">
                                         <input required onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder="A brief description of your photo..." />
                                     </div>
-                                <button className="allButtons">Upload Now</button>
+                                <button className="btn btn-outline-success allButtons">Upload Now</button>
                             </form>
                         </div>
                     )}
@@ -162,6 +177,7 @@ function Gallery(props) {
                     </div>
                 : <div className="galleryPhotoList">No photo available.</div>}
             </div>
+            <ToastContainer />
         </div>  
     )
 }

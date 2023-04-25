@@ -4,6 +4,8 @@ import Axios from "axios"
 import RatingsAndReviews from "../components/Ratings&Reviews"
 import Gallery from "../components/Gallery"
 import { useLocation, useNavigate } from 'react-router-dom'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function Profile(){
   const location = useLocation()
@@ -207,81 +209,92 @@ function UserProfile(props) {
         return Accounts
       })
     )
-    const data = new FormData()
-    if (file) {
-      data.append("photo", file)
-      const signatureResponse = await Axios.get("/get-signature")
 
-      const image = new FormData()
-      image.append("file", file)
-      image.append("api_key", api_key)
-      image.append("signature", signatureResponse.data.signature)
-      image.append("timestamp", signatureResponse.data.timestamp)
-    
-      const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: function (e) {
-          console.log(e.loaded / e.total)
-        }
-      })
-      let cloud_image = cloudinaryResponse.data.public_id
-  
-      data.append("image", cloud_image)
-      data.append("public_id", cloudinaryResponse.data.public_id)
-      data.append("version", cloudinaryResponse.data.version)
-      data.append("signature", cloudinaryResponse.data.signature)
+    const loadingNotif = async function myPromise() {
+      const data = new FormData()
+      if (file) {
+        data.append("photo", file)
+        const signatureResponse = await Axios.get("/get-signature")
 
-      if (cloudinaryResponse) {
-        props.setAccounts(prev => {
-          return prev.map(function (Accounts) {
-            if (Accounts.id == props.id) {
-              return { ...Accounts, image: cloud_image }
-            }
-            return Accounts
-          })
+        const image = new FormData()
+        image.append("file", file)
+        image.append("api_key", api_key)
+        image.append("signature", signatureResponse.data.signature)
+        image.append("timestamp", signatureResponse.data.timestamp)
+      
+        const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: function (e) {
+            console.log(e.loaded / e.total)
+          }
         })
-      }
-    }
-    data.append("_id", props.id)
-    data.append("firstname", draftFirstName)
-    data.append("lastname", draftLastName)
-    data.append("middlename", draftMiddleName)
-    data.append("age", draftAge)
-    data.append("address", draftAddress)
-
-    data.append("region", region ? region.name : props.location?.region)
-    data.append("province", province ? province.name : props.location?.province)
-    data.append("city", city ? city.name : props.location?.city)
-
-    data.append("about", draftAbout)
-    data.append("company", draftCompany)
-    data.append("position", draftPosition)
+        let cloud_image = cloudinaryResponse.data.public_id
     
-    const newPhoto = await Axios.post("/update-account", data, { headers: { "Content-Type": "multipart/form-data" } })
+        data.append("image", cloud_image)
+        data.append("public_id", cloudinaryResponse.data.public_id)
+        data.append("version", cloudinaryResponse.data.version)
+        data.append("signature", cloudinaryResponse.data.signature)
 
-    if (theTag) {
-      try {
-        const rmvTag = await Axios.post("/api/remove-tag/", {params: {
-          user: userSkill._id,
-          tag: theTag
-        }})
-        setUserSkill(rmvTag.data)
-      } catch (err) {
-        console.log(err)
+        if (cloudinaryResponse) {
+          props.setAccounts(prev => {
+            return prev.map(function (Accounts) {
+              if (Accounts.id == props.id) {
+                return { ...Accounts, image: cloud_image }
+              }
+              return Accounts
+            })
+          })
+        }
+      }
+      data.append("_id", props.id)
+      data.append("firstname", draftFirstName)
+      data.append("lastname", draftLastName)
+      data.append("middlename", draftMiddleName)
+      data.append("age", draftAge)
+      data.append("address", draftAddress)
+
+      data.append("region", region ? region.name : props.location?.region)
+      data.append("province", province ? province.name : props.location?.province)
+      data.append("city", city ? city.name : props.location?.city)
+
+      data.append("about", draftAbout)
+      data.append("company", draftCompany)
+      data.append("position", draftPosition)
+      
+      const newPhoto = await Axios.post("/update-account", data, { headers: { "Content-Type": "multipart/form-data" } })
+      
+      if (theTag) {
+        try {
+          const rmvTag = await Axios.post("/api/remove-tag/", {params: {
+            user: userSkill._id,
+            tag: theTag
+          }})
+          setUserSkill(rmvTag.data)
+        } catch (err) {
+          console.log(err)
+        }
+      }
+
+      if (addTag) {
+        try {
+          const adTag = await Axios.post("/api/add-tag/", {params: {
+            user: userSkill._id,
+            tag: addTag
+          }})
+          setUserSkill(adTag.data)
+        } catch (err) {
+          console.log(err)
+        }
       }
     }
-
-    if (addTag) {
-      try {
-        const adTag = await Axios.post("/api/add-tag/", {params: {
-          user: userSkill._id,
-          tag: addTag
-        }})
-        setUserSkill(adTag.data)
-      } catch (err) {
-        console.log(err)
+    toast.promise(
+      loadingNotif,
+      {
+        pending: 'Uploading image...',
+        success: 'Image uploaded.',
+        error: 'Image upload failed!'
       }
-    }
+    )
   }
 
   function idPlusKey(a, b) {
@@ -464,7 +477,7 @@ function UserProfile(props) {
                   <div>
                     {userSkill.skill?.map((a)=> {
                       return (
-                        <button type="button" className="btn btn-sm btn-primary" key={idPlusKey(props.id, a)} onClick={()=> {
+                        <button type="button" className="btn btn-outline-success allButtons" key={idPlusKey(props.id, a)} onClick={()=> {
                           setRemoveTag(true), setBtnTheTag(a)
                         }}>{a}</button>
                       )
@@ -557,6 +570,7 @@ function UserProfile(props) {
         )}
       </div>
       </div>
+      <ToastContainer />
     </div>
   )
 }
