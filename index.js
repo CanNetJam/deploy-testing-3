@@ -237,7 +237,6 @@ app.get("/api/hiring-search", async (req, res)=> {
     }
   }
   let range = sallaryRange(sallary)
-  
     try {
       const allResults = (await projects.find({$and: [
       {skillrequired: new RegExp(query, 'i'), 
@@ -771,9 +770,10 @@ app.post("/update-project", upload.single("photo"), requestCleanup, async (req, 
     province: req.body.province,
     city: req.body.city
   } 
-  let expirydate = addDays(req.body.approvaldate, 30)
-
-  req.cleanData.expirationdate = expirydate
+  if (req.body.approvaldate) {
+    let expirydate = addDays(req.body.approvaldate, 30)
+    req.cleanData.expirationdate = expirydate
+  }
   try {
     const request = await projects.findByIdAndUpdate({ _id: new ObjectId(req.body._id) }, { $set: req.cleanData })
     res.status(200).json(request)
@@ -784,13 +784,32 @@ app.post("/update-project", upload.single("photo"), requestCleanup, async (req, 
 
 app.get("/api/all-projects-expiry/:userid", auth, async (req, res) => {
   try {
+    function addDays(date, days) {
+      var result = new Date(date)
+      result.setDate(result.getDate() + days)
+      return result
+    }
+
+    let expirydate = addDays(Date.now(),5)
+
     const allProjects = await projects.find({
       employer: new ObjectId(req.params.userid),
       type: ["Job", "Project"],
       status: "Hiring", 
-      expirationdate: {$lt: Date.now()-5}
+      expirationdate: {$lte: expirydate}
     })
-    res.status(200).json(allProjects)
+
+    let expiredProject = []
+    for (i=0; i < allProjects.length; i++){
+      let haha = addDays(allProjects[i].expirationdate,-5)
+      if (haha <= expirydate) {
+        expiredProject = expiredProject.concat([
+          allProjects[i]
+        ])
+      }
+    }
+    
+    res.status(200).json(expiredProject)
   } catch (err) {
     res.status(500).json(err)
   }
@@ -902,9 +921,13 @@ app.post("/api/update-project/rejected/:projectid/:employer/:userid", async (req
   const projectid = req.params.projectid
   let noteAdd
   try {
-    const updateRejected = await projects.findByIdAndUpdate({_id: projectid}, {accepted: "No", tempfree: ""})
+    //const updateRejected = await projects.findByIdAndUpdate({_id: projectid}, {accepted: "No", tempfree: ""})
+    const updateRejected = await projects.findById({_id: projectid})
     if (req.params.employer !== req.params.userid) {
-      noteAdd = await projects.findByIdAndUpdate({_id: projectid}, {$push: {notes: {notesender: req.params.userid, note: req.body.note}}})
+      noteAdd = await projects.findByIdAndUpdate({_id: projectid}, {
+        $push: {notes: {notesender: req.params.userid, note: req.body.note}}, 
+        $pull: {tempcandidate: {applicantid: req.params.userid}}
+      })
     }
     res.status(200).json(noteAdd ? noteAdd : updateRejected)
   } catch (err) {

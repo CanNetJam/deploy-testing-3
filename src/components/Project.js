@@ -326,11 +326,43 @@ function Project({socket}) {
       var todaysdate = moment()
       return eventdate.diff(todaysdate, 'days')
     }
+
+    useEffect(() => {
+      const getDaysRemaining = async () => {
+        try {
+          if (projectInfo) {
+            if (theEmp===true) {
+              let daysBetween = daysRemaining(projectInfo?.expirationdate)
+              let slots = projectInfo?.slots
+              if (daysBetween<=5) {
+                toastDueDateWarningNotification(daysBetween, slots)
+              }
+            }
+          }
+        } catch (err) {
+          console.log(err)
+        }
+      }
+      getDaysRemaining()
+    }, [projectInfo])
     
     function toastWarningNotification() {
       toast.warn('Please login to continue.', {
         position: "top-center",
         autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      })
+    }
+
+    function toastDueDateWarningNotification(daysbetween, slots) {
+      toast.warn(`${daysbetween} more days before the post expires. You still have ${slots} more slots to fill up.`, {
+        position: "top-center",
+        autoClose: 2000,
         hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: true,
@@ -365,12 +397,14 @@ function Project({socket}) {
                     <br/>
                     <p className="profileCardName">{projectInfo.title}</p>
                     <div className="projectCardTop">
-
+                      <div className="projectCardTopPhoto">
+                        <img src={projectInfo.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${projectInfo.image}.jpg` : "/fallback.png"} className="projectPhoto" alt={`${projectInfo.company} named ${projectInfo.title}`}></img>
+                      </div>
                       <div className="projectCardTopDetails">
                         {projectInfo.status==="Hiring" ?
                           <div className="paragraphSpaceBetween">
                             <p>Hiring <b>{projectInfo.slots ? projectInfo.slots : "unspecified"}</b> people.</p>
-                            <p><b>{projectInfo.expirationdate ? daysRemaining(projectInfo.expirationdate) : "unspecified"}</b> days before post expires.</p>
+                            {projectInfo.expirationdate ? (daysRemaining(projectInfo.expirationdate)>1 ? <p><b>{daysRemaining(projectInfo.expirationdate)}</b> days before post expires.</p>: <b>{`${projectInfo.type} Expired.`}</b>) : "unspecified"}
                           </div>
                         :<></>}
                         <div className="paragraphSpaceBetween">
@@ -444,9 +478,6 @@ function Project({socket}) {
                             <div className="rightText">{moment(projectInfo.completiondate).format("MMM. DD, YYYY")}</div>
                           </div>
                         :<></>}
-                      </div>
-                      <div className="projectCardTopPhoto">
-                        <img src={projectInfo.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${projectInfo.image}.jpg` : "/fallback.png"} className="projectPhoto" alt={`${projectInfo.company} named ${projectInfo.title}`}></img>
                       </div> 
                     </div>
                     <br/>
@@ -631,6 +662,8 @@ function Project({socket}) {
                                 <div>
                                   <SearchBox 
                                   projectid={location.state._id}
+                                  projectInfo={projectInfo}
+                                  setProjectInfo={setProjectInfo}
                                   projecttype={projectInfo?.type}/>
                                 </div>
                               )} 
@@ -661,7 +694,7 @@ function Project({socket}) {
                               <div>
                                   <button className="btn btn-sm btn-outline-success applyButton" onClick={()=>{
                                       toastWarningNotification(),
-                                      window.setTimeout(()=>navigate("/login", {}), 3000)
+                                      window.setTimeout(()=>navigate("/login", {}), 2000)
                                   }}>
                                       Apply Now!
                                   </button>
@@ -712,14 +745,14 @@ function Project({socket}) {
                                       <div className="notif" key={a._id}>
                                         <div className="notifTop">
                                             <div>
-                                                <img className="messageImg" src={a.notesender.photo ? `/uploaded-photos/${a.notesender.photo}` : "/fallback.png"} alt={`${a.notesender.lastname}`} />
+                                              <img className="messageImg" src={a.notesender.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${a.notesender.image}.jpg` : "/fallback.png"}></img>
                                             </div>
                                             <div>
                                                 {a.notesender?.firstname} {a.notesender.middlename ? a.notesender.middlename.charAt(0).toUpperCase() + ". " : "" }{a.notesender?.lastname} declined your offer with a reason of: { a.note}
                                             </div>
                                         </div>
                                         <div className="notifBot">
-                                            <button className="btn btn-sm btn-primary" onClick={()=> {
+                                            <button className="btn btn-outline-success allButtons" onClick={()=> {
                                               readAll(projectInfo._id, a._id)
                                             }}>
                                               Mark as Read
@@ -745,6 +778,7 @@ function Project({socket}) {
                             {projectInfo?.employeelist.map(function(a) {
                               return <EmployeeList 
                                       _id={a._id}
+                                      beganAt={a.beganAt}
                                       key={idPlusKey(a._id, userData.user.id)} 
                                       employeeid ={a.employeeid} 
                                       employer ={projectInfo?.employer?._id} 

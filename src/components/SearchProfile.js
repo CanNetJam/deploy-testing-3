@@ -19,7 +19,9 @@ function SearchProfile({socket}) {
     const [ occupied, setOccupied ] = useState(false)
     const [ currentprj, setCurrentPrj ] = useState(0)
     const [ available, setAvailable ] = useState(true)
-
+    const [ requested, setRequested ] = useState(false)
+    const [ reload, setReload ] = useState()
+    
     useEffect(() => {
         const user = location?.state?._id
         const getUserData = async () => {
@@ -55,13 +57,18 @@ function SearchProfile({socket}) {
             if (location?.state?.projecttype==="Project" && currentprj>=3) {
                 setAvailable(false)
             }
+            location?.state?.projectInfo?.tempcandidate.map((a)=> {
+                if (a.applicantid._id===user) {
+                    setRequested(true)
+                }
+            })
             setProject(location?.state?.projectid ? location.state.projectid : null)
           } catch (err) {
             console.log(err)
           }
         }
         getUserData()
-    }, [occupied, currentprj])
+    }, [occupied, currentprj, reload])
 
     async function addCandidate() {
         const projectid = project
@@ -83,6 +90,8 @@ function SearchProfile({socket}) {
                     type: type,
                     action: action,
                 })
+                setReload(res.data)
+                
                 toastSucessNotification(projecttype)
             } catch (err) {
                 console.log(err)
@@ -247,17 +256,23 @@ function SearchProfile({socket}) {
                             {userData?.user?.type==="Employer" && (
                                 <>
                                     {available ?
-                                        <div className="searchProfileMidOptions">
-                                            <button className="btn btn-outline-success allButtons" onClick={()=>{
-                                                if (project) {
-                                                    addCandidate()
-                                                }
-                                                if (!project) {
-                                                    toastWarning2Notification(),
-                                                    window.setTimeout(()=>navigate("/project-list", {}), 4000)
-                                                }
-                                            }}>Hire Now!</button>
-                                        </div>
+                                        <>
+                                            {requested===false ? 
+                                                <div className="searchProfileMidOptions">
+                                                    <button className="btn btn-outline-success allButtons" onClick={()=>{
+                                                        if (project) {
+                                                            addCandidate()
+                                                        }
+                                                        if (!project) {
+                                                            toastWarning2Notification(),
+                                                            window.setTimeout(()=>navigate("/project-list", {}), 4000)
+                                                        }
+                                                    }}>Hire Now!</button>
+                                                </div>
+                                            : <>
+                                                <button className="btn btn-sm btn-outline-secondary cancelBtn">Cancel Request</button>
+                                            </>}
+                                        </>
                                     :<div className="searchProfileMidOptions">
                                         <p className="notAvailable"><i>Fully occupied, cannot be hired right now.</i></p>
                                     </div>}

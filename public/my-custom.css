@@ -32,6 +32,19 @@ html, body {
   padding: 5px;
 }
 
+.pageButtons {
+  width: auto;
+  height: auto;
+  min-width: 70px;
+  color: #ffffff;
+  background-color: #ff9400;
+  border: solid 1px;
+  border-radius: 4px;
+  border-color: #ffffff;
+  cursor: pointer;
+  padding: 5px;
+}
+
 .applyButton {
   width: auto;
   min-width: 175px;
@@ -48,6 +61,88 @@ html, body {
 
 .limitWideButtons {
   max-width: 200px;
+}
+
+.flexContent {
+  display: flex;
+  gap: 10px;
+}
+
+.dropdownHover {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content button {
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdownitem {
+  display: flex;
+  min-height: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.dropbtn {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.dropdownitem:hover {
+  background-color: rgb(213, 233, 224);
+}
+
+.dropdown-content button:hover {background-color: #ddd;}
+
+.dropdownHover:hover .dropdown-content {display: block;}
+
+.dropdownHover:hover .dropbtn {background-color: #3e8e41;}
+
+.arrow {
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+}
+
+.right {
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
+
+.left {
+  transform: rotate(135deg);
+  -webkit-transform: rotate(135deg);
+}
+
+.up {
+  transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+
+.closeIcon {
+  color: black;
 }
 
 .centerContent {
@@ -308,6 +403,7 @@ html, body {
   right: 20px;
   left: -60px;
   border-radius: 8px;
+  z-index: 2;
 }
 
 .counter {
@@ -373,6 +469,7 @@ html, body {
   max-width: 1500px;
   padding: 15px;
   background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .chatMenu {
@@ -522,6 +619,7 @@ html, body {
   padding: 10px;
   border-radius: 10px;
   background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .projectRequestApplication {
@@ -532,6 +630,7 @@ html, body {
   padding: 15px;
   border-radius: 10px;
   background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .projects-grid {
@@ -686,6 +785,7 @@ html, body {
   max-width: 1500px;
   padding: 15px;
   background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .aboutTopic {
@@ -848,6 +948,7 @@ html, body {
   max-width: 1500px;
   padding: 20px;
   background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .help div {
@@ -1032,15 +1133,22 @@ html, body {
 }
 
 .searchTop {
-  justify-content: space-between;
   align-items: center;
-  display: flex;
+  display: grid;
   width: 100%;
-  padding: 5px;
   gap: 5px;
   background-color: #ffffff;
   padding: 10px;
   border-radius: 5px;
+}
+
+.searchTopSearch {
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+  width: 100%;
+  gap: 5px;
+  background-color: #ffffff;
 }
 
 .searchBar {
@@ -1395,6 +1503,7 @@ html, body {
   max-width: 1500px;
   padding: 10px;
   background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .editProfileForm {
@@ -1554,6 +1663,7 @@ html, body {
   max-width: 1500px;
   padding: 15px;
   background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .projectUpdates {
@@ -1595,17 +1705,31 @@ html, body {
   cursor: pointer;
 }
 
+.employeeListWrapper {
+  border-radius: 5px;
+}
+
 .employeeList {
   display: flex;
   min-height: 20px;
   padding: 10px;
-  border-radius: 5px;
+
   justify-content: space-between;
   align-items: center;
 }
 
+.employeeListMore {
+  padding-left: 5px;
+  padding-right: 5px;
+  cursor: pointer;
+}
+
+.employeeListMore:hover {
+  background-color: #ffffff;
+}
+
 .projectListCard:hover,
-.employeeList:hover,
+.employeeListWrapper:hover,
 .notif:hover,
 .tagButton:hover {
   background-color: rgb(245, 243, 243);
@@ -1645,6 +1769,7 @@ html, body {
   max-width: 1500px;
   padding: 15px;
   background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 /*-------------------------------------------------Register----------------------------------------------*/
 .register {
@@ -1653,6 +1778,7 @@ html, body {
   width: 100%;
   max-width: 1500px;
   background-color:#ffffff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .titleLabel {
@@ -1716,6 +1842,7 @@ html, body {
   max-width: 1500px;
   background-color: #ffffff;
   padding: 15px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .reportsProjectsList {
@@ -1724,6 +1851,7 @@ html, body {
   max-width: 1500px;
   background-color: #ffffff;
   padding: 15px;
+  overflow-x: auto;
 }
 
 .projectListPhoto {
@@ -1961,6 +2089,10 @@ tr:nth-child(even) {
   padding: 15px;
 }
 
+.settings {
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
 .settings,
 .reports,
 .bugReports {
@@ -1983,6 +2115,7 @@ tr:nth-child(even) {
 /*-------------------------------------------------Reports----------------------------------------------*/
 .reports {
   align-items: center;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .reportsTop {
@@ -2218,6 +2351,53 @@ a:hover {
   padding: 25px;
 }
 
+.requestTable {
+  position: relative;
+  z-index: 1;
+}
+
+.requestModal {
+  position: absolute;
+  top: 0px;
+  z-index: 2;
+  width: 100%;
+}
+
+.requestModalPhoto {
+  height: auto;
+  max-height: 300px;
+  width: 100%;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+}
+
+.approveModalBackground {
+  width: 100%;
+  max-width: 1500px;
+  min-height: 70vh;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.approveModalContainer {
+  position: absolute;
+  top: 10px;
+  max-width: 500px;
+  max-height: 1000px;
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+}
+
 .modalContainer .title {
   display: inline-block;
   text-align: center;
@@ -2270,6 +2450,7 @@ a:hover {
   width: 100%;
   max-width: 1500px;
   background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .companyProfileContent {

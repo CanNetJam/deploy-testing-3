@@ -3,7 +3,7 @@ import Axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { UserContext } from "../home"
 
-function SearchBox({projectid, projecttype}) {
+function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
     const cloud_name = "dzjkgjjut"
     let navigate = useNavigate()
     const { userData, setUserData } = useContext(UserContext)
@@ -16,14 +16,10 @@ function SearchBox({projectid, projecttype}) {
     const [categoryBy, setCategoryBy] = useState("")
     const [categoryPick, setCategoryPick] = useState(false)
     const [filteredCategory, setFilteredCategory] = useState([])
-    const [sortBy, setSortBy] = useState("A-Z (First Name)")
+    const [sortBy, setSortBy] = useState("Highest Rating")
     const [result, setResult] = useState([])
     const [page, setPage] = useState(0)
     const [searchCount, setSearchCount] = useState(10)
-
-    const [btnSearchBy, setBtnSearchBy] = useState("")
-    const [btnSortBy, setBtnSortBy] = useState("")
-    const [btnSearchCount, setBtnSearchCount] = useState()
 
     let length = accounts.length
     let index = 0
@@ -98,123 +94,97 @@ function SearchBox({projectid, projecttype}) {
     return (
         <div className="searchComponent">
             <div className="searchTop">
-                <div className="quickSearch">
-                    <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                if (advSearch === false) {
-                                    setAdvSearch(true)
-                                }
-                                if (advSearch === true) {
-                                    setAdvSearch(false)
-                                    setCategoryPick(false)
-                                    setCategoryBy("")
-                                }
-                            }}>
-                                Categories
-                    </button>
-                </div>
-
-                <div className="searchBar">
-                    <input
-                        type="text"
-                        className="searchBox"
-                        placeholder={queryPlaceHolder(query)}
-                        onChange={(e) => setQuery(e.target.value)}
-                    />
-                </div>
-                <div className="testing">
-                    <div className="searchKey">
+                <div className="searchTopSearch">
+                    <div className="quickSearch">
                         <button className="btn btn-outline-success allButtons" onClick={()=> {
-                            if (keySearch === false) {
-                                setKeySearch(true)
-                            }
-                            if (keySearch === true) {
-                                setKeySearch(false)
-                            }
-                        }}>
-                            ...
+                                    if (advSearch === false) {
+                                        setAdvSearch(true)
+                                    }
+                                    if (advSearch === true) {
+                                        setAdvSearch(false)
+                                        setCategoryPick(false)
+                                        setCategoryBy("")
+                                    }
+                                }}>
+                                    Categories
                         </button>
                     </div>
-
-                    <div className="keyPicker">
+                    <div className="searchBar">
+                        <input
+                            type="text"
+                            className="searchBox"
+                            placeholder={queryPlaceHolder(query)}
+                            onChange={(e) => setQuery(e.target.value)}
+                        />
+                    </div>
+                    <div className="testing">
+                        <div className="searchKey">
+                            <button className="btn btn-outline-success allButtons" onClick={()=> {
+                                if (keySearch === false) {
+                                    setKeySearch(true)
+                                }
+                                if (keySearch === true) {
+                                    setKeySearch(false)
+                                }
+                            }}>
+                                ...
+                            </button>
+                        </div>
+                    </div>
+                </div>
                         {keySearch && (
-                            <div className="advanceSearch">
-                                <div>
-                                    <h4>Search by:</h4>
-                                    <div className="searchAdvWrapper">
-                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSearchBy("Skill")}}>
-                                            <b>Skill</b>
-                                        </button>
-                                        <button className="btn btn-outline-success allButtons" onClick={()=>{
-                                            setBtnSearchBy("Name")
+                            <div className="flexContent">
+                                <div className="dropdownHover">
+                                    <button className="btn btn-outline-success allButtons dropbtn" onClick={()=>{searchBy!=="Skill" ? setSearchBy("Skill"): null}}>
+                                        {searchBy!=="" ? searchBy+" " : "Search by "} 
+                                        <i class="arrow down"></i>
+                                    </button>
+                                    <div className="dropdown-content">
+                                        <label className="dropdownitem" onClick={()=>{setSearchBy("Skill")}}>
+                                            Skill
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{
+                                            setSearchBy("Name")
                                             setQuery("")
                                             }}>
-                                            <b>Name</b>
-                                        </button>
+                                            Name
+                                        </label>
                                     </div>
                                 </div>
-                                <div>
-                                    <h4>Sort by:</h4>
-                                    <div className="searchAdvWrapper">
-                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Highest Rating")}}>
-                                            Highest Rating
-                                        </button>
-                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Lowest Rating")}}>
-                                            Lowest Rating
-                                        </button>
-                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("A-Z (First Name)")}}>
-                                            A-Z (First Name)
-                                        </button>
-                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Z-A (First Name)")}}>
-                                            Z-A (First Name)
-                                        </button>
-                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("A-Z (Last Name)")}}>
-                                            A-Z (Last Name)
-                                        </button>
-                                        <button className="btn btn-outline-success allButtons" onClick={()=>{setBtnSortBy("Z-A (Last Name)")}}>
-                                            Z-A (Last Name)
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4>Show results by:</h4>
-                                    <div className="searchAlign centerContent">
-                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(5)}}>
-                                            5
-                                        </button>
-                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(10)}}>
-                                            10
-                                        </button>
-                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(50)}}>
-                                            25
-                                        </button>
-                                        <button className="btn btn-outline-success allButtons countBtn" onClick={()=>{setBtnSearchCount(50)}}>
-                                            50
-                                        </button>
-                                    </div>
-                                </div>
-                                <br />    
-                                <div className="centerContent">
-                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                        if (btnSearchBy!=="") {
-                                            setSearchBy(btnSearchBy)
+
+                                <div className="dropdownHover">
+                                    <button className="btn btn-outline-success allButtons dropbtn" onClick={()=>{
+                                        if (sortBy!=="Highest Rating") {
+                                            setSortBy("Highest Rating")
                                         }
-                                        if (btnSortBy!=="") {
-                                            setSortBy(btnSortBy)
-                                        }
-                                        if (btnSearchCount!==undefined) {
-                                            setSearchCount(btnSearchCount)
-                                        }
-                                        setPage(0)
-                                        setKeySearch(false)
                                     }}>
-                                        Apply
+                                        {sortBy!=="" ? sortBy+" " : "Sort by "} 
+                                        <i class="arrow down"></i>
                                     </button>
+                                    <div className="dropdown-content">
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("Highest Rating")}}>
+                                            Highest Rating
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("Lowest Rating")}}>
+                                            Lowest Rating
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("A-Z (First Name)")}}>
+                                            A-Z (First Name)
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("Z-A (First Name)")}}>
+                                            Z-A (First Name)
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("A-Z (Last Name)")}}>
+                                            A-Z (Last Name)
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("Z-A (Last Name)")}}>
+                                            Z-A (Last Name)
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         )}
-                    </div>
-                </div>
-            </div>
+            
 
             {advSearch===true? (
                 <div className="searchAdv">
@@ -246,6 +216,7 @@ function SearchBox({projectid, projecttype}) {
                     })}
                 </div>
             ): <></>}
+            </div>
 
             <div className="searchBot">
                 {result[0] ? 
@@ -258,6 +229,8 @@ function SearchBox({projectid, projecttype}) {
                                 } 
                                 if (userData?.user?.id!==a._id) {
                                     navigate("/search-profile", {state: {_id: a._id, projectid: projectid ? projectid : null,
+                                        projectInfo: projectInfo ? projectInfo : null, 
+                                    
                                         projecttype: projecttype, toHire: "No"}})
                                 }
                                 if (userData?.user===undefined) {
@@ -292,16 +265,17 @@ function SearchBox({projectid, projecttype}) {
                     })}
                     </div>
                     :<span className="searchList">No Applicant(s) found.</span>}
+
                 <div className="pageNumber">
+                    <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
                     {result?.map((a)=>{
                         return (
-                            <div key={result?.indexOf(a)}>
-                                <button className="btn btn-outline-success allButtons" onClick={()=>setPage(result?.indexOf(a))}>
-                                    {"Page "+((result?.indexOf(a))+1)}
-                                </button>
-                            </div>
+                            <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
+                                {(result?.indexOf(a))+1}
+                            </button>
                         )
                     })}
+                    <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
                 </div>
             </div>
         </div>

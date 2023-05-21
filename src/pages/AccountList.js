@@ -23,10 +23,6 @@ function AllAccounts(){
     const [page, setPage] = useState(0)
     const [searchCount, setSearchCount] = useState(10)
 
-    const [btnSearchBy, setBtnSearchBy] = useState("")
-    const [btnSortBy, setBtnSortBy] = useState("")
-    const [btnSearchCount, setBtnSearchCount] = useState()
-
     let length = accounts.length
     let index = 0
 
@@ -144,261 +140,241 @@ function AllAccounts(){
     }
     
     return(
-      <div className="accountsList">
-        <div className="contentTitle">
-            <label><b>List of Accounts</b></label>
-        </div>
-        <br/>
-        <div className="searchTop">
-                <div className="quickSearch">
-                    <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                if (advSearch === false) {
-                                    setAdvSearch(true)
-                                }
-                                if (advSearch === true) {
-                                    setAdvSearch(false)
-                                    setCategoryPick(false)
-                                    setCategoryBy("")
-                                }
-                            }}>
-                                Categories
-                    </button>
-                </div>
-
-                <div className="searchBar">
-                    <input
-                        type="text"
-                        className="searchBox"
-                        placeholder={queryPlaceHolder(query)}
-                        onChange={(e) => setQuery(e.target.value)}
-                    />
-                </div>
-                <div className="testing">
-                    <div className="searchKey">
+        <div className="accountsList">
+            <div className="contentTitle">
+                <label><b>List of Accounts</b></label>
+            </div>
+            <br/>
+            <div className="searchTop">
+                <div className="searchTopSearch">
+                    <div className="quickSearch">
                         <button className="btn btn-outline-success allButtons" onClick={()=> {
-                            if (keySearch === false) {
-                                setKeySearch(true)
-                            }
-                            if (keySearch === true) {
-                                setKeySearch(false)
-                            }
-                        }}>
-                            ...
+                                    if (advSearch === false) {
+                                        setAdvSearch(true)
+                                    }
+                                    if (advSearch === true) {
+                                        setAdvSearch(false)
+                                        setCategoryPick(false)
+                                        setCategoryBy("")
+                                    }
+                                }}>
+                                    Categories
                         </button>
                     </div>
-
-                    <div className="keyPicker">
+                    <div className="searchBar">
+                        <input
+                            type="text"
+                            className="searchBox"
+                            placeholder={queryPlaceHolder(query)}
+                            onChange={(e) => setQuery(e.target.value)}
+                        />
+                    </div>
+                    <div className="testing">
+                        <div className="searchKey">
+                            <button className="btn btn-outline-success allButtons" onClick={()=> {
+                                if (keySearch === false) {
+                                    setKeySearch(true)
+                                }
+                                if (keySearch === true) {
+                                    setKeySearch(false)
+                                }
+                            }}>
+                                ...
+                            </button>
+                        </div>
+                    </div>
+                </div>
                         {keySearch && (
-                            <div className="advanceSearch">
-                                <div>
-                                    <h4>Search by:</h4>
-                                    <div className="searchAdvWrapper">
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Skill")}}>
-                                            <b>Skill</b>
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
-                                          setBtnSearchBy("Name")
-                                          setQuery("")
-                                          }}>
-                                            <b>Name</b>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4>Sort by:</h4>
-                                    <div className="searchAdvWrapper">
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("A-Z (First Name)")}}>
-                                            A-Z (First Name)
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Z-A (First Name)")}}>
-                                            Z-A (First Name)
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("A-Z (Last Name)")}}>
-                                            A-Z (Last Name)
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Z-A (Last Name)")}}>
-                                            Z-A (Last Name)
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4>Show results by:</h4>
-                                    <div className="searchAlign centerContent">
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(5)}}>
-                                            5
-                                        </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(10)}}>
-                                            10
-                                        </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
-                                            25
-                                        </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
-                                            50
-                                        </button>
-                                    </div>
-                                </div>
-                                <br />    
-                                <div className="centerContent">
-                                    <button className="btn btn-sm btn-primary" onClick={()=> {
-                                        if (btnSearchBy!=="") {
-                                            setSearchBy(btnSearchBy)
-                                        }
-                                        if (btnSortBy!=="") {
-                                            setSortBy(btnSortBy)
-                                        }
-                                        if (btnSearchCount!==undefined) {
-                                            setSearchCount(btnSearchCount)
-                                        }
-                                        setPage(0)
-                                        setKeySearch(false)
-                                    }}>
-                                        Confirm
+                            <div className="flexContent">
+                                <div className="dropdownHover">
+                                    <button className="btn btn-outline-success allButtons dropbtn" onClick={()=>{searchBy!=="Skill" ? setSearchBy("Skill"): null}}>
+                                        {searchBy!=="" ? searchBy+" " : "Search by "} 
+                                        <i class="arrow down"></i>
                                     </button>
+                                    <div className="dropdown-content">
+                                        <label className="dropdownitem" onClick={()=>{setSearchBy("Skill")}}>
+                                            Skill
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{
+                                            setSearchBy("Name")
+                                            setQuery("")
+                                            }}>
+                                            Name
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="dropdownHover">
+                                    <button className="btn btn-outline-success allButtons dropbtn" onClick={()=>{
+                                        if (sortBy!=="Highest Rating") {
+                                            setSortBy("Highest Rating")
+                                        }
+                                    }}>
+                                        {sortBy!=="" ? sortBy+" " : "Sort by "} 
+                                        <i class="arrow down"></i>
+                                    </button>
+                                    <div className="dropdown-content">
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("Highest Rating")}}>
+                                            Highest Rating
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("Lowest Rating")}}>
+                                            Lowest Rating
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("A-Z (First Name)")}}>
+                                            A-Z (First Name)
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("Z-A (First Name)")}}>
+                                            Z-A (First Name)
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("A-Z (Last Name)")}}>
+                                            A-Z (Last Name)
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{setSortBy("Z-A (Last Name)")}}>
+                                            Z-A (Last Name)
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         )}
-                    </div>
-                </div>
             </div>
 
-            {advSearch===true? (
-                <div className="searchAdv">
-                    {category.map((a)=> {
+                {advSearch===true? (
+                    <div className="searchAdv">
+                        {category.map((a)=> {
+                            return (
+                                <div key={a._id}>
+                                    <label className="selectedCategory" onClick={()=>{
+                                        setCategoryBy(a.name)
+                                        setCategoryPick(true) 
+                                    }}><b>{a.name}</b></label>
+                                    {a.name===categoryBy ? 
+                                        <div>
+                                            {categoryPick && (
+                                                <div className="searchTabs">
+                                                    {filteredCategory?.map((b)=> {
+                                                        return <button className="btn btn-sm btn-primary" key={idPlusKey(categoryBy, b)} onClick={()=>{
+                                                                    setQuery(b),
+                                                                    setSearchBy("Skill")
+                                                                    setCategoryBy("")
+                                                                    setCategoryPick(false)
+                                                                    setAdvSearch(false)
+                                                                }}>{b}</button>
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    : <></>}
+                                </div>
+                            )
+                        })}
+                    </div>
+                ): <></>}
+
+            <div className="centerContent">
+            <div className="tableList">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th><div className="constantHW">Type</div></th>
+                            <th><div className="constantHW">Photo</div></th>
+                            <th><div className="constantHW">First Name</div></th>
+                            <th><div className="constantHW">Middle Name</div></th>
+                            <th><div className="constantHW">Last Name</div></th>
+                            <th><div className="constantHW">Email</div></th>
+                            <th><div className="constantHW">Age</div></th>
+                            <th><div className="constantHW">Adress</div></th>
+                            <th><div className="constantHW">Skill(s)</div></th>
+                            <th><div className="constantHW">Last Activity</div></th>
+                            
+                            <th><div className="constantHW">Profile</div></th>
+                            <th><div className="constantHW">Actions</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {result[0] ? 
+                        <>
+                        {result[page]?.map((acc) => {
+                            return (
+                                <tr key={acc._id}>
+                                    <td>{((accounts.indexOf(acc))+1)<10 ? "0"+((accounts.indexOf(acc))+1) : ((accounts.indexOf(acc))+1) }</td>
+                                    <td><div className="constantHW">{acc.type}</div></td>
+                                    <td><div className="constantHW"><img src={acc.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${acc.image}.jpg` : "/fallback.png"} className="messageImg"></img></div></td>
+                                    <td><div className="constantHW">{acc.firstname}</div></td>
+                                    <td><div className="constantHW">{acc.middlename ? acc.middlename : "-"}</div></td>
+                                    <td><div className="constantHW">{acc.lastname}</div></td>
+                                    <td><div className="constantHW">{acc.email}</div></td>
+                                    <td><div className="constantHW">{acc.age}</div></td>
+                                    <td><div className="constantHW">{acc.location?.city}, {acc.location?.province}, {acc.location?.region}</div></td>
+
+                                    <td><div className="constantHW">
+                                        {acc.skill[0] ?
+                                        <>
+                                            {acc.skill.map((a)=>{
+                                            return (
+                                                <div>
+                                                <label>{a},</label>
+                                                </div>
+                                            )
+                                            })}
+                                        </>
+                                        :<>Not specified.</>}
+                                    </div></td>
+
+                                    <td><div className="constantHW">
+                                        {acc.lastactive ? moment(acc.lastactive).format("MMM. DD, YYYY"): "No data."}<br />
+                                        ({format(acc.lastactive ? acc.lastactive : "No data.")})
+                                    </div></td>
+
+                                    <td><div className="constantHW">
+                                        <button className="btn btn-outline-success allButtons" onClick={()=> {
+                                            navigate("/search-profile", {state: {_id: acc._id, projectid: ""}})
+                                        }}>
+                                            Profile
+                                        </button>
+                                    </div></td>
+                                    <td><div className="constantHW">
+                                        {acc.type!=="Employer" ? null :
+                                        <button className="btn btn-outline-success allButtons" onClick={()=> {
+                                            startConversation(acc._id)
+                                        }}>
+                                            Chat
+                                        </button>
+                                        }
+
+                                        <button className="btn btn-outline-success allButtons" onClick={()=> {
+                                            AdminEdit(acc)
+                                        }}>
+                                            Edit
+                                        </button>
+                                        <button className="btn btn-outline-success allButtons" onClick={()=> {
+                                            deactivateAccount(acc._id)
+                                        }}>
+                                            Deactivate
+                                        </button>
+                                    </div></td>
+                                </tr>
+                            )
+                        }
+                        )}
+                    </>:<></>}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+            
+            <div className="pageNumber">
+                <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
+                    {result?.map((a)=>{
                         return (
-                            <div key={a._id}>
-                                <label className="selectedCategory" onClick={()=>{
-                                    setCategoryBy(a.name)
-                                    setCategoryPick(true) 
-                                }}><b>{a.name}</b></label>
-                                {a.name===categoryBy ? 
-                                    <div>
-                                        {categoryPick && (
-                                            <div className="searchTabs">
-                                                {filteredCategory?.map((b)=> {
-                                                    return <button className="btn btn-sm btn-primary" key={idPlusKey(categoryBy, b)} onClick={()=>{
-                                                                setQuery(b),
-                                                                setSearchBy("Skill")
-                                                                setCategoryBy("")
-                                                                setCategoryPick(false)
-                                                                setAdvSearch(false)
-                                                            }}>{b}</button>
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-                                : <></>}
-                            </div>
+                            <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
+                                {(result?.indexOf(a))+1}
+                            </button>
                         )
                     })}
-                </div>
-            ): <></>}
-
-        <div className="centerContent">
-          <div className="tableList">
-            <table>
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>Type</th>
-                        <th>Photo</th>
-                        <th>First Name</th>
-                        <th>Middle Name</th>
-                        <th>Last Name</th>
-                        <th>Email</th>
-                        <th>Age</th>
-                        <th>Adress</th>
-                        <th>Skill(s)</th>
-                        <th>Last Activity</th>
-                        
-                        <th>Profile</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                  {result[0] ? 
-                    <>
-                      {result[page]?.map((acc) => {
-                          return (
-                            <tr key={acc._id}>
-                                <td>{((accounts.indexOf(acc))+1)<10 ? "0"+((accounts.indexOf(acc))+1) : ((accounts.indexOf(acc))+1) }</td>
-                                <td>{acc.type}</td>
-                                <td><img src={acc.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${acc.image}.jpg` : "/fallback.png"} className="messageImg"></img></td>
-                                <td>{acc.firstname}</td>
-                                <td>{acc.middlename ? acc.middlename : "-"}</td>
-                                <td>{acc.lastname}</td>
-                                <td>{acc.email}</td>
-                                <td>{acc.age}</td>
-                                <td>{acc.location?.city}, {acc.location?.province}, {acc.location?.region}</td>
-
-                                <td>
-                                    {acc.skill[0] ?
-                                      <>
-                                        {acc.skill.map((a)=>{
-                                          return (
-                                            <div>
-                                              <label>{a},</label>
-                                            </div>
-                                          )
-                                        })}
-                                      </>
-                                    :<>Not specified.</>}
-                                </td>
-
-                                <td>
-                                    {acc.lastactive ? moment(acc.lastactive).format("MMM. DD, YYYY"): "No data."}<br />
-                                    ({format(acc.lastactive ? acc.lastactive : "No data.")})
-                                </td>
-
-                                <td>
-                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                        navigate("/search-profile", {state: {_id: acc._id, projectid: ""}})
-                                    }}>
-                                        Profile
-                                    </button>
-                                </td>
-                                <td>
-                                    {acc.type!=="Employer" ? null :
-                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                        startConversation(acc._id)
-                                    }}>
-                                        Chat
-                                    </button>
-                                    }
-
-                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                        AdminEdit(acc)
-                                    }}>
-                                        Edit
-                                    </button>
-                                    <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                        deactivateAccount(acc._id)
-                                    }}>
-                                        Deactivate
-                                    </button>
-                                </td>
-                            </tr>
-                          )
-                      }
-                    )}
-                  </>:<></>}
-                </tbody>
-            </table>
-          </div>
+                <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
+            </div>
         </div>
-          <div className="pageNumber">
-            {result?.map((a)=>{
-              return (
-                <div key={result?.indexOf(a)}>
-                  <button className="btn btn-outline-success allButtons" onClick={()=>setPage(result?.indexOf(a))}>
-                    {"Page "+((result?.indexOf(a))+1)}
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        
-      </div>
     )
 }
 

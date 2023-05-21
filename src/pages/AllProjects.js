@@ -19,11 +19,7 @@ function AllProjects(){
     const [page, setPage] = useState(0)
     const [searchCount, setSearchCount] = useState(10)
     const [sortSallaryText, setSortSallaryText] = useState("")
-
-    const [btnSearchBy, setBtnSearchBy] = useState("")
-    const [btnSortBy, setBtnSortBy] = useState("")
-    const [btnFilterSallary, setBtnFilterSallary] = useState("")
-    const [btnSearchCount, setBtnSearchCount] = useState()
+    const [advSearch, setAdvSearch] = useState(false)
     
     let length = projects.length
     let index = 0
@@ -76,167 +72,166 @@ function AllProjects(){
                 <label><b>List of Approved Jobs & Projects</b></label>
             </div>
             <br/>
-            <div className="searchTop">
-                <div className="searchBar">
-                    <input
-                        type="text"
-                        className="searchBox"
-                        placeholder={"Skill required or Job title"}
-                        onChange={(e) => setQuery(e.target.value)}
-                    />
-                </div>
-                <div className="searchBar">
-                    <input
-                        type="text"
-                        className="searchBox"
-                        placeholder={"Region, City or Town"}
-                        onChange={(e) => setQueryLocation(e.target.value)}
-                    />
-                </div>
 
-                <div>
-                    <button onClick={()=> getProjects()} className="btn btn-outline-success allButtons">
-                        Search
-                    </button>
-                </div>
-                <div className="testing">
-                    <div className="searchKey">
-                        <button className="btn btn-outline-success allButtons" onClick={()=> {
-                            if (keySearch === false) {
-                                setKeySearch(true)
-                            }
-                            if (keySearch === true) {
-                                setKeySearch(false)
-                            }
-                        }}>
-                            ...
+            <div className="searchTop">
+                <div className="searchTopSearch">
+                    <div className="searchBar">
+                        <input
+                            type="text"
+                            className="searchBox"
+                            placeholder={"Skill required or Job title"}
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                        />
+                    </div>
+                    <div className="searchBar">
+                        <input
+                            type="text"
+                            className="searchBox"
+                            placeholder={"Region, City or Town"}
+                            onChange={(e) => setQueryLocation(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <button onClick={()=> getProjects()} className="btn btn-outline-success allButtons">
+                            Search
                         </button>
                     </div>
-                
-                <div className="keyPicker2">
-                        {keySearch && (
-                            <div className="advanceSearch">
-                                <div>
-                                    <h5>Filter by:</h5>
-                                    <div className="searchAdvWrapper">
-                                        <label>Type: <b>{btnSearchBy}</b></label>
-                                        {searchBy==="" ? 
-                                            <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Job Hiring")}}>
-                                                <b>Job Hiring</b>
-                                            </button>
-                                        :<></>}
-                                        {searchBy==="" ? 
-                                            <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("Project Hiring")}}>
-                                                <b>Project Hiring</b>
-                                            </button>
-                                        :<></>}
-                                        {searchBy!=="" ? 
-                                            <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSearchBy("")}}>
-                                                <b>Remove type filter</b>
-                                            </button>
-                                        :<></>}
-                                    </div>
-                                    <div className="searchAdvWrapper">
-                                        <label>Sallary range: <b>{sortSallaryText}</b></label>
-                                        {querySallary==="" ? 
-                                        <>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
-                                            setBtnFilterSallary("1")
-                                            setSortSallaryText("less than ₱ 10, 001")
-                                        }}>
-                                            <b>less than ₱10,001</b>
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
-                                            setBtnFilterSallary("2")
-                                            setSortSallaryText("₱ 10, 001 to ₱ 25, 000")
-                                        }}>
-                                            <b>₱10,001 to ₱25,000</b>
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
-                                            setBtnFilterSallary("3")
-                                            setSortSallaryText("₱ 25, 001 to ₱ 50, 000")
-                                        }}>
-                                            <b>₱25,001 to ₱50,000</b>
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
-                                            setBtnFilterSallary("4")
-                                            setSortSallaryText("₱ 50, 001 to ₱ 100, 000")
-                                        }}>
-                                            <b>₱50,001 to ₱100,000</b>
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
-                                            setBtnFilterSallary("5")
-                                            setSortSallaryText("more than ₱ 100, 000")
-                                        }}>
-                                            <b>more than ₱100,000</b>
-                                        </button>
-                                        </>
-                                        :<></>}
-                                        {querySallary!=="" ? 
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{
-                                            setBtnFilterSallary("")
-                                            setSortSallaryText("")
-                                        }}>
-                                            <b>Remove sallary filter</b>
-                                        </button>
-                                        :<></>}
-                                    </div>
-                                </div>
-                                <div>
-                                    <h5>Sort by: {sortBy}</h5>
-                                    <div className="searchAdvWrapper">
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Latest")}}>
-                                            Latest
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Oldest")}}>
-                                            Oldest
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("A-Z")}}>
-                                            A-Z
-                                        </button>
-                                        <button className="btn btn-sm btn-primary" onClick={()=>{setBtnSortBy("Z-A")}}>
-                                            Z-A
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h5>Show {searchCount} results</h5>
-                                    <div className="searchAlign centerContent">
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(5)}}>
-                                            5
-                                        </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(10)}}>
-                                            10
-                                        </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
-                                            25
-                                        </button>
-                                        <button className="btn btn-sm btn-primary countBtn" onClick={()=>{setBtnSearchCount(50)}}>
-                                            50
-                                        </button>
-                                    </div>
-                                </div>
-                                <br />    
-                                <div className="centerContent">
-                                    <button className="btn btn-sm btn-primary" onClick={()=> {
-                                        setSearchBy(btnSearchBy)
-                                        if (btnSortBy!=="") {
-                                            setSortBy(btnSortBy)
-                                        }
-                                        setQuerySallary(btnFilterSallary)
-                                        if (btnSearchCount!==undefined) {
-                                            setSearchCount(btnSearchCount)
-                                        }
-                                        setPage(0)
-                                        setKeySearch(false)
-                                    }}>
-                                        Confirm
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+                    <div className="testing">
+                        <div className="searchKey">
+                            <button className="btn btn-outline-success allButtons" onClick={()=> {
+                                if (keySearch === false) {
+                                    setKeySearch(true)
+                                }
+                                if (keySearch === true) {
+                                    setKeySearch(false)
+                                }
+                            }}>
+                                ...
+                            </button>
+                        </div>
                     </div>
                 </div>
+
+                {keySearch===true ? (
+                    <div className="flexContent">
+                        <div className="dropdownHover">
+                            <button className="btn btn-outline-success allButtons dropbtn" onClick={()=>{searchBy!=="" ? setSearchBy(""): null}}>
+                                {searchBy!=="" ? searchBy+" " : "Search by "} 
+                                {searchBy==="" ? <i class="arrow down"></i>: <label className="closeIcon"><b>X</b></label>}
+                            </button>
+                            <div className="dropdown-content"> 
+                                <label className="dropdownitem" onClick={()=>{setSearchBy("Job Hiring")}}>
+                                    Job Hiring
+                                </label>
+                                <label className="dropdownitem" onClick={()=>{setSearchBy("Project Hiring")}}>
+                                    Project Hiring
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="dropdownHover">
+                            <button className="btn btn-outline-success allButtons dropbtn" onClick={()=>{
+                                if ( querySallary!=="") {
+                                    setQuerySallary("")
+                                    setSortSallaryText("")
+                                }
+                            }}>
+                                {sortSallaryText!=="" ? sortSallaryText+" " : "Sallary range "} 
+                                {querySallary==="" ? <i class="arrow down"></i>: <label className="closeIcon"><b>X</b></label>}
+                            </button>
+                            <div className="dropdown-content">
+                                        <label className="dropdownitem" onClick={()=>{
+                                            setQuerySallary("1")
+                                            setSortSallaryText("less than ₱ 10, 001")
+                                        }}>
+                                            less than ₱10,001
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{
+                                            setQuerySallary("2")
+                                            setSortSallaryText("₱ 10, 001 to ₱ 25, 000")
+                                        }}>
+                                            ₱10,001 ~ ₱25,000
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{
+                                            setQuerySallary("3")
+                                            setSortSallaryText("₱ 25, 001 to ₱ 50, 000")
+                                        }}>
+                                            ₱25,001 ~ ₱50,000
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{
+                                            setQuerySallary("4")
+                                            setSortSallaryText("₱ 50, 001 to ₱ 100, 000")
+                                        }}>
+                                            ₱50,001 ~ ₱100,000
+                                        </label>
+                                        <label className="dropdownitem" onClick={()=>{
+                                            setQuerySallary("5")
+                                            setSortSallaryText("more than ₱ 100, 000")
+                                        }}>
+                                            more than ₱100,000
+                                        </label>
+                            </div>
+                        </div>
+
+                        <div className="dropdownHover">
+                            <button className="btn btn-outline-success allButtons dropbtn" onClick={()=>{
+                                if (sortBy!=="Latest") {
+                                    setSortBy("Latest")
+                                }
+                            }}>
+                                {sortBy!=="" ? sortBy+" " : "Sort by "} 
+                                <i class="arrow down"></i>
+                            </button>
+                            <div className="dropdown-content">
+                                <label className="dropdownitem" onClick={()=>{setSortBy("Latest")}}>
+                                    Latest
+                                </label>
+                                <label className="dropdownitem" onClick={()=>{setSortBy("Oldest")}}>
+                                    Oldest
+                                </label>
+                                <label className="dropdownitem" onClick={()=>{setSortBy("A-Z")}}>
+                                    A-Z
+                                </label>
+                                <label className="dropdownitem" onClick={()=>{setSortBy("Z-A")}}>
+                                    Z-A
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                ): null}
+
+                {advSearch===true? (
+                    <div className="searchAdv">
+                        {category.map((a)=> {
+                            return (
+                                <div key={a._id}>
+                                    <label className="selectedCategory" onClick={()=>{
+                                        setCategoryBy(a.name)
+                                        setCategoryPick(true) 
+                                    }}><b>{a.name}</b></label>
+                                    {a.name===categoryBy ? 
+                                        <div>
+                                            {categoryPick && (
+                                                <div className="searchTabs">
+                                                    {filteredCategory?.map((b)=> {
+                                                        return <button className="btn btn-outline-success allButtons" key={idPlusKey(categoryBy, b)} onClick={()=>{
+                                                                    setQuery(b),
+                                                                    setCategoryBy("")
+                                                                    setCategoryPick(false)
+                                                                    setAdvSearch(false)
+                                                                }}>{b}</button>
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    : <></>}
+                                </div>
+                            )
+                        })}
+                    </div>
+                ): null}
             </div>
 
             <div className="tableList">
@@ -317,15 +312,15 @@ function AllProjects(){
                 </table>
             </div>
             <div className="pageNumber">
+                <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
                 {result?.map((a)=>{
-                return (
-                    <div key={result?.indexOf(a)}>
-                    <button className="btn btn-outline-success allButtons" onClick={()=>setPage(result?.indexOf(a))}>
-                        {"Page "+((result?.indexOf(a))+1)}
-                    </button>
-                    </div>
-                )
+                    return (
+                        <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
+                            {(result?.indexOf(a))+1}
+                        </button>
+                    )
                 })}
+                <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
             </div>
         </div>
     )

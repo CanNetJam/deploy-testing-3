@@ -127,7 +127,7 @@ function Reports() {
         documentTitle: "System Report",
         //onAfterPrint: ()=> alert("Successfully printed a soft copy.")
     })
-    console.log(allAnnualRequestData)
+    
     useEffect(() => {
         const getRecords = async () => {  
             try {
