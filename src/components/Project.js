@@ -47,6 +47,7 @@ function Project({socket}) {
     const [ modalOpen, setModalOpen ] = useState(false)
     const [ toEndContract, setToEndContract ] = useState()
     const [ statusToReview, setStatusToReview ] = useState()
+    const [ extend, setExtend ] = useState(false)
     
     useEffect(() => {
         const projectid = location.state._id
@@ -106,6 +107,9 @@ function Project({socket}) {
             if (res.data.status==="Concluded" || res.data.requeststatus==="Denied") {
               setOngoing(false)
               setHiring(false)
+            }
+            if (res.data.requeststatus==="Pending") {
+              setExtend(true)
             }
             if (res.data.type==="Job") {
               setAJob(true)
@@ -277,6 +281,16 @@ function Project({socket}) {
       }
     } 
 
+    async function extendPost() {
+      try {
+        const res = await Axios.post(`/api/update-project/extend-post/${projectInfo?._id}`)
+        toastExtendAlert()
+        setReload(res.data)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+
     async function readAll(a, b) {
       try {
         const res = await Axios.post(`/api/update-project/read-note/${a}/${b}`)
@@ -334,7 +348,7 @@ function Project({socket}) {
             if (theEmp===true) {
               let daysBetween = daysRemaining(projectInfo?.expirationdate)
               let slots = projectInfo?.slots
-              if (daysBetween<=5) {
+              if (daysBetween<=5 && daysBetween>0) {
                 toastDueDateWarningNotification(daysBetween, slots)
               }
             }
@@ -357,6 +371,19 @@ function Project({socket}) {
         progress: undefined,
         theme: "light",
       })
+    }
+
+    function toastExtendAlert() {
+      toast("Successfully sent a post extension request! Please wait for the Admin's approval.", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
     }
 
     function toastDueDateWarningNotification(daysbetween, slots) {
@@ -392,7 +419,10 @@ function Project({socket}) {
                   <div className="projectCard">
                     <div className="contentTitle sideContent">
                       <label><b>{projectInfo.type}</b></label>
-                      <label>{projectInfo.status!=="" ? <b>{projectInfo.status}</b> : "Not approved."}</label>
+                      {theEmp && extend===false ? 
+                        daysRemaining(projectInfo.expirationdate)<=20 && daysRemaining(projectInfo.expirationdate)>0 ? <button onClick={()=> extendPost()} className="btn btn-outline-success allButtons">Extend post</button>:null
+                      :null}
+                      <label>{daysRemaining(projectInfo.expirationdate)>1 ? (projectInfo.status!=="" ? <b>{projectInfo.status}</b> : "Not approved.") : <b>Inactive</b>}</label>
                     </div>
                     <br/>
                     <p className="profileCardName">{projectInfo.title}</p>
@@ -403,7 +433,7 @@ function Project({socket}) {
                       <div className="projectCardTopDetails">
                         {projectInfo.status==="Hiring" ?
                           <div className="paragraphSpaceBetween">
-                            <p>Hiring <b>{projectInfo.slots ? projectInfo.slots : "unspecified"}</b> people.</p>
+                            {daysRemaining(projectInfo.expirationdate)>1 ? <p>Hiring <b>{projectInfo.slots ? projectInfo.slots : "unspecified"}</b> people.</p>: <p><b>Inactive.</b></p>}
                             {projectInfo.expirationdate ? (daysRemaining(projectInfo.expirationdate)>1 ? <p><b>{daysRemaining(projectInfo.expirationdate)}</b> days before post expires.</p>: <b>{`${projectInfo.type} Expired.`}</b>) : "unspecified"}
                           </div>
                         :<></>}

@@ -325,7 +325,7 @@ app.get("/api/all-accounts", auth, async (req, res) => {
 app.get("/api/pending-projects/:type", auth, async (req, res) => {
   if(req.params.type==="Admin") {
     try {
-      const allProjects = await projects.find({type: {$in: ["Job Request", "Project Request"]}, requeststatus: "Pending"})
+      const allProjects = await projects.find({type: {$in: ["Job Request", "Project Request", "Job", "Project"]}, requeststatus: "Pending"})
       .populate({path:"employer", select:["firstname", "middlename", "lastname", "company"]})
       .sort({creationdate: -1})
       res.status(200).json(allProjects)
@@ -1058,6 +1058,15 @@ app.post("/api/end-contract/:projectid/:employeeid", async (req, res) => {
     }
     res.status(200).json(info)
   } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+app.post("/api/update-project/extend-post/:projectid", async (req, res) =>{
+  try {
+    const extendPost = await projects.findByIdAndUpdate({_id: req.params.projectid}, {requeststatus: "Pending"})
+    res.status(200).json(extendPost)
+  }catch (err) {
     res.status(500).json(err)
   }
 })

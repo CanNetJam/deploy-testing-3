@@ -91,11 +91,13 @@ function CompanyProfile() {
     async function submitHandler(e) {
         e.preventDefault()
         const data = new FormData()
+        let cloud_image
         if (file) {
             data.append("photo", file)
             setCompanyInfo({ ...companyInfo, logo: file })
             setPutFile(true)
             setIsEditing(false)
+
             const signatureResponse = await Axios.get("/get-signature")
         
             const image = new FormData()
@@ -110,16 +112,15 @@ function CompanyProfile() {
                 console.log(e.loaded / e.total)
                 }
             })
-            let cloud_image = cloudinaryResponse.data.public_id
+            cloud_image = cloudinaryResponse.data.public_id
         
             data.append("image", cloud_image)
             data.append("public_id", cloudinaryResponse.data.public_id)
             data.append("version", cloudinaryResponse.data.version)
             data.append("signature", cloudinaryResponse.data.signature)
-
-            if (cloudinaryResponse) {
+            console.log(cloud_image)
+            if (cloud_image!=="") {
                 setPutFile(false)
-                setCompanyInfo({ ...companyInfo, logo: cloud_image })
             }
         }
         data.append("employerid", userData.user?.id)
@@ -131,6 +132,7 @@ function CompanyProfile() {
         data.append("province", province ? province.name : location.state?.companyinfo?.location?.province)
         data.append("city", city ? city.name : location.state?.companyinfo?.location?.city)
         
+        
         setCompanyInfo({ ...companyInfo, companyname: draftCompanyName, 
             companysize: draftCompanySize, 
             details: draftInfo,
@@ -139,12 +141,13 @@ function CompanyProfile() {
                 region: region ? region.name : location.state?.companyinfo?.location?.region, 
                 province: province ? province.name : location.state?.companyinfo?.location?.province, 
                 city: city ? city.name : location.state?.companyinfo?.location?.city
-            }
+            },
+            logo: cloud_image
         })
         setIsEditing(false)
         await Axios.post("/api/upload/company-details", data, { headers: { "Content-Type": "multipart/form-data" } })
     }
-    
+
     return (
         <div className="companyProfile">
             <div className="companyProfileContent">
@@ -196,18 +199,18 @@ function CompanyProfile() {
                 </div>
 
                 {isEditing===false && (
-                    <div>
+                    <div className="companyProfileMidBot">
                         <div className="companyProfileMid">
                             <div className="paragraphSpaceBetween">
-                                <div><label><b>Company Size: </b></label></div> 
+                                <div><label className="companyDetailsLogo"><img src={"/WebPhoto/people.png"}/> <b>Company Size </b></label></div> 
                                 <div className="rightText">{companyInfo.companysize ? " "+companyInfo.companysize+" Employees" : <i>Not specified.</i>}</div>
                             </div>
                             <div className="paragraphSpaceBetween">
-                                <div><label><b>Established at: </b></label></div>
+                                <div><label className="companyDetailsLogo"><img src={"/WebPhoto/calendar.png"}/> <b>Established at </b></label></div>
                                 <div className="rightText">{companyInfo.establishdate ? " "+companyInfo.establishdate : <i>Not specified.</i>}</div>
                             </div>
                             <div className="paragraphSpaceBetween">
-                                <div><label><b>Location: </b></label></div>
+                                <div><label className="companyDetailsLogo"><img src={"/WebPhoto/map.png"}/> <b>Location </b></label></div>
                                 <div className="rightText">{companyInfo.location ? companyInfo.location?.city+", " + companyInfo.location?.province+", " + companyInfo.location?.region: <i>Not specified.</i>}</div>
                             </div>
                         </div>

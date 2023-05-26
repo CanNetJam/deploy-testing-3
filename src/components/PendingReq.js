@@ -84,7 +84,7 @@ function AllRequests({socket}){
                     return (
                       <tr key={prj._id}>
                               <td>{((projects.indexOf(prj))+1)<10 ? "0"+((projects.indexOf(prj))+1) : ((projects.indexOf(prj))+1)}</td>
-                              <td><div className="constantHW">{prj.type}</div></td>
+                              <td><div className="constantHW">{prj.type==="Job Request" || prj.type==="Project Request" ? prj.type : "Extend Post Request"}</div></td>
                           
                               <td><div className="constantHW">{prj.title}</div></td>
                               
@@ -172,10 +172,10 @@ function ApproveRequestModal({ setRequestModalOpen, toUpdate, socket, isApproved
     if (isApproved===true) {
       setDraftStatus("Approved")
       setDraftApprovalDate(() => new Date().toISOString())
-      if (toUpdate.type==="Project Request") {
+      if (toUpdate.type==="Project Request" || toUpdate.type==="Project") {
         setDraftType("Project")
       }
-      if (toUpdate.type==="Job Request") {
+      if (toUpdate.type==="Job Request" || toUpdate.type==="Job") {
         setDraftType("Job")
       }
       setStatus("Hiring")
@@ -230,7 +230,7 @@ function ApproveRequestModal({ setRequestModalOpen, toUpdate, socket, isApproved
       
       const logType = "APPROVE"
       const subject = toUpdate._id
-      const type = toUpdate.type
+      const type = toUpdate.type==="Project Request" || toUpdate.type==="Project Request" ? toUpdate.type : (toUpdate.type+" post extension")
       const action = "approved your"
       await Axios.post(`/api/send-notifications/${userData.user.id}/${toUpdate?.employer?._id}/${action}/${type}/${subject}`)
       await Axios.post(`/api/admin-logs/${userData.user.id}/${toUpdate?.employer?._id}/${subject}/${logType}`)
