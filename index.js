@@ -323,7 +323,7 @@ app.get("/api/all-accounts", auth, async (req, res) => {
 })
 
 app.get("/api/pending-projects/:type", auth, async (req, res) => {
-  if(req.params.type==="Admin") {
+  if(req.params.type==="Admin" || req.params.type==="Super Administrator") {
     try {
       const allProjects = await projects.find({type: {$in: ["Job Request", "Project Request", "Job", "Project"]}, requeststatus: "Pending"})
       .populate({path:"employer", select:["firstname", "middlename", "lastname", "company"]})
@@ -338,7 +338,7 @@ app.get("/api/pending-projects/:type", auth, async (req, res) => {
 })
 
 app.get("/api/denied-projects/:type", auth, async (req, res) => {
-  if(req.params.type==="Admin") {
+  if(req.params.type==="Admin" || req.params.type==="Super Administrator") {
     try {
       const allProjects = await projects.find({type: {$in: ["Job Request", "Job", "Project Request", "Project"]}, requeststatus: "Denied"})
       .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
