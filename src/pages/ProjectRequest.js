@@ -509,7 +509,7 @@ function ProjectProposal({socket}) {
 
                 <div className="mb-2">
                   <div className="requiredLabel">
-                    <label>Expected Sallary (in Philippine Pesos):<label className="requiredAlert"> <b> *</b></label></label>
+                    <label>Expected Salary (in Philippine Pesos):<label className="requiredAlert"> <b> *</b></label></label>
                   </div>
                   <input required onChange={e => {
                     setSallary(e.target.value)

@@ -130,7 +130,7 @@ function Messages({socket}) {
       const key = a + b 
       return key
     }
-
+    console.log(conversations)
     return (
             <div className="messages">
               <div ref={topPage}></div>
@@ -140,7 +140,7 @@ function Messages({socket}) {
                         <br/>
                         <br/>
                         <p className="profileCardName2">Conversations</p>
-                        {conversations.map((c)=>{
+                        {conversations?.map((c)=>{
                             return (
                               <div key={c._id} onClick={()=> setCurrentChat(c)}>
                                 <Conversation  conversation={c} currentUser={userData.user} />

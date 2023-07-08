@@ -610,7 +610,7 @@ function Project({socket}) {
                         </div>
                         }
                         <div className="paragraphSpaceBetween">
-                          <div>Sallary:</div> 
+                          <div>Salary:</div> 
                           <div className="rightText">₱ {new Intl.NumberFormat().format(projectInfo.sallary.toFixed(2))}
                           </div>
                         </div>

@@ -258,7 +258,7 @@ function AllProjects(){
                             <th><div className="constantHW">Company</div></th>
                             <th><div className="constantHW">Skill</div></th>
                             <th><div className="constantHW">Slots</div></th>
-                            <th><div className="constantHW">Sallary</div></th>
+                            <th><div className="constantHW">Salary</div></th>
                             <th><div className="constantHW">Duration</div></th>
                             <th><div className="constantHW">Location</div></th>
                             <th><div className="constantHW">Employee</div></th>
