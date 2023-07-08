@@ -1,5 +1,7 @@
 import React, { useState, useEffect} from "react"
 import Axios from "axios"
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function TagsSettings() {
     const [category, setCategory] = useState([])
@@ -25,7 +27,9 @@ function TagsSettings() {
         e.preventDefault()
         try {
             const res = await Axios.post(`/api/add-tag/${selectedCategory}/${tag}`)
-            alert(res.data)
+            if (res) {
+                toastAddSuccessNotification()
+            }
             let capitalize = tag?.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ')
             setCategory(prev =>
                 prev.map(function (t) {
@@ -48,7 +52,9 @@ function TagsSettings() {
     async function removeTag() {
         try {
             const res = await Axios.post(`/api/remove-tag/${selectedCategory}/${tag}`)
-            alert(res.data)
+            if (res) {
+                toastRemoveSuccessNotification(res.data)
+            }
             setCategory(prev =>
                 prev.map(function (t) {
                   if (t._id == selectedCategory) {
@@ -72,10 +78,38 @@ function TagsSettings() {
         const key = a + b 
         return key
     }
+
+    function toastAddSuccessNotification() {
+        toast.success('Successfully added a new tag.', {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            })
+    }
+
+    function toastRemoveSuccessNotification(props) {
+        toast.success(`${props}`, {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            })
+    }
     
     return (
         <div>
-            <div>
+            <div className="horizontal_line"></div>
+            <p className="profileCardName">Tags Settings</p>
+            <div className="settingsCategoryWrapper">
                 {category.map((a)=> {
                     return (
                         <div className="settingsCategory" key={a._id}>
@@ -83,8 +117,8 @@ function TagsSettings() {
                                 <div className="selectedCategoryLabel">
                                     <label className="selectedCategory"><b>{a.name}</b></label>
                                 </div>
-                                <div className="selectedCategorySettings">
-                                    <button onClick={()=> {
+                                <div className="accessSettings">
+                                    <label className="selectedCategorySettings" onClick={()=> {
                                         if (accessSettings===false) {
                                             setAccessSettings(true)
                                             setSelectedCategory(a._id)
@@ -97,86 +131,107 @@ function TagsSettings() {
                                         }
                                     }}>
                                         <img src={"/WebPhoto/settings.png"} alt={"settings icon"} />
-                                    </button>
-                                </div>
-                                {accessSettings===true && selectedCategory===a?._id?
-                                    <div>
-                                        {removingTag!==true ?
-                                            <button onClick={()=>{
-                                                setAddingTag(true)
-                                            }} className="btn btn-sm btn-primary">Add Tag</button>
-                                        :<></>}
+                                    </label>
+                                    {accessSettings===true && selectedCategory===a?._id?
+                                        <div className="accessSettingsOpen">
+                                            {removingTag!==true ?
+                                                <label onClick={()=>{
+                                                    setAddingTag(true)
+                                                    setAccessSettings(false)
+                                                }} className="accessSettingsLabel">Add Tag</label >
+                                            :<></>}
 
-                                        {addingTag!==true && removingTag===false?
-                                            <button onClick={()=>{
-                                                setRemovingTag(true)
-                                            }} className="btn btn-sm btn-outline-secondary cancelBtn">Remove Tag</button>
-                                        :<></>}
-
-                                        {removingTag===true ?
-                                            <button onClick={()=>{
-                                                setTag(""),
-                                                setRemovingTag(false),
-                                                setAccessSettings(false),
-                                                setSelectedCategory()
-                                            }} className="btn btn-sm btn-outline-secondary cancelBtn">Cancel</button>
-                                        :<></>}
-                                    </div>
-                                :<></>}
-                            </div>
-                            {addingTag===true && selectedCategory===a._id?
-                                <form className="addTag" onSubmit={addTag}>
-                                    <br />
-                                    <input autoFocus required onChange={e => setTag(e.target.value)} type="text" className="form-control form-control-sm" value={tag}/>
-                                    <button className="btn btn-sm btn-primary">Confirm</button>
-                                    <button type="button" className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=> {
-                                        setTag(""),
-                                        setAddingTag(false),
-                                        setAccessSettings(false),
-                                        setSelectedCategory()
-                                    }}>
-                                    Cancel
-                                </button>
-                            </form>
-                            :<></>}
-                            <br />
-                            <div className="settingsCategoryBot">
-                                {removingTag===true && selectedCategory===a?._id?
-                                <div>
-                                    <div className="searchTabs">
-                                        {a?.tags?.map((b)=> {
-                                            return <button className="btn btn-sm btn-primary" key={idPlusKey(a.name, b)} onClick={()=>{
-                                                        setTag(b)
-                                                    }}>{b}</button>
-                                        })}
-                                    </div>
-                                    {tag!=="" ?
-                                    <div className="confirmRemoveLabel">
-                                        <label>Remove <b>{tag}</b> from the <b>{a?.name}</b> category?</label>
-                                        <div>
-                                            <button onClick={()=> {
-                                                removeTag()
-                                            }}
-                                            className="btn btn-sm btn-primary">Confirm</button>
-                                            <button onClick={()=> {
-                                                setTag("")
-                                            }}className="btn btn-sm btn-outline-secondary cancelBtn">Cancel</button>
+                                            {addingTag!==true && removingTag===false?
+                                                <label  onClick={()=>{
+                                                    setRemovingTag(true)
+                                                    setAccessSettings(false)
+                                                }} className="accessSettingsLabel">Remove Tag</label >
+                                            :<></>}
                                         </div>
-                                    </div>
                                     :<></>}
                                 </div>
-                                :
-                                    <div className="searchTabs">
-                                        {a?.tags?.map((b)=> {
-                                            return <label className="tagLabel" key={idPlusKey(a.name, b)}>{b}</label>
-                                        })}
-                                    </div>
-                                }
                             </div>
+                            {addingTag===true && selectedCategory===a._id?
+                                <div className="newModalBackground2">
+                                    <form className="addTag" onSubmit={addTag}>
+                                        <div>
+                                            <label style={{fontSize: 18}}>Adding a new tag to <b>{a.name}</b>.</label>
+                                        </div>
+                                        <br/>
+                                        <div><label>Input new tag to be added.</label></div>
+                                        <div>
+                                            <input autoFocus required onChange={e => setTag(e.target.value)} type="text" className="form-control form-control-sm" value={tag}/>
+                                        </div>
+                                        <br/>
+                                        <div>
+                                            <button className="btn btn-outline-success allButtons">Confirm</button>
+                                            <button type="button" className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=> {
+                                                setTag(""),
+                                                setAddingTag(false),
+                                                setAccessSettings(false),
+                                                setSelectedCategory()
+                                            }}>
+                                            Close
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            :null}
+                            <br />
+                            <div className="settingsCategoryBot">
+                                <div className="searchTabs">
+                                    {a?.tags?.map((b)=> {
+                                        return <label className="selectedSettingsTagLabel" key={idPlusKey(a.name, b)}>{b}</label>
+                                    })}
+                                </div>
+                            </div>
+                            {removingTag===true && selectedCategory===a?._id?
+                                <div className="newModalBackground2">
+                                    <div className="removeTag">
+                                        <div className="removeTagLabel">
+                                            <div><label style={{fontSize: 18}}>Removing a tag on <b>{a.name}</b>.</label></div>
+                                            {removingTag===true ?
+                                                <button onClick={()=>{
+                                                    setTag(""),
+                                                    setRemovingTag(false),
+                                                    setAccessSettings(false),
+                                                    setSelectedCategory()
+                                                }} className="btn btn-sm btn-outline-secondary cancelBtn">Close</button>
+                                            :null}
+                                        </div>
+                                        <br/>
+                                        <div className="searchTabsDelete">
+                                            {a?.tags?.map((b)=> {
+                                                return <label className="selectedTagLabel" key={idPlusKey(a.name, b)} onClick={()=>{
+                                                            setTag(b)
+                                                        }}>{b}</label >
+                                            })}
+                                        </div>
+                                        {tag!=="" ?
+                                            <div>
+                                                <label>Remove <b>{tag}</b> from the <b>{a?.name}</b> category?</label>
+                                                <br/>
+                                                <br/>
+                                            <div className="confirmRemoveLabel">
+                                                <button onClick={()=> {
+                                                    removeTag()
+                                                }}
+                                                className="btn btn-outline-success allButtons">Confirm</button>
+                                                <button onClick={()=> {
+                                                    setTag("")
+                                                }}className="btn btn-sm btn-outline-secondary cancelBtn">Cancel</button>
+                                            </div>
+                                            </div>
+                                        :null}
+                                    </div>
+                                </div>
+                                :
+                            null}
                         </div>
                     )
                 })}
             </div>
+            <ToastContainer />
         </div>
     )
 }

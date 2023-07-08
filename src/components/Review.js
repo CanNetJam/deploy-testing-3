@@ -9,7 +9,7 @@ function Review(props) {
     const [ file, setFile ] = useState("")
     const [ description, setDescription ] = useState("")
     const [ uploadedby, setUploadedBy ] = useState(userData.user.id)
-    const [ rating, setRating ] = useState("")
+    const [ rating, setRating ] = useState(5)
     const [ empInfo, setEmpInfo ] = useState()
     const [ freeInfo, setFreeInfo ] = useState()
     const [ isRated, setIsRated ] = useState()
@@ -91,7 +91,7 @@ function Review(props) {
       
       setFile("")
       setDescription("")
-      setRating("")
+      setRating(5)
       setUploadedBy("")
 
       await Axios.post(`/api/reviews/${projectid}/${candidate}`, data, { headers: { "Content-Type": "multipart/form-data" } })
@@ -107,38 +107,47 @@ function Review(props) {
     return (
       <div>
         <form className="reviewForm" onSubmit={submitHandler}>
-          <div>
-            <label className="contentSubheading">Reviewing <b>{freeInfo?.firstname} { freeInfo?.middlename ? freeInfo?.middlename?.charAt(0).toUpperCase() + "." : ""} {freeInfo?.lastname}</b>...</label>
-            <textarea required rows = "5" cols = "40" autofocus onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder={`Write something about ${freeInfo?.firstname} attitude or perforance while working with you,`} />
+          <div className="reviewHeader">
+            <div>
+              <label className="contentSubheading">Reviewing <b>{freeInfo?.firstname} { freeInfo?.middlename ? freeInfo?.middlename?.charAt(0).toUpperCase() + "." : ""} {freeInfo?.lastname}</b>...</label>
+            </div>
+            <div>
+              <button onClick={()=>props.setWriteReview(false)} className="btn btn-sm btn-outline-secondary cancelBtn">Cancel</button>
+            </div>
           </div>
+          <div>
+            <label> (5 stars is the Highest...1 star is the Lowest)</label><br/>
+            {isRated===false && 
+              <div className="contentTitle">
+                <label><b>Please select a rating below!</b></label>
+              </div>
+            }
+            <br/>
+            <div className="starsContainer">
+              Rating: 
+                {ratings.map((a)=> {
+                    return (
+                      <label className="eachStar" type="button" key={idPlusKey(a, userData.user.id)} onClick={()=> {
+                        setRating(a), setIsRated(true)
+                      }}>
+                        {rating>=a ?
+                          <img key={a}src={"/WebPhoto/star.png"} style={{height: 24, width: 24 }} alt={"star icon"} />
+                        : 
+                          <img key={a}src={"/WebPhoto/dim-star.png"} style={{height: 24, width: 24 }} alt={"dim star icon"} />
+                        }
+                      </label>
+                    )
+                })}
+            </div>
+          </div>
+          <br/>
+          <textarea required rows = "5" cols = "40" autofocus onChange={e => setDescription(e.target.value)} value={description} type="text" className="form-control" placeholder={`Write something about ${freeInfo?.firstname}'s attitude or perforance while working with you,`} />
           <br/>
           <div>
             <label>Add photo (optional)</label>
             <input ref={CreatePhotoField} onChange={e => setFile(e.target.files[0])} type="file" className="form-control" />
           </div>
           <br/>
-          <div>
-            <label>Rate your Employee. (5 is the Highest...1 is the Lowest)</label><br/>
-            {isRated===false && <label>Please select a rating below!</label>}
-            <div>
-                {ratings.map((a)=> {
-                    return <button type="button" className="btn btn-outline-success allButtons" key={idPlusKey(a, userData.user.id)} onClick={()=> {setRating(a), setIsRated(true)}}>{a}</button>
-                })}
-            </div>
-            <br/>
-            <div>
-              {rating && (
-                <div>
-                  <label>Give 
-                    {ratings.map((a)=>{
-                      if(a<=rating) {
-                        return <img key={a}src={"/WebPhoto/star.png"} alt={"star icon"} />
-                      }
-                    })} to {freeInfo?.firstname} { freeInfo?.middlename ? freeInfo?.middlename?.charAt(0).toUpperCase() + "." : ""} {freeInfo?.lastname}?</label>
-                </div>
-              )}
-            </div>
-          </div>
           <div className="centerContent">
             <button className="btn btn-outline-success allButtons">Confirm</button>
           </div>

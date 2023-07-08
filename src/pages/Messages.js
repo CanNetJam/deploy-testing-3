@@ -12,9 +12,24 @@ function Messages({socket}) {
     const [ currentChat, setCurrentChat ] = useState(location.state?._id ? location.state._id : null)
     const [ messages, setMessages ] = useState([])
     const [ newMessage, setNewMessage ] = useState("")
+    const [ query, setQuery ] = useState("")
     const [ arrivalMessage, setArrivalMessage ] = useState(null)
-    
+    const topPage = useRef(null)
     const scrollRef = useRef()
+
+    const scrollToSection = (elementRef) => {
+      window.scrollTo({
+        top: elementRef.current.offsetTop,
+        behavior: "smooth",
+      })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
     
     useEffect(()=> {
       socket.current = socket
@@ -40,9 +55,12 @@ function Messages({socket}) {
     useEffect(() => {
         const getConversations = async () => {
           try {
-            const res = await Axios.get("/conversations/" + userData.user.id)
+            const res = await Axios.get("/conversations/",{params: {
+              query: query,
+              userId: userData.user.id
+          }})
             setConversations(res.data)
-            if (!location.state?._id) {
+            if (!location.state?._id && currentChat===null) {
               setCurrentChat(res.data[0])
             }
           } catch (err) {
@@ -50,8 +68,8 @@ function Messages({socket}) {
           }
         }
         getConversations()
-    }, [userData.user.id])
-    
+    }, [userData.user.id, query])
+
     useEffect(() => {
         const getMessages = async () => {
           try {
@@ -115,9 +133,13 @@ function Messages({socket}) {
 
     return (
             <div className="messages">
+              <div ref={topPage}></div>
                 <div className="chatMenu">
                     <div className="chatMenuWrapper">
-                        <input placeholder="Search for Partners" className="chatMenuInput" />
+                        <input onChange={(e) => setQuery(e.target.value)} placeholder="Search for Partners" className="chatMenuInput" />
+                        <br/>
+                        <br/>
+                        <p className="profileCardName2">Conversations</p>
                         {conversations.map((c)=>{
                             return (
                               <div key={c._id} onClick={()=> setCurrentChat(c)}>

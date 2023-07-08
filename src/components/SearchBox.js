@@ -1,9 +1,9 @@
-import React, {useState, useEffect, useContext} from "react"
+import React, {useState, useEffect, useContext, useRef} from "react"
 import Axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { UserContext } from "../home"
 
-function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
+function SearchBox({projectid, projectInfo, setProjectInfo, projecttype, setSearchOn}) {
     const cloud_name = "dzjkgjjut"
     let navigate = useNavigate()
     const { userData, setUserData } = useContext(UserContext)
@@ -20,9 +20,24 @@ function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
     const [result, setResult] = useState([])
     const [page, setPage] = useState(0)
     const [searchCount, setSearchCount] = useState(10)
+    const topPage = useRef(null)
 
     let length = accounts.length
     let index = 0
+
+    const scrollToSection = (elementRef) => {
+        window.scrollTo({
+          top: elementRef.current.offsetTop,
+          behavior: "smooth",
+        })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
     
     useEffect(() => {
         let isCancelled = false
@@ -34,6 +49,7 @@ function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
                 sort: sortBy
             }})
             if (!isCancelled) {
+                setPage(0),
                 setAccounts(res.data)
             }
           } catch (err) {
@@ -93,6 +109,12 @@ function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
 
     return (
         <div className="searchComponent">
+            <div ref={topPage}></div>
+            {setSearchOn ? 
+                <div className="modalClosing">
+                    <button className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=>setSearchOn(false)}>Cancel</button>
+                </div>
+            : null}
             <div className="searchTop">
                 <div className="searchTopSearch">
                     <div className="quickSearch">
@@ -118,17 +140,15 @@ function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
                         />
                     </div>
                     <div className="testing">
-                        <div className="searchKey">
-                            <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                if (keySearch === false) {
-                                    setKeySearch(true)
-                                }
-                                if (keySearch === true) {
-                                    setKeySearch(false)
-                                }
-                            }}>
-                                ...
-                            </button>
+                        <div className="searchKey leftNewButtons hovertext" data-hover="Filter" onClick={()=> {
+                            if (keySearch === false) {
+                                setKeySearch(true)
+                            }
+                            if (keySearch === true) {
+                                setKeySearch(false)
+                            }
+                        }}>
+                            <img src={"/WebPhoto/filter.png"} alt={"filter icon"} />
                         </div>
                     </div>
                 </div>
@@ -200,12 +220,12 @@ function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
                                         {categoryPick && (
                                             <div className="searchTabs">
                                                 {filteredCategory?.map((b)=> {
-                                                    return <button className="btn btn-outline-success allButtons" key={idPlusKey(categoryBy, b)} onClick={()=>{
+                                                    return <label className="selectedTagLabel" key={idPlusKey(categoryBy, b)} onClick={()=>{
                                                                 setQuery(b),
                                                                 setCategoryBy("")
                                                                 setCategoryPick(false)
                                                                 setAdvSearch(false)
-                                                            }}>{b}</button>
+                                                            }}>{b}</label>
                                                 })}
                                             </div>
                                         )}
@@ -220,7 +240,7 @@ function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
 
             <div className="searchBot">
                 {result[0] ? 
-                    <div className="searchList">
+                    <div className="searchCandidateList">
                     {result[page]?.map((a) => {
                         return (
                             <div className="searchItem" key={a._id} onClick={()=>{
@@ -238,10 +258,10 @@ function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
                                 }
                             }}>
                                 <div className="searchBoxProfileTop">
-                                    <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.image}.jpg` : "/fallback.png"} className="searchImg" ></img>
+                                    <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_55/${a.image}.jpg` : "/fallback.png"} className="searchImg" ></img>
                                     {a.ratings[0] ? 
                                         <div>
-                                            <p>Average Rating: <b>{a.averagerating}</b> <br></br>({a.ratings.length}) review(s).</p>
+                                            <p>Average Rating: <br/> <b>{a.averagerating}</b> <img style={{height: 16, width: 16 }} src={"/WebPhoto/star.png"} alt={"star icon"} /> <br/>({a.ratings.length}) review(s).</p>
                                         </div>
                                     : 
                                     <div>
@@ -249,8 +269,9 @@ function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
                                     </div>}
                                 </div>
                                 <div className="searchBoxProfileBot">
-                                    <p className="p1">{a.firstname} {a.middlename ? a.middlename?.charAt(0).toUpperCase()+". " : " "} {a.lastname}</p>
-                                    <p className="p2">
+                                    <label className="p1"><b>{a.firstname} {a.middlename ? a.middlename?.charAt(0).toUpperCase()+". " : " "} {a.lastname}</b></label>
+                                    <br />
+                                    <label className="p2">
                                         {a.skill.map((b)=> {
                                             return (
                                                 <div>
@@ -258,25 +279,26 @@ function SearchBox({projectid, projectInfo, setProjectInfo, projecttype}) {
                                                 </div>
                                             )  
                                         })}
-                                    </p>
+                                    </label>
                                 </div>
                             </div>
                         )
                     })}
                     </div>
                     :<span className="searchList">No Applicant(s) found.</span>}
-
-                <div className="pageNumber">
-                    <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
-                    {result?.map((a)=>{
-                        return (
-                            <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
-                                {(result?.indexOf(a))+1}
-                            </button>
-                        )
-                    })}
-                    <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
-                </div>
+                {result[0] ? 
+                    <div className="pageNumber">
+                        <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
+                        {result?.map((a)=>{
+                            return (
+                                <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
+                                    {(result?.indexOf(a))+1}
+                                </button>
+                            )
+                        })}
+                        <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
+                    </div>
+                : null}
             </div>
         </div>
     )

@@ -58,9 +58,11 @@ function LeftNavFree({savedNotifications, setNumber}){
                     type = "All Project", 
                     readAll(userData.user.id), 
                     setNumber(prev=>prev+1), 
+                    setOpenProfile(false),
                     navigate("/project-list")
                 }
                 if (projectNotif?.length===0) {
+                    setOpenProfile(false),
                     navigate("/project-list")
                 }
             }}>
@@ -69,7 +71,7 @@ function LeftNavFree({savedNotifications, setNumber}){
                     <div className="counter">{projectNotif.length}</div>
                 :<></>}
             </div>
-            <div className="leftButtons hovertext" data-hover="Notifications" onClick={()=>{navigate("/notifications")}}>
+            <div className="leftButtons hovertext" data-hover="Notifications" onClick={()=>{setOpenProfile(false), navigate("/notifications")}}>
                 <img src={"/WebPhoto/notifications.png"} alt={"notifications icon"} />
                 {notifications[0] ? 
                     <div className="counter">{notifications.length}</div>
@@ -80,9 +82,11 @@ function LeftNavFree({savedNotifications, setNumber}){
                     type = "Message", 
                     readAll(userData.user.id), 
                     setNumber(prev=>prev+1), 
+                    setOpenProfile(false),
                     navigate("/messages")
                 }
                 if (messagesNotif?.length===0) {
+                    setOpenProfile(false),
                     navigate("/messages")
                 }
             }}>
@@ -99,16 +103,17 @@ function LeftNavFree({savedNotifications, setNumber}){
                         setOpenProfile(false)
                     }
                 }}>
-                    {userData.user.sex==="Male" ?
-                        <img src={"/WebPhoto/maleuser.png"} alt={"male user icon"} />
-                    :<></>}
-                    {userData.user.sex==="Female" ?
-                        <img src={"/WebPhoto/femaleuser.png"} alt={"female user icon"} />
-                    :<></>}
+                    <img src={"/WebPhoto/menu.png"} alt={"menu icon"} />
                 {openProfile && (
                     <div className="accountPicker">
                         <div className="leftButtons" onClick={()=>{setOpenProfile(false), navigate("/profile/user")}}> 
-                            <>My Profile</>
+                            <>                    
+                            {userData.user.sex==="Male" ?
+                                <img src={"/WebPhoto/maleuser.png"} alt={"male user icon"} />
+                            :null}
+                            {userData.user.sex==="Female" ?
+                                <img src={"/WebPhoto/femaleuser.png"} alt={"female user icon"} />
+                            :null}Profile</>
                         </div>
                         <div className="leftButtons" onClick={()=>{setOpenProfile(false), navigate("/settings")}}>
                             <><img src={"/WebPhoto/settings.png"} alt={"settings icon"} />Settings</>

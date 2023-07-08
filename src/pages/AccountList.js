@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react"
+import React, { useState, useEffect, useContext, useRef } from "react"
 import Axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { UserContext } from "../home"
@@ -22,9 +22,23 @@ function AllAccounts(){
     const [result, setResult] = useState([])
     const [page, setPage] = useState(0)
     const [searchCount, setSearchCount] = useState(10)
-
+    const topPage = useRef(null)
     let length = accounts.length
     let index = 0
+
+    const scrollToSection = (elementRef) => {
+        window.scrollTo({
+          top: elementRef.current.offsetTop,
+          behavior: "smooth",
+        })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
 
     useEffect(() => {
         let isCancelled = false
@@ -141,6 +155,7 @@ function AllAccounts(){
     
     return(
         <div className="accountsList">
+            <div ref={topPage}></div>
             <div className="contentTitle">
                 <label><b>List of Accounts</b></label>
             </div>
@@ -170,17 +185,15 @@ function AllAccounts(){
                         />
                     </div>
                     <div className="testing">
-                        <div className="searchKey">
-                            <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                if (keySearch === false) {
-                                    setKeySearch(true)
-                                }
-                                if (keySearch === true) {
-                                    setKeySearch(false)
-                                }
-                            }}>
-                                ...
-                            </button>
+                        <div className="searchKey leftNewButtons hovertext" data-hover="Filter" onClick={()=> {
+                            if (keySearch === false) {
+                                setKeySearch(true)
+                            }
+                            if (keySearch === true) {
+                                setKeySearch(false)
+                            }
+                        }}>
+                            <img src={"/WebPhoto/filter.png"} alt={"filter icon"} />
                         </div>
                     </div>
                 </div>
@@ -252,13 +265,13 @@ function AllAccounts(){
                                             {categoryPick && (
                                                 <div className="searchTabs">
                                                     {filteredCategory?.map((b)=> {
-                                                        return <button className="btn btn-sm btn-primary" key={idPlusKey(categoryBy, b)} onClick={()=>{
+                                                        return <label className="selectedTagLabel" key={idPlusKey(categoryBy, b)} onClick={()=>{
                                                                     setQuery(b),
                                                                     setSearchBy("Skill")
                                                                     setCategoryBy("")
                                                                     setCategoryPick(false)
                                                                     setAdvSearch(false)
-                                                                }}>{b}</button>
+                                                                }}>{b}</label>
                                                     })}
                                                 </div>
                                             )}
@@ -362,18 +375,19 @@ function AllAccounts(){
                 </table>
             </div>
             </div>
-            
-            <div className="pageNumber">
-                <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
-                    {result?.map((a)=>{
-                        return (
-                            <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
-                                {(result?.indexOf(a))+1}
-                            </button>
-                        )
-                    })}
-                <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
-            </div>
+            {result[0] ?
+                <div className="pageNumber">
+                    <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
+                        {result?.map((a)=>{
+                            return (
+                                <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
+                                    {(result?.indexOf(a))+1}
+                                </button>
+                            )
+                        })}
+                    <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
+                </div>
+            : null}
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react"
+import React, { useState, useContext, useEffect, useRef } from "react"
 import { UserContext } from "../home"
 import Notif from "../components/Notif"
 import Axios from "axios"
@@ -12,10 +12,25 @@ function Notifications(props) {
     const [ page, setPage ] = useState(0)
     const [ searchCount, setSearchCount ] = useState(10)
     const [ notifResult, setNotifResult ] = useState([])
-
+    const topPage = useRef(null)
+    
     const scrollToEnd = ()=> {
         setPage(page+1)
     }
+
+    const scrollToSection = (elementRef) => {
+        window.scrollTo({
+          top: elementRef.current.offsetTop,
+          behavior: "smooth",
+        })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
     /* Supposed to be used for infinite scroll pagination
     window.onscroll = function () {
         if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
@@ -78,6 +93,7 @@ function Notifications(props) {
     
     return (
         <div className="notifications">
+            <div ref={topPage}></div>
             <div className="notificationsTop">
                 <div className="contentTitle">
                     <label><b>Notifications</b></label>

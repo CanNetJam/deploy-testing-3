@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react"
+import React, { useState, useEffect, useContext, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import Axios from "axios"
 import moment from "moment"
@@ -20,9 +20,23 @@ function AllProjects(){
     const [searchCount, setSearchCount] = useState(10)
     const [sortSallaryText, setSortSallaryText] = useState("")
     const [advSearch, setAdvSearch] = useState(false)
-    
+    const topPage = useRef(null)
     let length = projects.length
     let index = 0
+
+    const scrollToSection = (elementRef) => {
+        window.scrollTo({
+          top: elementRef.current.offsetTop,
+          behavior: "smooth",
+        })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
 
     useEffect(() => {
         const getFiltered = async () => { 
@@ -68,6 +82,7 @@ function AllProjects(){
     
     return(
         <div className="projectsList">
+            <div ref={topPage}></div>
             <div className="contentTitle">
                 <label><b>List of Approved Jobs & Projects</b></label>
             </div>
@@ -99,17 +114,15 @@ function AllProjects(){
                         </button>
                     </div>
                     <div className="testing">
-                        <div className="searchKey">
-                            <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                if (keySearch === false) {
-                                    setKeySearch(true)
-                                }
-                                if (keySearch === true) {
-                                    setKeySearch(false)
-                                }
-                            }}>
-                                ...
-                            </button>
+                        <div className="searchKey leftNewButtons hovertext" data-hover="Filter" onClick={()=> {
+                            if (keySearch === false) {
+                                setKeySearch(true)
+                            }
+                            if (keySearch === true) {
+                                setKeySearch(false)
+                            }
+                        }}>
+                            <img src={"/WebPhoto/filter.png"} alt={"filter icon"} />
                         </div>
                     </div>
                 </div>
@@ -311,17 +324,19 @@ function AllProjects(){
                     </tbody>
                 </table>
             </div>
-            <div className="pageNumber">
-                <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
-                {result?.map((a)=>{
-                    return (
-                        <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
-                            {(result?.indexOf(a))+1}
-                        </button>
-                    )
-                })}
-                <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
-            </div>
+            {result[0] ? 
+                <div className="pageNumber">
+                    <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
+                    {result?.map((a)=>{
+                        return (
+                            <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
+                                {(result?.indexOf(a))+1}
+                            </button>
+                        )
+                    })}
+                    <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
+                </div>
+            : null}
         </div>
     )
 }

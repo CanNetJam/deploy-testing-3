@@ -12,7 +12,7 @@ function EmployeeList(props) {
     const { userData, setUserData } = useContext(UserContext)
     const [ reviewed, setReviewed ] = useState(false)
     const [ openEmployee, setOpenEmployee ] = useState(false)
-    console.log(props)
+
     useEffect(() => {
         const projectid = props.projectid
         const candidate = props.employeeid?._id 

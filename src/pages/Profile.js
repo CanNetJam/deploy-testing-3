@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useContext } from "react"
+import React, { useState, useEffect, useContext, useRef } from "react"
 import {UserContext} from "../home"
 import Axios from "axios"
 import RatingsAndReviews from "../components/Ratings&Reviews"
 import Gallery from "../components/Gallery"
+import CompanyProfile from "../components/CompanyProfile"
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -93,6 +94,21 @@ function UserProfile(props) {
   const [ region, setRegion ] = useState("")
   const [ province, setProvince ] = useState("")
   const [ city, setCity ] = useState("")
+  const topPage = useRef(null)
+
+  const scrollToSection = (elementRef) => {
+    window.scrollTo({
+      top: elementRef.current.offsetTop,
+      behavior: "smooth",
+    })
+  }
+
+  useEffect(()=> {
+      const windowOpen = () => {   
+          scrollToSection(topPage)
+      }
+      windowOpen()
+  }, [])
 
   useEffect(() => {
     const getLocations = async () => {
@@ -290,9 +306,9 @@ function UserProfile(props) {
     toast.promise(
       loadingNotif,
       {
-        pending: 'Uploading image...',
-        success: 'Image uploaded.',
-        error: 'Image upload failed!'
+        pending: 'Updating profile...',
+        success: 'Profile updated.',
+        error: 'Profile update failed!'
       }
     )
   }
@@ -301,16 +317,10 @@ function UserProfile(props) {
     const key = a + b 
     return key
   }
-  
+
   return (
     <div className="profileCard">
-      {userData.user?.type==="Employer" && (
-        <div className="rightContent">
-          <button className="btn btn-outline-success allButtons" onClick={(e)=>{navigate("/company-profile", {state: {companyinfo: props.companyinfo, employer: userData.user?.id}})}}>
-            Company Profile
-          </button>
-        </div>
-      )}
+      <div ref={topPage}></div>
       <div className="searchProfile">
       <div className="searchProfileTop">
         <div className="profile-ProfilePhotoWrapper">
@@ -337,13 +347,9 @@ function UserProfile(props) {
                 return <label key={idPlusKey(props.id, a)}>{a ? (a)+", " : null} </label>
                 })} </div>
               :<br />}
-              {props.type==="Employer" ? 
-                <div>
-                  <p>Company: {props?.company ? props.company : ""}<br />
-                  Position: {props?.position ? props.position : ""}</p>
-                </div>
-              :<br />}
-              About: {props.about}</p>
+              <p className="fromTextArea">About: <br/> {props.about}</p>
+              </p>
+              
               {!props.readOnly && (
                 <>
                   <button
@@ -530,13 +536,13 @@ function UserProfile(props) {
                                             {categoryPick && (
                                                 <div className="searchTabs">
                                                     {filteredCategory?.map((b)=> {
-                                                        return <button className="tagButton" key={idPlusKey(categoryBy, b)} onClick={()=>{
+                                                        return <label className="selectedTagLabel" key={idPlusKey(categoryBy, b)} onClick={()=>{
                                                                     setAddTag(b),
                                                                     setAddTagSelected(true)
                                                                     setCategoryBy("")
                                                                     setCategoryPick(false)
                                                                     setAdvSearch(false)
-                                                                }}>{b}</button>
+                                                                }}>{b}</label>
                                                     })}
                                                 </div>
                                             )}
@@ -558,6 +564,13 @@ function UserProfile(props) {
           )}
         </div>
       </div>
+
+      {userData.user?.type==="Employer" && ( 
+        <>
+          <label className="text-muted small">Note: As an employer, your personal profile is hidden. Your company profile below is visible instead.</label>
+          <CompanyProfile employer={props.id}/>
+        </>
+      )}
 
       <div className="profileCardMid">
         {props.theFree && (

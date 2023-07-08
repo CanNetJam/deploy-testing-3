@@ -3,13 +3,14 @@ html, body {
   height: 100%;
   width: 100%;
   margin: 0;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
+  font-family: 'Lato', sans-serif;
+  font-size: 16px;  
 }
 
 .all {
   height: 100%;
   background-color: #f1f1f1;
+  display: grid;
 }
 
 .contentSubheading {
@@ -30,6 +31,17 @@ html, body {
   border-color: #ffffff;
   cursor: pointer;
   padding: 5px;
+}
+
+.allButtons:hover {
+  color: #ff9400;
+  background-color: #1b651b;
+  border-color: #ff9400;
+}
+
+.allButtons img{
+  max-height: 30px;
+  max-width: 30px;
 }
 
 .pageButtons {
@@ -161,7 +173,7 @@ html, body {
 }
 
 .centerContentGrid2 {
-  padding: 40px;
+  padding: 20px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
   gap: 30px;
@@ -194,6 +206,7 @@ html, body {
   gap: 5px;
   justify-content: left;
   align-items:left;
+  width: 100%;
 }
 
 .coloredContent{
@@ -205,7 +218,9 @@ html, body {
 }
 
 .top {
-  height: 10%;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .pagefooter {
@@ -234,6 +249,7 @@ html, body {
   display: flex;
   justify-content: space-around;
   align-items: center;
+  position: relative;
 }
 
 .btn {
@@ -279,33 +295,43 @@ html, body {
 /*--------------------------------------------Navigation---------------------------------------------flex-direction: column;*/
 .topnav {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 2fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+  gap: 10px;
   justify-content: space-between;
-
   padding: 10px;
-  height: 100%;
+  max-height: 100px;
   width: 100%;
   background-color: #1b651b;
   color:#ffffff;
-  font-size: 24px;
-  justify-content: space-between;
+  font-size: 18px;
   align-items: center;
 }
 
 .topnavLeft {
   display: flex;
-  gap: 20px;
+  gap: 25px;
   background-color: #1b651b;
   color: #ffffff;
-  align-items: left;
+  align-items: center;
 }
 
-.companyLink,
 .topButtons,
 .leftButtons {
   cursor: pointer;
   position: relative;
+  min-width: 80px;
+  align-items: center;
+}
+
+.leftNewButtons {
+  cursor: pointer;
+  position: relative;
+  min-width: 50px;
+  align-items: center;
+}
+
+.companyLink {
+  cursor: pointer;
   min-width: 80px;
   align-items: center;
 }
@@ -327,9 +353,10 @@ html, body {
   cursor: pointer;
 }
 
-.leftButtons {
+.leftButtons,
+.leftNewButtons {
   display: flex;
-  justify-content: left;
+  justify-content: center;
   height: auto;
   min-height: 40px;
   width: auto;
@@ -375,6 +402,14 @@ html, body {
   justify-content: right;
 }
 
+.actions {
+  display: flex;
+  gap: 5px;
+  background-color: #1b651b;
+  color: #ffffff;
+  justify-content: right;
+}
+
 .topnavRightAdmin {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
@@ -409,7 +444,7 @@ html, body {
 .counter {
   width: 20px;
   height: 20px;
-  background-color: crimson;
+  background-color: rgb(214, 71, 99);
   color: white;
   border-radius: 50%;
   padding: 5px;
@@ -419,16 +454,11 @@ html, body {
   justify-content: center;
   position: absolute;
   top: -2px;
-  right: 35px;
+  right: 15px;
 }
 
 .base {
   display: flex;
-  height: 100%;
-}
-
-.content {
-  flex: 90%;
   height: 100%;
 }
 
@@ -459,6 +489,7 @@ html, body {
 .hovertext:hover:before {
   opacity: 1;
   visibility: visible;
+  z-index: 2;
 }
 
 /*---------------------------------------Messages------------------------------------------calc(100vh - 70px)*/
@@ -493,9 +524,13 @@ html, body {
   height: 100%;
 }
 
+.chatMenuWrapper {
+  border-right: 1px solid;
+}
+
 .chatMenuInput {
-  width: 90%;
-  padding: 10px 0;
+  width: 100%;
+  padding: 10px;
   border: none;
   border-bottom: 1px solid gray;
 }
@@ -611,7 +646,8 @@ html, body {
 
 /*-------------------------------------------------Projects List----------------------------------*/
 .projectRequest,
-.projects {
+.projects,
+.eachProject {
   min-height: 100vh;
   height: 100%;
   width: 100%;
@@ -795,9 +831,10 @@ html, body {
 
 .aboutTopic1 {
   min-height: 450px;
-  background-image: url("/WebPhoto/About/employee-female.jpg");
-  background-size: cover;
-  background-position: center top;
+  background-color: white;
+  background-image: url("/WebPhoto/job-application-art.jpg");
+  background-size: contain;
+  background-position: right center;
   background-repeat: no-repeat;
   display: flex;
   align-items:center;
@@ -809,9 +846,23 @@ html, body {
   padding: 20px;
   text-align: center;
   width: 50%;
+  background-color: #ffffff;
+  border-radius: 5px;
 }
 
 .aboutTopic2 {
+  min-height: 700px;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/WebPhoto/org.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-radius: 5px;
+  padding: 10px;
+  display: grid;
+  grid-row-gap: 50px;
+}
+
+.aboutTopicDev {
   min-height: 500px;
   background-image: url("/WebPhoto/About/job-application-2.jpg");
   background-size: cover;
@@ -819,19 +870,27 @@ html, body {
   background-repeat: no-repeat;
   border-radius: 5px;
   padding: 10px;
+  display: grid;
+  justify-content: space-around;
 }
 
 .aboutTopic2Content {
+  display: grid;
+  gap: 300px;
+  justify-content: center;
+}
+
+.aboutTopic2Content div {
+  width: 100%;
   display: flex;
-  align-items:center;
   justify-content: center;
 }
 
 .aboutTopic2Content p {
+  width: 100%;
   background-color: white;
   padding: 20px;
   text-align: center;
-  width: 50%;
   border-radius: 8px;
   opacity: 0.9;
 }
@@ -848,20 +907,27 @@ html, body {
   width: 100%;
   padding: 10px;
   text-align: center;
-  background-color: #1b651b;
   color: #ffffff;
   border-radius: 8px;
 }
 
+.aboutTopic2Options1 {
+  background-color: #1b651b;
+}
+
+.aboutTopic2Options2 {
+  background-color: #ff9400;
+}
+
+.aboutTopic2Options3 {
+  background-color: #3a5938;
+}
+
 .aboutTopic3 {
-  min-height: 600px;
-  background-image: url("/WebPhoto/About/CVSU-Carmona.jpg");
-  background-size: cover;
-  background-position: center bottom;
-  background-repeat: no-repeat;
-  display: flex;
+  min-height: 400px;
+  display: grid;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
   border-radius: 5px;
   padding: 10px;
 }
@@ -870,7 +936,7 @@ html, body {
   background-color: white;
   padding: 20px;
   text-align: center;
-  width: 50%;
+  width: 100%;
   border-radius: 8px;
   opacity: 0.9;
 }
@@ -883,6 +949,8 @@ html, body {
   background-repeat: no-repeat;
   border-radius: 5px;
   padding: 10px;
+  background-color: green;
+  opacity: 0.8;
 }
 
 .missionVissionContent p {
@@ -890,6 +958,7 @@ html, body {
   text-align: center;
   border-radius: 8px;
   opacity: 0.9;
+  font-size: 18px;
 }
 
 .aboutDeveloper {
@@ -921,17 +990,59 @@ html, body {
   font-size: 24px;
 }
 
+.aboutTopic3Title{
+  height: auto;
+  width: auto;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  color: white;
+  font-size: 56px;
+}
+
+.aboutTopic2Title{
+  height: auto;
+  width: auto;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  color: white;
+  background-color: #ff9400;
+  padding: 20px;
+  border-radius: 5px;
+  font-size: 36px;
+}
+
+.aboutContentTopic3 {
+  min-height: 100px;
+  width: auto;
+  max-width: 800px;
+  padding: 15px;
+  text-align: justify;
+  text-justify: inter-word;
+  background-color: #ff9400;
+  color: white;
+  border-radius: 8px;
+}
+
 .aboutContent {
   min-height: 75px;
+  max-width: 800px;
   padding: 10px;
   font-size: 20px;
   text-align: justify;
   text-justify: inter-word;
 }
 
+.aboutContentTopic2 {
+  opacity: 0.9;
+}
+
 .missionVission {
   display: flex;
-  gap: 20px;
+  gap: 40px;
+  padding-left: 40px;
+  padding-right: 40px;
 }
 
 .missionVission div{
@@ -992,13 +1103,21 @@ html, body {
 /*-------------------------------------------------Homes----------------------------------------------*/
 .homes {
   min-height: 100vh;
+  display: grid;
+  justify-content: space-around;
+  gap: 20px 20px;
   height: 100%;
   width: 100%;
-  display: flex;
+}
+
+.homesCopy {
+  min-height: 100vh;
+  display: grid;
   align-items: center;
-  justify-content:space-evenly;
+  justify-content: center;
   gap: 20px 20px;
-  padding: 15px 125px 15px  125px;
+  height: 100%;
+  width: 100%;
 }
 
 .loginWrapper {
@@ -1054,12 +1173,91 @@ html, body {
   background-color: #878181;
 }
 
-.infoCard {
-  max-height: 600px;
+.homeDashboardWrapper {
+  min-height: 100vh;
+  display: grid;
+  justify-content: stretch;
+  gap: 20px 20px;
   height: 100%;
-  max-width: 800px;
+  width: 100%;
+}
+
+.homeDashboard {
+  height: 100vh;
+  max-width: 100%;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/WebPhoto/About/CVSU-Carmona.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: #878181;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.universityDashboard {
+  min-height: 100vh;
+  height: auto;
+  width: auto;
+  max-width: 100%;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/WebPhoto/cvsu-main.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-radius: 10px;
+}
+
+.homeDashboardCenter {
+  display: grid;
+  justify-content: center;
+  gap: 10px;
+}
+
+.homeDashboardTitle {
+  height: auto;
+  max-width: 300px;
+  width: auto;
+  max-width: 600px;
+  color: white;
+  font-size: 78px;
+  text-align: center;
+}
+
+.homeDashboardText {
+  height: auto;
+  max-width: 300px;
+  width: auto;
+  max-width: 600px;
+  color: white;
+  font-size: 28px;
+  text-align: center;
+}
+
+.infoCardTitleWrapper {
+  min-height: 100px;
+  width: 100%;
+  border-radius: 5px;
+}
+.infoCardTextWrapper {
+  min-height: 200px;
+  width: 100%;
+  border-radius: 5px;
+  padding: 30px;
+}
+
+.infoCard {
+  min-height: 50vh;
+  height: auto;
   width: 100%;
   border-radius: 8px;
+  background-color: white;
+  padding-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 10px;
+  justify-content: space-around;
+  align-items: center;
+  padding: 20px;
 }
 
 .infoCardPhoto {
@@ -1070,18 +1268,30 @@ html, body {
   border-radius: 8px;
 }
 
+.infoCardPhoto:hover,
+.searchItem:hover,
+.searchHiring:hover {
+  -moz-box-shadow: 0 0 8px black;
+  -webkit-box-shadow: 0 0 8px black;
+  box-shadow: 0px 0px 8px black;
+}
+
 .infoCardTitle {
-  font-size: 48px;
+  font-size: 36px;
   display: flex;
   justify-content: space-around;
-  color: white;
   text-align: center;
+}
+
+.infoCardText {
+  font-size: 18px;
+  display: grid;
+  justify-content: center;
 }
 
 .infoCardFooter {
   text-align: center;
   font-size: 36px;
-  color: white;
 }
 
 .projectUpdate {
@@ -1120,7 +1330,11 @@ html, body {
 }
 
 .currentProject {
-  padding: 15px;
+  width: auto;
+  height: auto;
+  background-color: #dddddd;
+  border-radius: 4px;
+  padding: 10px;
 }
 /*-------------------------------------------------Search----------------------------------------------*/
 .searchComponent {
@@ -1138,7 +1352,7 @@ html, body {
   width: 100%;
   gap: 5px;
   background-color: #ffffff;
-  padding: 10px;
+  padding: 5px;
   border-radius: 5px;
 }
 
@@ -1201,10 +1415,10 @@ html, body {
 }
 
 .searchItem {
-  max-height: 350px;
-  max-width: 550px;
+  max-height: 250px;
+  max-width: 250px;
   background-color: #ffffff;
-  padding: 15px;
+  padding: 5px;
   border-radius: 10px;
   cursor: pointer;
   text-align:left;
@@ -1213,8 +1427,8 @@ html, body {
 }
 
 .searchImg {
-  width: 128px;
-  height: 128px;
+  width: 115px;
+  height: 115px;
   border-radius: 10px;
   object-fit: cover;
   margin-right: 10px;
@@ -1226,6 +1440,17 @@ html, body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   grid-column-gap: 50px;
+  grid-row-gap: 15px;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.searchCandidateList {
+  height: auto;
+  padding: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-column-gap: 20px;
   grid-row-gap: 15px;
   justify-content: center;
   border-radius: 8px;
@@ -1257,9 +1482,8 @@ html, body {
 .searchHiringTop {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 10px;
-  font-size: 24px;
+  font-size: 18px;
 }
 
 .searchHiringTop img {
@@ -1270,7 +1494,6 @@ html, body {
 .searchHiringBot {
   padding: 10px;
   align-items: center;
-  font-size: 20px;
 }
 
 .searchBox {
@@ -1358,12 +1581,22 @@ html, body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   grid-column-gap: 10px;
+  grid-row-gap: 10px;
+  height: auto;
+}
+
+.searchTabsDelete {
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-column-gap: 10px;
+  grid-row-gap: 10px;
   height: auto;
 }
 
 .selectCategory {
   height: 35px;
-  min-width: 100px;
+  min-width: 250px;
   max-width: 100%;
 }
 
@@ -1373,19 +1606,28 @@ html, body {
   align-items: center;
 }
 
+.selectedCategorySettings {
+  cursor: pointer;
+}
+
 .settingsCategoryTitle {
   font-size: 36px;
   text-align: center;
 }
 
 .selectedCategoryLabel {
-  font-size: 24px;
+  font-size: 18px;
+}
+
+.settingsCategoryWrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-column-gap: 10px;
 }
 
 .settingsCategory {
-  border: solid 2px;
-  border-radius: 8px;
   padding: 10px;
+  max-width: 100%;
 }
 
 .settingsCategoryTop {
@@ -1405,11 +1647,6 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.selectedCategorySettings button {
-  border: 1px solid;
-  border-radius: 5px;
 }
 
 .confirmRemoveLabel {
@@ -1432,7 +1669,29 @@ html, body {
 }
 
 .addTag {
+  width: 300px;
+  height: auto;
+  display: grid;
+  justify-content: center;
+  background-color: white;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.addTag div,
+.removeTagLabel, 
+.confirmRemoveLabel {
   display: flex;
+  justify-content: center;
+}
+
+.removeTag {
+  width: 400px;
+  display: grid;
+  justify-content: center;
+  background-color: white;
+  border-radius: 5px;
+  padding: 10px;
 }
 
 .searchProfile {
@@ -1444,6 +1703,7 @@ html, body {
 
 .searchProfileTop {
   display: flex;
+  width: 100%;
 }
 
 .searchProfileMidOptions{
@@ -1459,8 +1719,6 @@ html, body {
 
 .searchBoxProfileTop {
   display: flex;
-  justify-content: space-between;
-  padding: 10px;
   margin: 0px;
   font-size: 16px;
 }
@@ -1471,11 +1729,13 @@ html, body {
 }
 
 .p1 {
-  font-size: 28px;
+  font-size: 22px;
+  height: auto;
 }
 
 .p2 {
-  font-size: 20px;
+  font-size: 16px;
+  height: auto;
 }
 
 .pageNumber {
@@ -1568,7 +1828,7 @@ html, body {
 
 .profileCardText {
   width: 100%;
-  padding: 15px;
+  padding: 10px;
 }
 
 .profileCardTextWrapper {
@@ -1579,8 +1839,16 @@ html, body {
 }
 
 .profileCardName {
-  font-size: 36px;
+  font-size: 24px;
   padding: 10px;
+  background-color: #1b651b;
+  color: #ffffff;
+  text-align: center;
+}
+
+.profileCardName2 {
+  font-size: 20px;
+  padding: 8px;
   background-color: #1b651b;
   color: #ffffff;
   text-align: center;
@@ -1687,7 +1955,7 @@ html, body {
 .galleryTopTitle label,
 .reviews label,
 .projectRequestFormTop label {
-  font-size: 36px;
+  font-size: 26px;
 }
 
 .notifList {
@@ -1731,6 +1999,7 @@ html, body {
 .projectListCard:hover,
 .employeeListWrapper:hover,
 .notif:hover,
+.accessSettingsLabel:hover,
 .tagButton:hover {
   background-color: rgb(245, 243, 243);
 }
@@ -1831,7 +2100,7 @@ html, body {
   text-align:left;
   margin: 0;
   display: grid;
-  gap: 20px;
+  gap: 5px;
 }
 /*-------------------------------------------------Projects List----------------------------------------------*/
 .projectsList,
@@ -1896,13 +2165,13 @@ html, body {
   max-width: 1500px;
   padding: 5px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 2fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 2fr));
   gap: 10px;
   border-radius: 8px;
 }
 
 .projectCardTopDetails {
-  width: auto;
+  width: 100%;
   display: grid;
   justify-content: center;
 }
@@ -1935,6 +2204,7 @@ html, body {
 }
 
 .projectListCard {
+  height: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1993,10 +2263,14 @@ html, body {
   max-width: 100%;
   padding: 15px;
   border-radius: 6px;
-  background-color: #f1f1f1;
+  background-color: white;
   margin: 0;
   display: grid;
   justify-content: center;
+}
+
+.reviewForm div {
+  min-width: 500px;
 }
 
 .reviewList {
@@ -2053,6 +2327,19 @@ th, td {
   overflow: hidden;
 }
 
+.constantHWBugs {
+  min-width: 150px;
+  max-width: auto;
+  max-height: 200px;
+  overflow: hidden;
+}
+
+.bugImg {
+  min-width: 150px;
+  max-width: auto;
+  max-height: 200px;
+}
+
 .smallHW {
   min-width: 100px;
   max-width: auto;
@@ -2080,8 +2367,7 @@ tr:nth-child(even) {
 /*-------------------------------------------------Settings----------------------------------------------*/
 .settings,
 .reports,
-.dashBoard,
-.bugReports {
+.dashBoard {
   min-height: 100vh;
   height: 100%;
   width: 100%;
@@ -2139,12 +2425,17 @@ tr:nth-child(even) {
   border: solid 1px;
   border-radius: 5px;
   display: grid;
-  gap: 10px;
   justify-content: center;
 }
 
 .reportContentTop {
-  max-height: 100px;
+  height: 50px;
+  width: 100%;
+}
+
+.reportContentBot {
+  min-height: 250px;
+  max-height: 100%;
   width: 100%;
 }
 
@@ -2160,12 +2451,13 @@ tr:nth-child(even) {
 
 .pieChartFiller {
   background-color: grey;
-  min-height: 200px;
-  min-width: 280px;
+  min-height: 220px;
+  min-width: 300px;
   display: flex;
   align-items: center;
   justify-content: space-around;
   border-radius: 10px;
+  font-size: 22px;
 }
 
 .annual-report-grid {
@@ -2325,6 +2617,8 @@ a:hover {
 
 .toPrint {
   padding: 20px;
+  width: 100%;
+  height: auto;
 }
 
 /*-------------------------------------------------End Contract Modal----------------------------------------------*/
@@ -2351,16 +2645,62 @@ a:hover {
   padding: 25px;
 }
 
-.requestTable {
+.newModalBackground {
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(95, 95, 95, 0.9);
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.newModalBackground2 {
+  width: 100%;
+  height: 100vh;
+  top: 0px;
+  left: 0px;
+  background-color: rgba(95, 95, 95, 0.9);
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+}
+
+.requestTable,
+.eachProject,
+.settings {
   position: relative;
   z-index: 1;
 }
 
-.requestModal {
+.requestModal,
+.projectSearchModal {
   position: absolute;
   top: 0px;
   z-index: 2;
   width: 100%;
+}
+
+.eachProject {
+  display: flex;
+  justify-content: center;
+}
+
+.projectSearchModal {
+  min-width: auto;
+  max-width: 900px;
+  max-height: 800px;
+  overflow-y: scroll;
+}
+
+.reviewModal {
+  z-index: 2;
+  min-width: auto;
+  max-width: 600px;
+  max-height: 800px;
 }
 
 .requestModalPhoto {
@@ -2401,7 +2741,7 @@ a:hover {
 .modalContainer .title {
   display: inline-block;
   text-align: center;
-  font-size: 28px;
+  font-size: 24px;
 }
 
 .titleCloseBtn {
@@ -2430,6 +2770,7 @@ a:hover {
   display: flex;
   justify-content: center;
   align-items: center;
+  column-gap: 5px;
 }
 
 #cancelBtn {
@@ -2443,7 +2784,9 @@ a:hover {
 }
 
 /*---------------------------------------------Company Profile---------------------------------------------*/
-.companyProfile {
+.companyProfile,
+.systemLogs,
+.bugReports {
   padding: 20px;
   min-height: 100vh;
   height: 100%;
@@ -2463,23 +2806,34 @@ a:hover {
   align-items: center;
   gap: 20px;
   border-radius: 12px;
-  padding: 5px;
+  padding: 10px;
   position: relative;
   background-color: #1b651b;
   color: #ffffff;
 }
 
+.companyProfileTopHeader {
+  min-height: 250px;
+}
+
 .companyLogo {
-  height: auto;
-  width: auto;
+  min-height: 240px;
+  min-width: 240px;
   max-height: 250px;
   max-width: 250px;
   border-radius: 8px;
+  object-fit: fill;
+}
+
+.companyProfileTopBot {
+  display: grid;
+  width: 100%;
 }
 
 .companyProfileMidBot {
   display: grid;
   justify-content: center;
+  width: 100%;
 }
 
 .companyProfileMid,
@@ -2513,4 +2867,178 @@ a:hover {
   border-radius: 10px;
   background-color: #ffffff;
   margin: 0;
+}
+
+.topnavLabel {
+  cursor: pointer;
+}
+
+.topnavLabelTitle {
+  font-size: 24px;
+}
+
+.topnavLabel:hover {
+  color: orange;
+}
+
+.windowContainer {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  max-width: 1500px;
+}
+
+.dateRangeInputBox {
+  min-width: 250px;
+}
+
+.printHeader {
+  display: grid;
+  justify-content: center;
+}
+
+.cvsuHeaderWrapper {
+  height: auto;
+  max-width: 700px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+}
+
+.cvsuHeaderLeft {
+  flex: 3;
+  height: 100%;
+  width: 100%;
+}
+
+.cvsuHeaderLeft img{
+  max-width: 140px;
+  max-height: 140px;
+}
+
+.cvsuHeaderRight {
+  flex: 9;
+  height: 100%;
+  width: 100%;
+}
+
+.cvsuHeader1 {
+  font-family: Century Gothic;
+  font-size: 10pt;
+  max-height: 20px;
+  text-align: center;
+}
+
+.cvsuHeader2 {
+  font-family: Bookman;
+  font-size: 12pt;
+  max-height: 20px;
+  text-align: center;
+}
+
+.cvsuHeader3 {
+  font-family: Century Gothic;
+  font-size: 9pt;
+  max-height: 20px;
+  text-align: center;
+}
+
+.cvsuHeader4 {
+  font-family: Lucida Calligraphy;
+  font-size: 9pt;
+  max-height: 20px;
+  text-align: center;
+}
+
+.selectedTagLabel {
+  width: auto;
+  height: auto;
+  text-align: center;
+  align-items: center;
+  background-color: #dddddd;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.selectedSettingsTagLabel {
+  width: auto;
+  height: auto;
+  text-align: center;
+  align-items: center;
+  background-color: #dddddd;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+.selectedTagLabel:hover {
+  background-color: #bebdbd;
+}
+
+.modalClosing {
+  display: flex;
+  justify-content: right;
+  align-items:right;
+  width: 100%;
+  padding-bottom: 10px;
+}
+
+.starsContainer {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  gap: 3px;
+}
+
+.starsContainerWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+}
+
+.starsContainer label{
+  max-width: 30px;
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.eachStar {
+  border-radius: 50%;
+}
+
+.eachStar:hover {
+  -moz-box-shadow: 0 0 3px black;
+  -webkit-box-shadow: 0 0 3px black;
+  box-shadow: 0px 0px 3px black;
+}
+
+.reportsTableWrapper {
+  height: 100px;
+}
+
+.accessSettings {
+  position: relative;
+  display: inline-block;
+}
+
+.accessSettingsOpen {
+  display: grid;
+  position: absolute;
+  top: 50px;
+  right: 0px;
+  background-color: white;
+  border-radius: 5px;
+  width: 120px;
+  box-shadow: 0px 5px 5px 5px rgba(0,0,0,0.1);
+  z-index: 1;
+  padding: 5px;
+}
+
+.accessSettingsLabel {
+  cursor: pointer;
+  padding: 3px;
 }

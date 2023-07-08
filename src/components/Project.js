@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react"
+import React, { useState, useEffect, useContext, useRef } from "react"
 import Axios from "axios"
 import { useLocation, useNavigate } from 'react-router-dom'
 import { UserContext } from "../home"
@@ -48,6 +48,14 @@ function Project({socket}) {
     const [ toEndContract, setToEndContract ] = useState()
     const [ statusToReview, setStatusToReview ] = useState()
     const [ extend, setExtend ] = useState(false)
+    const projectProgressScroll = useRef(null)
+
+    const scrollToSection = (elementRef) => {
+      window.scrollTo({
+        top: elementRef.current.offsetTop,
+        behavior: "smooth",
+      })
+    }
     
     useEffect(() => {
         const projectid = location.state._id
@@ -215,7 +223,7 @@ function Project({socket}) {
     async function endProject (e) {
       e.preventDefault()
       const projectid = location.state._id
-      if (end==="Accomplished") {
+      if (1===1) {
         const theEnd = await Axios.post(`/api/end-project/${projectid}`)
         setDone(theEnd.data)
         if (theAdmin) {
@@ -247,6 +255,7 @@ function Project({socket}) {
               })
             }
           })
+          setEnding(false)
         }
         if (!theAdmin) {
           //notif for admin
@@ -275,6 +284,7 @@ function Project({socket}) {
               })
             }
           })
+          setEnding(false)
         }
       } else {
         toastErrorNotification()
@@ -413,8 +423,57 @@ function Project({socket}) {
     }
 
     return (
-        <div className="projects">
-            {modalOpen && <EndContractModal setOpenModal={setModalOpen} projectInfo={projectInfo} toEndContract={toEndContract} setReload={setReload}/>}
+        <div className="eachProject">
+            {modalOpen && 
+              <div className="newModalBackground">
+                <EndContractModal setOpenModal={setModalOpen} projectInfo={projectInfo} toEndContract={toEndContract} setReload={setReload}/>
+              </div>
+            }
+            
+              {searchOn && 
+                <div className="newModalBackground">
+                  <div className="projectSearchModal">
+                    <SearchBox 
+                      projectid={location.state._id}
+                      projectInfo={projectInfo}
+                      setProjectInfo={setProjectInfo}
+                      projecttype={projectInfo?.type} 
+                      setSearchOn={setSearchOn}
+                    />
+                  </div>
+                </div>
+              }
+
+              {statusToReview==="Concluded" && theEmp && writeReview ? 
+                <div className="newModalBackground">
+                  <div className="reviewModal">
+                    <Review 
+                      projectid={location.state._id}  
+                      toEndContract={toEndContract}
+                      setWriteReview={setWriteReview}
+                    />
+                  </div>
+                </div>
+              : null} 
+            
+              {ending && (
+                <div className="newModalBackground">
+                  <form onSubmit={endProject} className="modalContainer">
+                    <div className="title">
+                        <p>Are you sure you want to accomplish this {projectInfo.type}?</p>
+                    </div>
+                    <div className="body">
+                        <p className="text-muted small">Warning: This action is irreversible!</p>
+                    </div>
+                    <div className="footer">
+                        <button type="submit" className="btn btn-outline-success allButtons">Confirm</button>
+                        <button type="button" className="btn btn-sm btn-outline-secondary cancelBtn" onClick={() => {setEnding(false)}} id="cancelBtn">
+                            Cancel
+                        </button>
+                    </div>
+                  </form>
+                </div>
+              )}
             {projectInfo && (
                   <div className="projectCard">
                     <div className="contentTitle sideContent">
@@ -426,91 +485,7 @@ function Project({socket}) {
                     </div>
                     <br/>
                     <p className="profileCardName">{projectInfo.title}</p>
-                    <div className="projectCardTop">
-                      <div className="projectCardTopPhoto">
-                        <img src={projectInfo.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${projectInfo.image}.jpg` : "/fallback.png"} className="projectPhoto" alt={`${projectInfo.company} named ${projectInfo.title}`}></img>
-                      </div>
-                      <div className="projectCardTopDetails">
-                        {projectInfo.status==="Hiring" ?
-                          <div className="paragraphSpaceBetween">
-                            {daysRemaining(projectInfo.expirationdate)>1 ? <p>Hiring <b>{projectInfo.slots ? projectInfo.slots : "unspecified"}</b> people.</p>: <p><b>Inactive.</b></p>}
-                            {projectInfo.expirationdate ? (daysRemaining(projectInfo.expirationdate)>1 ? <p><b>{daysRemaining(projectInfo.expirationdate)}</b> days before post expires.</p>: <b>{`${projectInfo.type} Expired.`}</b>) : "unspecified"}
-                          </div>
-                        :<></>}
-                        <div className="paragraphSpaceBetween">
-                          <div>Skill Required</div> 
-                          <div className="rightText">{projectInfo.skillrequired}</div>
-                        </div>
-                        <div className="paragraphSpaceBetween">
-                          <div>Employment type</div> 
-                          <div className="rightText">{projectInfo.employmenttype}</div>
-                        </div>
-                        {projectInfo.company!=="undefined" ?
-                          <div className="paragraphSpaceBetween">
-                            <div>Company</div> 
-                            <div className="rightText companyLink" onClick={()=> navigate("/company-profile", {state: {companyinfo: projectInfo.employer?.companyinfo, employer: projectInfo.employer._id}})}><u>{projectInfo.employer?.companyinfo?.companyname}</u></div>
-                          </div>
-                        : 
-                        <div className="paragraphSpaceBetween">
-                          <div>Company</div> 
-                          <div className="rightText"><i>Not specified.</i></div>
-                        </div>
-                        }
-                        <div className="paragraphSpaceBetween">
-                          <div>Sallary</div> 
-                          <div className="rightText">₱ {new Intl.NumberFormat().format(projectInfo.sallary.toFixed(2))}
-                          </div>
-                        </div>
-                        <div className="paragraphSpaceBetween">
-                          <div>Duration</div> 
-                          <div className="rightText">{projectInfo.duration} months</div>
-                        </div>
-                        <div className="paragraphSpaceBetween">
-                          <div>Location</div> 
-                          <div className="rightText">
-                            {projectInfo.location?.city}, {projectInfo.location?.province}, <br/>
-                            {projectInfo.location?.region}
-                          </div>
-                        </div>
-                        <div className="paragraphSpaceBetween">
-                          <div>Minimum requirements</div> 
-                          <div className="rightText">
-                            {projectInfo.minimumreq.map((a)=> {
-                              if (a.what==="Others") {
-                                return <><label>{a.note}</label><br/></>
-                              } else {
-                                return <><label>{a.what}</label><br/></>
-                              }
-                            })}
-                          </div>
-                        </div>
-                        <div>
-                          <label>Description:</label>
-                          <div className="fromTextAreaContainer">
-                          <p className="fromTextArea">{projectInfo.description}</p>
-                          </div>
-                        </div>
-                        {accepted ? 
-                          <>
-                            <div className="paragraphSpaceBetween">
-                              <div>Start</div> 
-                              <div className="rightText">{moment(projectInfo.acceptdate).format("MMM. DD, YYYY")}</div>
-                            </div>
-                            <div className="paragraphSpaceBetween">
-                              <div>Expected end</div> 
-                              <div className="rightText">{moment(expectedDate).format("MMM. YYYY")}</div>
-                            </div>
-                          </>
-                        :<></>}
-                        {!ongoing && !hiring ? 
-                          <div className="paragraphSpaceBetween">
-                            <div>Date concluded</div> 
-                            <div className="rightText">{moment(projectInfo.completiondate).format("MMM. DD, YYYY")}</div>
-                          </div>
-                        :<></>}
-                      </div> 
-                    </div>
-                    <br/>
+
                     <div className="projectCardMid">
                       {hiring && isFree && theEmp ?
                         <div className="actionButtonWrapper">
@@ -562,6 +537,7 @@ function Project({socket}) {
                           <button className="btn btn-outline-success allButtons" onClick={()=>{
                             if (openProgress===false) {
                               setOpenProgress(true)
+                              scrollToSection(projectProgressScroll)
                             }
                             if (openProgress===true) {
                               setOpenProgress(false)
@@ -584,41 +560,9 @@ function Project({socket}) {
                           }}>
                             Accomplish {projectInfo.type}
                           </button>
-                          {ending && (
-                                  <form onSubmit={endProject}>
-                                    <div>
-                                      <p>Please type "Accomplished" to proceed.</p>
-                                      <input onChange={e => setEnd(e.target.value)} value={end} type="text"/>
-                                    </div>
-                                    <div>
-                                      <button className="allButtons">Confirm</button>
-                                    </div>
-                                  </form>
-                                )}
-                              </div>
-                              )}
-
-                            {ongoing && theAdmin && (
-                              <div className="actionButtonWrapper">
-                                <button className="allButtons actionButton" onClick={()=>{
-                                  if (ending===false) {
-                                    setEnding(true)
-                                  }
-                                  if (ending===true) {
-                                    setEnding(false)
-                                  }
-                                  }}>Accomplish {projectInfo.type}</button>
-                                {ending && (
-                                  <form onSubmit={endProject}>
-                                    <p>Please type "Accomplished" to proceed.</p>
-                                    <input onChange={e => setEnd(e.target.value)} value={end} type="text"/>
-                                    <button className="allButtons">Confirm</button>
-                                  </form>
-                                )}
-                              </div>
-                            )}
-                        
-                        
+                        </div>
+                      )}
+                  
                         {ongoing && theFree ?
                           <div className="actionButtonWrapper">
                             <button className="allButtons actionButton" onClick={()=>{
@@ -635,6 +579,91 @@ function Project({socket}) {
                         : <></>}
                     </div>
 
+                    <div className="projectCardTop">
+                      <div className="projectCardTopPhoto">
+                        <img src={projectInfo.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${projectInfo.image}.jpg` : "/fallback.png"} className="projectPhoto" alt={`${projectInfo.company} named ${projectInfo.title}`}></img>
+                      </div>
+                      <div className="projectCardTopDetails">
+                        {projectInfo.status==="Hiring" ?
+                          <div className="paragraphSpaceBetween">
+                            {daysRemaining(projectInfo.expirationdate)>1 ? <p>Hiring <b>{projectInfo.slots ? projectInfo.slots : "unspecified"}</b> people.</p>: <p><b>Inactive.</b></p>}
+                            {projectInfo.expirationdate ? (daysRemaining(projectInfo.expirationdate)>1 ? <p><b>{daysRemaining(projectInfo.expirationdate)}</b> days before post expires.</p>: <b>{`${projectInfo.type} Expired.`}</b>) : "unspecified"}
+                          </div>
+                        :<></>}
+                        <div className="paragraphSpaceBetween">
+                          <div>Skill Required:</div> 
+                          <div className="rightText">{projectInfo.skillrequired}</div>
+                        </div>
+                        <div className="paragraphSpaceBetween">
+                          <div>Employment type:</div> 
+                          <div className="rightText">{projectInfo.employmenttype}</div>
+                        </div>
+                        {projectInfo.company!=="undefined" ?
+                          <div className="paragraphSpaceBetween">
+                            <div>Company:</div> 
+                            <div className="rightText companyLink" onClick={()=> navigate("/company-profile", {state: {companyinfo: projectInfo.employer?.companyinfo, employer: projectInfo.employer._id}})}><u>{projectInfo.employer?.companyinfo?.companyname}</u></div>
+                          </div>
+                        : 
+                        <div className="paragraphSpaceBetween">
+                          <div>Company:</div> 
+                          <div className="rightText"><i>Not specified.</i></div>
+                        </div>
+                        }
+                        <div className="paragraphSpaceBetween">
+                          <div>Sallary:</div> 
+                          <div className="rightText">₱ {new Intl.NumberFormat().format(projectInfo.sallary.toFixed(2))}
+                          </div>
+                        </div>
+                        <div className="paragraphSpaceBetween">
+                          <div>Duration:</div> 
+                          <div className="rightText">{projectInfo.duration} months</div>
+                        </div>
+                        <div className="paragraphSpaceBetween">
+                          <div>Location:</div> 
+                          <div className="rightText">
+                            {projectInfo.location?.city}, {projectInfo.location?.province}, <br/>
+                            {projectInfo.location?.region}
+                          </div>
+                        </div>
+                        <div className="paragraphSpaceBetween">
+                          <div>Minimum requirements:</div> 
+                          <div className="rightText">
+                            {projectInfo.minimumreq.map((a)=> {
+                              if (a.what==="Others") {
+                                return <><label>{a.note}</label><br/></>
+                              } else {
+                                return <><label>{a.what}</label><br/></>
+                              }
+                            })}
+                          </div>
+                        </div>
+                        <div>
+                          <label>Description:</label>
+                          <div className="fromTextAreaContainer">
+                          <p className="fromTextArea">{projectInfo.description}</p>
+                          </div>
+                        </div>
+                        {accepted ? 
+                          <>
+                            <div className="paragraphSpaceBetween">
+                              <div>Start:</div> 
+                              <div className="rightText">{moment(projectInfo.acceptdate).format("MMM. DD, YYYY")}</div>
+                            </div>
+                            <div className="paragraphSpaceBetween">
+                              <div>Expected end:</div> 
+                              <div className="rightText">{moment(expectedDate).format("MMM. YYYY")}</div>
+                            </div>
+                          </>
+                        :<></>}
+                        {!ongoing && !hiring ? 
+                          <div className="paragraphSpaceBetween">
+                            <div>Date concluded:</div> 
+                            <div className="rightText">{moment(projectInfo.completiondate).format("MMM. DD, YYYY")}</div>
+                          </div>
+                        :<></>}
+                      </div> 
+                    </div>
+                    <br/>
                     <div className="centerContent">
                       {hiring && !accepted && !rejected && theFree ?
                         <div>
@@ -685,22 +714,6 @@ function Project({socket}) {
                     <div>
                       {hiring ? 
                         <div>
-                          <div>
-                            {isFree && (
-                            <div>
-                              {searchOn && (
-                                <div>
-                                  <SearchBox 
-                                  projectid={location.state._id}
-                                  projectInfo={projectInfo}
-                                  setProjectInfo={setProjectInfo}
-                                  projecttype={projectInfo?.type}/>
-                                </div>
-                              )} 
-                            </div>  
-                            )}
-                          </div>
-
                           <div className="centerContent">
                             {!applied ? 
                               <div>
@@ -829,7 +842,7 @@ function Project({socket}) {
                     :<></>}
 
                     {!aJob && (ongoing || !ongoing) && accepted ?
-                      <div>
+                      <div ref={projectProgressScroll}>
                         {openProgress && (
                           <div className="centerContent">
                             <ProjectUpdates 

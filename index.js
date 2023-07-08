@@ -323,7 +323,7 @@ app.get("/api/all-accounts", auth, async (req, res) => {
 })
 
 app.get("/api/pending-projects/:type", auth, async (req, res) => {
-  if(req.params.type==="Admin") {
+  if(req.params.type==="Admin" || req.params.type==="Super Administrator") {
     try {
       const allProjects = await projects.find({type: {$in: ["Job Request", "Project Request", "Job", "Project"]}, requeststatus: "Pending"})
       .populate({path:"employer", select:["firstname", "middlename", "lastname", "company"]})
@@ -338,7 +338,7 @@ app.get("/api/pending-projects/:type", auth, async (req, res) => {
 })
 
 app.get("/api/denied-projects/:type", auth, async (req, res) => {
-  if(req.params.type==="Admin") {
+  if(req.params.type==="Admin" || req.params.type==="Super Administrator") {
     try {
       const allProjects = await projects.find({type: {$in: ["Job Request", "Job", "Project Request", "Project"]}, requeststatus: "Denied"})
       .populate({path:"employer", select:["firstname", "middlename", "lastname"]})
@@ -508,6 +508,7 @@ app.post("/api/create-account/:type", upload.single("photo"), auth, registerClea
         sex: req.cleanData.sex,
         phone: req.body.phone,
         citizenship: req.body.citizenship,
+        candidatetype: req.body.candidatetype,
         degree: {
           school: req.body.school,
           course: req.body.course,
@@ -552,6 +553,7 @@ app.post("/api/create-account/:type", upload.single("photo"), auth, registerClea
         sex: req.cleanData.sex,
         phone: req.body.phone,
         citizenship: req.body.citizenship,
+        candidatetype: req.body.candidatetype,
         degree: {
           school: req.body.school,
           course: req.body.course,
@@ -1053,7 +1055,7 @@ app.post("/api/end-contract/:projectid/:employeeid", async (req, res) => {
       { $set: { "employeelist.$[haha].completiondate": Date.now(), "employeelist.$[haha].employmentstatus": "Concluded"} },
       { arrayFilters: [ { "haha.employeeid":  req.params.employeeid } ]}
     )
-    if (info.employeelist.length===1) {
+    if (info.slots===0) {
       await projects.findOneAndUpdate({ _id: new ObjectId(req.params.projectid) }, {$set: {status: "Concluded"}})
     }
     res.status(200).json(info)
@@ -1097,10 +1099,33 @@ app.post("/api/create-conversation", async (req, res)=>{
 })
 
 //get conversation for a single user
-app.get("/conversations/:userId", async (req, res)=> {
+app.get("/conversations/", async (req, res)=> {
   try {
-    const conversation = await conversations.find({members: { $in: [req.params.userId]}}).sort({updatedAt: -1})
-    res.status(200).json(conversation)
+    let userId = req.query.userId
+    let query = req.query.query
+    let friend = ""
+    const conversation = await conversations.find({members: { $in: [userId]}}).sort({updatedAt: -1})
+    if (query!=="") {
+      let conversationFriend
+      if (conversation.length!==0) {
+        for (let i = 0; i<conversation.length; i++) {
+          conversationFriend = await accounts.find({$or: [{firstname: new RegExp(query, 'i')}, {lastname: new RegExp(query, 'i')}]})
+          if (conversationFriend.length!==0) {
+            friend = conversationFriend[0]._id
+          }
+        }
+      }
+    }
+    if (friend!=="") {
+      const member1 = userId
+      const member2 = friend.toString()
+
+      const theConversation = await conversations.findOne({members: { $all: [member1, member2]}})
+      res.status(200).json([theConversation])
+    } 
+    if (friend==="") {
+      res.status(200).json(conversation)
+    }
   } catch(err){ 
     res.status(500).json(err)
   }
@@ -1903,6 +1928,137 @@ app.get("/api/reports/all-completed-jobs&projects", async (req, res) => {
     console.log(err)
   }
 })
+
+app.get("/api/reports/monthly-new-user", async (req, res) => {
+  const startDate = req.query.startDate
+  const endDate = req.query.endDate
+  let data
+  try {
+    const allUsers = await accounts.find({createdAt: {
+      $gte: startDate,
+      $lt: endDate 
+    }})
+    const allCandidateUsers = allUsers?.filter((data) => data.type === "Candidate")
+    const allEmployerUsers = allUsers?.filter((data) => data.type === "Employer")
+    data = {
+      newUsers: {
+        data: allUsers,
+      },
+      subtotal: [
+        {
+          id: 1,
+          type: "Candidate",
+          count: allCandidateUsers.length,
+          data: allCandidateUsers
+        },
+        {
+          id: 2,
+          type: "Employer",
+          count: allEmployerUsers.length,
+          data: allEmployerUsers
+        }
+      ]
+    }
+    res.status(200).send(data)
+  } catch(err) {
+    console.log(err)
+  }
+})
+
+app.get("/api/reports/monthly-new-user-candidatetype", async (req, res) => {
+  const startDate = req.query.startDate
+  const endDate = req.query.endDate
+  let data
+  try {
+    const allUsers = await accounts.find({$and: [{createdAt: {
+      $gte: startDate,
+      $lt: endDate 
+    }}, {type: "Candidate"}]})
+    const allUndergraduate = allUsers?.filter((data) => data.candidatetype === "Undergraduate")
+    const allAlumni = allUsers?.filter((data) => data.candidatetype === "Alumni")
+    const allTraining = allUsers?.filter((data) => data.candidatetype === "Extension Training Graduate")
+
+    data = {
+      allCandidates: {
+        data: allUsers,
+      },
+      subtotal: [
+        {
+          id: 1,
+          type: "Undergraduate",
+          count: allUndergraduate.length,
+          data: allUndergraduate
+        },
+        {
+          id: 2,
+          type: "Alumni",
+          count: allAlumni.length,
+          data: allAlumni
+        },
+        {
+          id: 3,
+          type: "Extension Training Graduate",
+          count: allTraining.length,
+          data: allTraining
+        }
+      ]
+    }
+    res.status(200).send(data)
+  } catch(err) {
+    console.log(err)
+  }
+})
+
+app.get("/api/reports/monthly-new-user-candidate-degree", async (req, res) => {
+  const startDate = req.query.startDate
+  const endDate = req.query.endDate
+  let data
+  try {
+    const allUsers = await accounts.find({$and: [{createdAt: {
+      $gte: startDate,
+      $lt: endDate 
+    }}, {type: "Candidate"}, {candidatetype: "Alumni"}]})
+    const allAssociate = allUsers?.filter((data) => data.degree.degreetitle === "Associate Degree")
+    const allBachelor = allUsers?.filter((data) => data.degree.degreetitle === "Bachelor's Degree")
+    const allMaster = allUsers?.filter((data) => data.degree.degreetitle === "Master's Degree")
+    const allDoctoral = allUsers?.filter((data) => data.degree.degreetitle === "Doctoral Degree")
+
+    data = {
+      allAlumni: {
+        data: allUsers,
+      },
+      subtotal: [
+        {
+          id: 1,
+          type: "Associate Degree",
+          count: allAssociate.length,
+          data: allAssociate
+        },
+        {
+          id: 2,
+          type: "Bachelor's Degree",
+          count: allBachelor.length,
+          data: allBachelor
+        },
+        {
+          id: 3,
+          type: "Master's Degree",
+          count: allMaster.length,
+          data: allMaster
+        },
+        {
+          id: 4,
+          type: "Doctoral Degree",
+          count: allDoctoral.length,
+          data: allDoctoral
+        }
+      ]
+    }
+    res.status(200).send(data)
+  } catch(err) {
+    console.log(err)
+  }
+})
 //Answers---------------------------------------------------------------------------------------------
 app.post("/api/answers/:userid/:projectid", async (req, res) => {
   obj = {
@@ -1958,6 +2114,7 @@ app.get("/api/all-bug-report",  async (req, res) => {
 
 //Company---------------------------------------------------------------------------------------------
 app.post("/api/upload/company-details", upload.single("photo"), async (req, res) => {
+  
   if (req.file) {
     // if they are uploading a new photo
     obj = {
@@ -1976,12 +2133,11 @@ app.post("/api/upload/company-details", upload.single("photo"), async (req, res)
     if (expectedSignature === req.body.signature) {
       obj.logo = req.body.image
     }
-
     const addCompany = await accounts.findOneAndUpdate({ _id: new ObjectId(req.body.employerid) }, { $set: {companyinfo: obj}})
     if (addCompany.companyinfo.logo) {
       cloudinary.uploader.destroy(addCompany.companyinfo.logo)
     }
-    res.status(200).send(addCompany)
+    res.status(200).send(true)
   } else {
     // if they are not uploading a new photo
     obj = {

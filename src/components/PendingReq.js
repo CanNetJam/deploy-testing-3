@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useContext } from "react"
+import React, { useState, useEffect, useContext, useRef } from "react"
 import Axios from "axios"
 import {UserContext} from "../home"
-import {format} from "timeago.js"
 import moment from "moment"
 
 function AllRequests({socket}){
@@ -15,8 +14,23 @@ function AllRequests({socket}){
     const [ requestModalOpen, setRequestModalOpen ] = useState(false)
     const [ isApproved, setIsApproved ] = useState(false)
     const [ isDenied, setIsDenied ] = useState(false)
+    const topPage = useRef(null)
     let length = projects.length
     let index = 0
+
+    const scrollToSection = (elementRef) => {
+      window.scrollTo({
+        top: elementRef.current.offsetTop,
+        behavior: "smooth",
+      })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
 
     useEffect(() => {
       let isCancelled = false
@@ -48,16 +62,19 @@ function AllRequests({socket}){
 
     return (
       <div className="requestTable">
+        <div ref={topPage}></div>
         <div className="requestModal">
-        {requestModalOpen && <ApproveRequestModal 
-          setRequestModalOpen={setRequestModalOpen} 
-          toUpdate={toUpdate} 
-          socket={socket}
-          isApproved={isApproved}
-          setIsApproved={setIsApproved}
-          isDenied={isDenied}
-          setIsDenied={setIsDenied}
-          setUpdate={setUpdate} />}
+          {requestModalOpen && 
+            <ApproveRequestModal 
+            setRequestModalOpen={setRequestModalOpen} 
+            toUpdate={toUpdate} 
+            socket={socket}
+            isApproved={isApproved}
+            setIsApproved={setIsApproved}
+            isDenied={isDenied}
+            setIsDenied={setIsDenied}
+            setUpdate={setUpdate} />
+          }
         </div>
         <div className="tableList">
           <table>
@@ -102,8 +119,8 @@ function AllRequests({socket}){
                               
                               <td><div className="constantHW">{moment(prj.creationdate).format("MM/DD/YY")}</div></td>
                               <td>
-                                  <div className="constantHW">
-                                    <button className="btn btn-outline-success allButtons" onClick={()=>{
+                                  <div className="leftButtons">
+                                    <div className="leftButtons hovertext" data-hover="Approve" onClick={()=>{
                                       result[page]?.map((a)=> {
                                         if (a._id===prj._id) {
                                           setToUpdate(a)
@@ -111,8 +128,11 @@ function AllRequests({socket}){
                                       })
                                       setRequestModalOpen(true)
                                       setIsApproved(true)
-                                      }}>Approve</button>
-                                    <button className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=>{
+                                      }}>
+                                        <img src={"/WebPhoto/check.png"} alt={"check icon"} />
+                                    </div>
+
+                                    <div className="leftButtons hovertext" data-hover="Deny" onClick={()=>{
                                       result[page]?.map((a)=> {
                                         if (a._id===prj._id) {
                                           setToUpdate(a)
@@ -120,7 +140,9 @@ function AllRequests({socket}){
                                       })
                                       setRequestModalOpen(true)
                                       setIsDenied(true)
-                                      }}>Deny</button>
+                                      }}>
+                                        <img src={"/WebPhoto/x.png"} alt={"x icon"} />
+                                    </div>
                                   </div>
                               </td>
                       </tr>
@@ -131,17 +153,19 @@ function AllRequests({socket}){
             </tbody>
           </table>
         </div>
-        <div className="pageNumber">
-            <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
-            {result?.map((a)=>{
-                return (
-                    <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
-                        {(result?.indexOf(a))+1}
-                    </button>
-                )
-            })}
-            <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
-        </div>
+        {result[0] ? 
+          <div className="pageNumber">
+              <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
+              {result?.map((a)=>{
+                  return (
+                      <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
+                          {(result?.indexOf(a))+1}
+                      </button>
+                  )
+              })}
+              <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
+          </div>
+        : null}
       </div>
     )
 }
@@ -271,7 +295,7 @@ function ApproveRequestModal({ setRequestModalOpen, toUpdate, socket, isApproved
         <div className="approveModalContainer">
           <form className="modalForm" onSubmit={submitHandler}>
             <div>
-              {isApproved===true ? <h4><b>Approved</b></h4> : <h4><b>Denied</b></h4>}
+              {isApproved===true ? <h5><b>Approved</b></h5> : <h5><b>Denied</b></h5>}
             </div>
             <div>
               <img src={toUpdate.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${toUpdate.image}.jpg` : "/fallback.png"} className="requestModalPhoto" alt={`${toUpdate.title}`}></img>

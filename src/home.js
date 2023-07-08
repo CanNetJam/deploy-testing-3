@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, } from 'react'
+import React, { createContext, useState, useEffect } from 'react'
 import Axios from "axios"
 import { createRoot } from "react-dom/client"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -29,6 +29,7 @@ import SearchProfile from "./components/SearchProfile"
 import Project from "./components/Project"
 import Hiring from "./components/Hiring"
 import CompanyProfile from "./components/CompanyProfile"
+import AllLogsTable from "./components/AllLogsTable"
 
 export const UserContext = createContext()
 
@@ -41,7 +42,8 @@ function App() {
   const [ savedNotifications, setSavedNotifications ] = useState([])
   const [ liveNotif, setLiveNotif ] = useState([])
   const [ number, setNumber ] = useState(0)
- 
+  const [ currentWindow, setCurrentWindow ] = useState("")
+  
   //http://localhost:3000
   //https://deploy-testing-3.onrender.com
   useEffect(()=> {
@@ -140,11 +142,11 @@ function App() {
       <Router > 
           <UserContext.Provider value={{ userData, setUserData }}>
           <div className="top"> 
-            <TopNav savedNotifications={savedNotifications} setNumber={setNumber}/>
+            <TopNav savedNotifications={savedNotifications} setNumber={setNumber} setCurrentWindow={setCurrentWindow} />
           </div>
           <div className="content">
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Home currentWindow={currentWindow} setCurrentWindow={setCurrentWindow} />} />
               <Route path="/search" element={<SearchBox />} />
               <Route path="/search-profile" element={<SearchProfile socket={socket} />}/>
               <Route path="/hiring" element={<Hiring />} />
@@ -167,6 +169,7 @@ function App() {
               <Route path="/reports" element={<Reports />} />
               <Route path="/bug-reports" element={<BugReports />} />
               <Route path="/company-profile" element={<CompanyProfile />} />
+              <Route path="/system-logs" element={<AllLogsTable />} />
             </Routes> 
           </div>
           <div className="pagefooter">

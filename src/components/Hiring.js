@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from "react"
+import React, {useState, useEffect, useContext, useRef} from "react"
 import Axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { UserContext } from "../home"
@@ -24,9 +24,24 @@ function Hiring() {
     const [page, setPage] = useState(0)
     const [searchCount, setSearchCount] = useState(10)
     const [sortSallaryText, setSortSallaryText] = useState("")
+    const topPage = useRef(null)
     
     let length = projects.length
     let index = 0
+
+    const scrollToSection = (elementRef) => {
+        window.scrollTo({
+          top: elementRef.current.offsetTop,
+          behavior: "smooth",
+        })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
 
     useEffect(() => {
         const getFiltered = async () => { 
@@ -67,6 +82,7 @@ function Hiring() {
                 sort: sortBy,
                 sallary: querySallary,
             }})
+            setPage(0),
             setProjects(res.data)
         } catch (err) {
             console.log(err)
@@ -88,6 +104,7 @@ function Hiring() {
 
     return (
         <div className="searchComponent">
+            <div ref={topPage}></div>
             <div className="searchTop">
                 <div className="searchTopSearch">
                     <div className="quickSearch">
@@ -124,21 +141,19 @@ function Hiring() {
 
                     <div>
                         <button onClick={()=> getProjects()} className="btn btn-outline-success allButtons">
-                            Search
+                            <img src={"/WebPhoto/search.png"} alt={"search icon"} />
                         </button>
                     </div>
                     <div className="testing">
-                        <div className="searchKey">
-                            <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                if (keySearch === false) {
-                                    setKeySearch(true)
-                                }
-                                if (keySearch === true) {
-                                    setKeySearch(false)
-                                }
-                            }}>
-                                ...
-                            </button>
+                        <div className="searchKey leftNewButtons hovertext" data-hover="Filter" onClick={()=> {
+                            if (keySearch === false) {
+                                setKeySearch(true)
+                            }
+                            if (keySearch === true) {
+                                setKeySearch(false)
+                            }
+                        }}>
+                            <img src={"/WebPhoto/filter.png"} alt={"filter icon"} />
                         </div>
                     </div>
                 </div>
@@ -245,12 +260,12 @@ function Hiring() {
                                             {categoryPick && (
                                                 <div className="searchTabs">
                                                     {filteredCategory?.map((b)=> {
-                                                        return <button className="btn btn-outline-success allButtons" key={idPlusKey(categoryBy, b)} onClick={()=>{
+                                                        return <label className="selectedTagLabel" key={idPlusKey(categoryBy, b)} onClick={()=>{
                                                                     setQuery(b),
                                                                     setCategoryBy("")
                                                                     setCategoryPick(false)
                                                                     setAdvSearch(false)
-                                                                }}>{b}</button>
+                                                                }}>{b}</label>
                                                     })}
                                                 </div>
                                             )}
@@ -283,7 +298,7 @@ function Hiring() {
                                     <img src={a.image ? `https://res.cloudinary.com/${cloud_name}/image/upload/w_300,h_200,c_fill,q_85/${a.image}.jpg` : "/fallback.png"} className="hiringImg" alt={`${a.company} named ${a.title}`}></img>
                                     <div>
                                         <p><b>{a.type}</b>: {a.skillrequired} (<i>{a.employmenttype}</i>)</p>
-                                        <p className="text-muted small">Hiring <b>{a?.slots ? a.slots : "unspecified"}</b> people for this position.</p>
+                                        <p>Hiring <b>{a?.slots ? a.slots : "unspecified"}</b> people for this position.</p>
                                     </div>
                                 </div>
                                 <br />
@@ -300,18 +315,19 @@ function Hiring() {
                     })}
                 </div>
                     :<span className="searchList">No Hiring(s) found.</span>}
-
-                <div className="pageNumber">
-                    <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
-                    {result?.map((a)=>{
-                        return (
-                            <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
-                                {(result?.indexOf(a))+1}
-                            </button>
-                        )
-                    })}
-                    <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
-                </div>
+                {result[0] ? 
+                    <div className="pageNumber">
+                        <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
+                        {result?.map((a)=>{
+                            return (
+                                <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
+                                    {(result?.indexOf(a))+1}
+                                </button>
+                            )
+                        })}
+                        <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
+                    </div>
+                : null}
             </div>
         </div>
     )

@@ -56,10 +56,10 @@ function Login() {
       }
 
       return (
-        <div className="homes dashboardCopy">
+        <div className="homesCopy dashboardCopy">
           <div className="loginWrapper">
             <div className="loginTop">
-              <h1>Log In</h1>
+              <h1>Sign In</h1>
             </div>
             <div className="loginBot">
               <form className="loginForm" onSubmit={handleSubmit}>
@@ -79,7 +79,7 @@ function Login() {
                 </div>
                 <br />
                 <div className="centerContent">
-                  <button className="allButtons" variant="success" type="submit">Log In</button>
+                  <button className="allButtons" variant="success" type="submit">Next</button>
                 </div>
               </form>
             </div>

@@ -1,6 +1,7 @@
-import React, { useState } from "react"
+import React, { useState, useEffect, useRef } from "react"
 
 function Help(){
+    const topPage = useRef(null)
     const [ question1, setQuestion1 ] = useState(false)
     const [ question2, setQuestion2 ] = useState(false)
     const [ question3, setQuestion3 ] = useState(false)
@@ -8,9 +9,24 @@ function Help(){
     const [ question5, setQuestion5 ] = useState(false)
     const [ question6, setQuestion6 ] = useState(false)
     const [ question7, setQuestion7 ] = useState(false)
+
+    const scrollToSection = (elementRef) => {
+        window.scrollTo({
+          top: elementRef.current.offsetTop,
+          behavior: "smooth",
+        })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
     
     return (
         <div className="help">
+            <div ref={topPage}></div>
             <div className="contentTitle centerContent">
                 <label><b>Help Center</b></label>
             </div>

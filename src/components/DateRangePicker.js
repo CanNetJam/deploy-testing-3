@@ -48,7 +48,7 @@ function DateRangePickerComp(props) {
             <input
                 value={`${format(range[0].startDate, "MMMM dd, yyyy")} - ${format(range[0].endDate, "MMMM dd, yyyy")}`}
                 readOnly
-                className="inputBox"
+                className="dateRangeInputBox"
                 onClick={ () => setOpen(open => !open) }
             />
 

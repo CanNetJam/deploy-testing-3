@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react"
+import React, { useState, useEffect, useContext, useRef } from "react"
 import { UserContext } from "../home"
 import Axios from "axios"
 import { useNavigate } from "react-router-dom"
@@ -8,6 +8,27 @@ function ProjectList() {
     const { userData, setUserData } = useContext(UserContext)
     const [ projects, setProjects ] = useState([])
     const [ tab, setTab ] = useState("Hiring")
+    const [ result, setResult ] = useState([])
+    const [ searchCount, setSearchCount ] = useState(10)
+    const [ page, setPage ] = useState(0)
+    const topPage = useRef(null)
+
+    let length = projects.length
+    let index = 0
+
+    const scrollToSection = (elementRef) => {
+      window.scrollTo({
+        top: elementRef.current.offsetTop,
+        behavior: "smooth",
+      })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
     
     useEffect(() => {
     async function go() {
@@ -16,30 +37,44 @@ function ProjectList() {
     }
     go()
     }, [tab])
+
+    useEffect(() => {
+      const getFiltered = async () => { 
+          setResult([])
+          let slice = (source, index) => source.slice(index, index + searchCount)
+          while (index < length) {
+              let temp = [slice(projects, index)]
+              setResult(prev=>prev.concat(temp))
+              index += searchCount
+          }
+      }
+      getFiltered()
+    }, [projects])
     
     return (
       <div className="projects">
+        <div ref={topPage}></div>
         <div className="projectsTop contentTitle">
           <label><b>Job/Project List</b> (<i>{tab}</i>)</label>
           <div className="projectsTopBtn">
-            <button className="btn btn-outline-success allButtons" onClick={()=>{setTab("Hiring")}}>
+            <button className="btn btn-outline-success allButtons" onClick={()=>{setPage(0), setTab("Hiring")}}>
               Hiring
             </button>
-            <button className="btn btn-outline-success allButtons" onClick={()=>{setTab("Ongoing")}}>
+            <button className="btn btn-outline-success allButtons" onClick={()=>{setPage(0), setTab("Ongoing")}}>
               Ongoing
             </button>
-            <button className="btn btn-outline-success allButtons" onClick={()=>{setTab("Concluded")}}>
+            <button className="btn btn-outline-success allButtons" onClick={()=>{setPage(0), setTab("Concluded")}}>
               Concluded
             </button>
           </div>
         </div>
 
         <div className="projectsBot">
-          {projects[0] ? 
-            <div>
-              {projects.map(function(Projects) {
+          {result[0] ? 
+            <div className="searchHiringList">
+              {result[page]?.map(function(Projects) {
                 return (
-                  <div className="projects-grid" key={Projects._id}>
+                  <div key={Projects._id}>
                     <EachProject 
                       _id={Projects._id} 
                       type ={Projects.type}  
@@ -65,6 +100,19 @@ function ProjectList() {
               <span>You have no {tab} projects right now.</span>
             </div>}
         </div>
+          {result[0] ? 
+            <div className="pageNumber">
+                <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
+                {result?.map((a)=>{
+                    return (
+                        <button key={result?.indexOf(a)} disabled={result?.indexOf(a)===page ? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(result?.indexOf(a))}>
+                            {(result?.indexOf(a))+1}
+                        </button>
+                    )
+                })}
+                <button disabled={page===(result.length-1)? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page+1)}>Next</button>
+            </div>
+          : null}
       </div>
     )
 }

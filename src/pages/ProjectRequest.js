@@ -64,6 +64,21 @@ function ProjectProposal({socket}) {
     const [ steps, setSteps ] = useState([1, 2, 3])
     const [ currentStep, setCurrentStep] = useState(1)
     const [ nextBtn, setNextBtn ] = useState(true)
+    const topPage = useRef(null)
+
+    const scrollToSection = (elementRef) => {
+      window.scrollTo({
+        top: elementRef.current.offsetTop,
+        behavior: "smooth",
+      })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
 
     useEffect(() => {
       const getCategory = async () => {
@@ -292,6 +307,7 @@ function ProjectProposal({socket}) {
     
     return (
       <div className="projectRequestApplication">
+        <div ref={topPage}></div>
         <div className="projectRequestFormTop">
             <label><b>Request Form</b></label> 
             <button className="btn btn-sm btn-outline-secondary cancelBtn" onClick={()=> navigate(-1)}>Cancel</button>
@@ -392,14 +408,14 @@ function ProjectProposal({socket}) {
                                               {categoryPick && (
                                                   <div className="searchTabs">
                                                       {filteredCategory?.map((b)=> {
-                                                          return <div className="tagButton" key={idPlusKey(categoryBy, b)} onClick={()=>{
+                                                          return <label className="selectedTagLabel" key={idPlusKey(categoryBy, b)} onClick={()=>{
                                                                       setSkillRequired(b)
                                                                       setTitle(b)
                                                                       setCategoryBy("")
                                                                       setIsSkill(true)
                                                                       setCategoryPick(false)
                                                                       setAdvSearch(false)
-                                                                  }}>{b}</div>
+                                                                  }}>{b}</label>
                                                       })}
                                                   </div>
                                               )}

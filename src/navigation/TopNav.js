@@ -5,7 +5,7 @@ import LeftNavFree from "./LeftNavFree"
 import LeftNavEmp from "./LeftNavEmp"
 import LeftNavAdmin from "./LeftNavAdmin"
 
-function TopNav({savedNotifications, setNumber}){
+function TopNav({savedNotifications, setNumber, setCurrentWindow}){
     const { userData, setUserData } = useContext(UserContext)
     let navigate = useNavigate()
 
@@ -20,23 +20,22 @@ function TopNav({savedNotifications, setNumber}){
     return (
         <div className="topnav">
             <div className="topnavLeft">
-                <div className="leftButtons" onClick={()=>{navigate("/")}}>
-                    <><img className="webIcons" src={"/WebPhoto/webicon4.png"} alt={"website icon"} /></>
-                </div>
-                <div className="leftButtons hovertext" data-hover="About" onClick={()=>{navigate("/about")}}>
-                    <><img src={"/WebPhoto/about.png"} alt={"about icon"} /></>
-                </div>
+                <label onClick={() => {setCurrentWindow(""), navigate("/")}} className="topnavLabel ropnavLabelTitle"><b>TRABAWHO?</b></label>
+                <label onClick={() => {setCurrentWindow("candidate"), navigate("/")}} className="topnavLabel">Hire Now!</label>
+                <label onClick={() => {setCurrentWindow("hiring"), navigate("/")}} className="topnavLabel">Apply Here!</label>
+                <label onClick={() => {setCurrentWindow("about"), navigate("/")}} className="topnavLabel">About</label>
+                <label onClick={() => {setCurrentWindow("contact"), navigate("/")}} className="topnavLabel">Contact Us</label>
             </div>
                 {userData?.user ? (
                     <>
                         {userData?.user?.type==="Candidate" ? 
-                            <LeftNavFree savedNotifications={savedNotifications} setNumber={setNumber}/>
+                            <LeftNavFree savedNotifications={savedNotifications} setNumber={setNumber} />
                         :<></>}
                         {userData?.user?.type==="Employer" ? 
-                            <LeftNavEmp savedNotifications={savedNotifications} setNumber={setNumber}/>
+                            <LeftNavEmp savedNotifications={savedNotifications} setNumber={setNumber} />
                         :<></>}
                         {userData?.user?.type==="Admin" || userData?.user?.type==="Super Administrator" ? 
-                            <LeftNavAdmin savedNotifications={savedNotifications} setNumber={setNumber}/>
+                            <LeftNavAdmin savedNotifications={savedNotifications} setNumber={setNumber} />
                         :<></>}
                     </>
                 ) : (

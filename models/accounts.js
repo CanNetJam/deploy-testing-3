@@ -66,6 +66,7 @@ const userSchema = new mongoose.Schema({
         default: () => Date.now(),
     },
     phone: Number,
+    candidatetype: String,
     degree: {
         school: String,
         course: String,

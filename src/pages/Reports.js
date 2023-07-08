@@ -16,7 +16,9 @@ function Reports() {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026,2027, 2028, 2029, 2030]
     const [ currentView, setCurrentView] = useState("View Monthly Reports")
-    const [ viewData, setViewData] = useState(true)
+    const [ viewData, setViewData] = useState(false)
+    const [ openHeader, setOpenHeader] = useState(false)
+    const topPage = useRef(null)
     const [ selectedMonth, setSelectedMonth] = useState(monthNow)
     const [ selectedYear, setSelectedYear] = useState(yearNow)
     const [ numMonth, setNumMonth] = useState(moment(Date.now()).format("MM"))
@@ -120,13 +122,56 @@ function Reports() {
             data: "",
         }],
     })
-
     const componentRef = useRef()
+
+    const [ emptyNewUser, setEmptyNewUser] = useState(false)
+    const [ pie7Total, setPie7Total] = useState(0)
+    const [ newUserData, setNewUserData ] = useState({
+        labels: "",
+        datasets: [{
+            label: "",
+            data: "",
+        }]
+    })
+    const [ emptyNewUserCandidate, setEmptyNewUserCandidate] = useState(false)
+    const [ pie8Total, setPie8Total] = useState(0)
+    const [ newUserCandidateTypeData, setNewUserCandidateTypeData ] = useState({
+        labels: "",
+        datasets: [{
+            label: "",
+            data: "",
+        }]
+    })
+    const [ emptyNewUserAlumni, setEmptyNewUserAlumni] = useState(false)
+    const [ pie9Total, setPie9Total] = useState(0)
+    const [ newUserAlumniDegreeData, setNewUserAlumniDegreeData ] = useState({
+        labels: "",
+        datasets: [{
+            label: "",
+            data: "",
+        }]
+    })
+    
     const handlePrint = useReactToPrint({
+        onBeforeGetContent: async ()=> setOpenHeader(true),
         content: () => componentRef.current,
         documentTitle: "System Report",
-        //onAfterPrint: ()=> alert("Successfully printed a soft copy.")
+        onAfterPrint: ()=> setOpenHeader(false)
     })
+
+    const scrollToSection = (elementRef) => {
+        window.scrollTo({
+          top: elementRef.current.offsetTop,
+          behavior: "smooth",
+        })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
     
     useEffect(() => {
         const getRecords = async () => {  
@@ -349,6 +394,9 @@ function Reports() {
                 })
                 setEmptyRequest(false)
             }
+            if (res.data.requests.data.length===0) {
+                setEmptyRequest(true)
+            }
 
             const res2 = await Axios.get("/api/reports/all-completed-jobs&projects", {params: {
                 startDate: dateRange.startDate,
@@ -372,6 +420,9 @@ function Reports() {
                 })
                 setEmptyAccomplished(false)
             }
+            if (res2.data.jobs.data.length===0) {
+                setEmptyAccomplished(true)
+            }
 
             const res3 = await Axios.get(`/api/reports/ongoing-projects`)
             if (res3.data.total!==0) {
@@ -394,6 +445,60 @@ function Reports() {
             }
             if (res3.data.total===0) {
                 setEmptyOngoing(true)
+            }
+
+            const res4 = await Axios.get(`/api/reports/monthly-new-user`, {params: {
+                startDate: dateRange.startDate,
+                endDate: dateRange.endDate
+            }})
+            if (res4.data.newUsers.data.length!==0) {
+                setPie7Total(res4.data.newUsers.data.length)
+                setNewUserData({
+                    labels: res4.data.subtotal.map((data)=> data.type),
+                    datasets: [{
+                        data: res4.data.subtotal.map((data)=> data.count)
+                    }]
+                })
+                setEmptyNewUser(false)
+            }
+            if (res4.data.newUsers.data.length===0) {
+                setEmptyNewUser(true)
+            }
+
+            const res5 = await Axios.get(`/api/reports/monthly-new-user-candidatetype`, {params: {
+                startDate: dateRange.startDate,
+                endDate: dateRange.endDate
+            }})
+            if (res5.data.allCandidates.data.length!==0) {
+                setPie8Total(res5.data.allCandidates.data.length)
+                setNewUserCandidateTypeData({
+                    labels: res5.data.subtotal.map((data)=> data.type),
+                    datasets: [{
+                        data: res5.data.subtotal.map((data)=> data.count)
+                    }]
+                })
+                setEmptyNewUserCandidate(false)
+            }
+            if (res5.data.allCandidates.data.length===0) {
+                setEmptyNewUserCandidate(true)
+            }
+
+            const res6 = await Axios.get(`/api/reports/monthly-new-user-candidate-degree`, {params: {
+                startDate: dateRange.startDate,
+                endDate: dateRange.endDate
+            }})
+            if (res6.data.allAlumni.data.length!==0) {
+                setPie9Total(res6.data.allAlumni.data.length)
+                setNewUserAlumniDegreeData({
+                    labels: res6.data.subtotal.map((data)=> data.type),
+                    datasets: [{
+                        data: res6.data.subtotal.map((data)=> data.count)
+                    }]
+                })
+                setEmptyNewUserAlumni(false)
+            }
+            if (res6.data.allAlumni.data.length===0) {
+                setEmptyNewUserAlumni(true)
             }
           } catch (err) {
             console.log(err)
@@ -420,9 +525,10 @@ function Reports() {
 
     return (
         <div className="reports">
+            <div ref={topPage}></div>
                 <div className="reportsTop">
-                    <div className="centerContent">
-                        <p>System Reports</p>
+                    <div className="contentTitle">
+                        <label><b>System Reports</b></label>
                     </div>
                     <br />
                     <div className="sideContent">
@@ -470,6 +576,9 @@ function Reports() {
                             }} className="btn btn-outline-success allButtons">
                                 {viewData===true ? "Hide Data" : "View Data"}
                             </button>
+                            <button onClick={()=> navigate("/system-logs")} className="btn btn-outline-success allButtons">
+                                View System Logs
+                            </button>
                             <button onClick={()=> navigate("/bug-reports")} className="btn btn-outline-success allButtons">
                                 View Bug Reports
                             </button>
@@ -478,52 +587,149 @@ function Reports() {
                 </div>
                 <br />
                 {currentView==="View Monthly Reports" && (
-                <div className="toPrint" ref={componentRef} style={{width: '100%', height: '100%'}}>
+                <div className="toPrint" ref={componentRef}>
+                    {openHeader && (
+                    <div className="printHeader">
+                        <div className="cvsuHeaderWrapper">
+                            <div className="cvsuHeaderLeft">
+                                <img src={"/WebPhoto/About/CVSU-logo.png"}/>
+                            </div>
+                            <div className="cvsuHeaderRight">
+                                <div className="cvsuHeader1">
+                                    Republic of the Philippines
+                                </div>
+                                <div className="cvsuHeader2">
+                                    <b>CAVITE STATE UNIVERSITY</b>
+                                </div>
+                                <div className="cvsuHeader1">
+                                    <b>Carmona Campus</b>
+                                </div>
+                                <div className="cvsuHeader3">
+                                    Market Road. Carmona, Cavite
+                                </div>
+                                <div className="cvsuHeader4">
+                                    (046) 487-6328/cvsucarmona@cvsu.edu.ph
+                                </div>
+                                <div className="cvsuHeader3">
+                                    www.cvsu.edu.ph
+                                </div>
+                            </div>
+                        </div>
+                        <div className="contentTitle">
+                            <label><b>TRABAWHO? MONTHLY REPORT</b></label>
+                        </div>
+                    </div>
+                    )}
                     <div>
                         <p>Monthly Report: {moment(dateRange.startDate).format("MM/DD/YY")} to {moment(dateRange.endDate).format("MM/DD/YY")}</p>
                     </div>
+                    <br />
                     <br />
                     <div className="requests-grid">
                         <div className="reportContent">
                             <div className="reportContentTop">
                                 <label clasName="contentSubheading">Requests</label>
                             </div>
-                            {emptyRequest!==true ?
-                                <div style={{ width: 300 }}>
-                                    <PieChart chartData={requestData} />
-                                    <br/>
-                                    <p><b>{pie1Total}</b> request recieved.</p>
-                                </div>
-                            :<div className="pieChartFiller"><b>No data.</b></div>}
+                            <div className="reportContentBot">
+                                {emptyRequest!==true ?
+                                    <div style={{ width: 300 }}>
+                                        <PieChart chartData={requestData} />
+                                        <br/>
+                                        <div className="centerContent">
+                                            <p><b>{pie1Total}</b> request recieved.</p>
+                                        </div>
+                                    </div>
+                                :<div className="pieChartFiller"><b>No data.</b></div>}
+                            </div>
                         </div>
                         
                         <div className="reportContent">
                             <div className="reportContentTop">
                                 <label clasName="contentSubheading">Accomplished Jobs & Projects</label>
                             </div>
-                            {emptyAccomplished!==true ?
-                                <div style={{ width: 300 }}>
-                                    <PieChart chartData={accomplishedData} />
-                                    <br/>
-                                    <p><b>{pie2Total}</b> accomplished jobs & projects.</p>
-                                </div>
-                            :<div className="pieChartFiller"><b>No data.</b></div>}
+                            <div className="reportContentBot">
+                                {emptyAccomplished!==true ?
+                                    <div style={{ width: 300 }}>
+                                        <PieChart chartData={accomplishedData} />
+                                        <br/>
+                                        <div className="centerContent">
+                                            <p><b>{pie2Total}</b> accomplished jobs & projects.</p>
+                                        </div>
+                                    </div>
+                                :<div className="pieChartFiller"><b>No data.</b></div>}
+                            </div>
                         </div>
 
                         <div className="reportContent">
                             <div className="reportContentTop">
                                 <label clasName="contentSubheading">Ongoing Jobs & Projects </label>
                             </div>
-                            {emptyOngoing!==true ?
-                                <div style={{ width: 300 }}>
-                                    <PieChart chartData={ongoingData} />
-                                    <br/>
-                                    <p><b>{pie3Total}</b> ongoing jobs & projects.</p>
-                                </div>
-                            :<div className="pieChartFiller"><b>No data.</b></div>}
+                            <div className="reportContentBot">
+                                {emptyOngoing!==true ?
+                                    <div style={{ width: 300 }}>
+                                        <PieChart chartData={ongoingData} />
+                                        <br/>
+                                        <div className="centerContent">
+                                            <p><b>{pie3Total}</b> ongoing jobs & projects.</p>
+                                        </div>
+                                    </div>
+                                :<div className="pieChartFiller"><b>No data.</b></div>}
+                            </div>
+                        </div>
+
+                        <div className="reportContent">
+                            <div className="reportContentTop">
+                                <label clasName="contentSubheading">New Users</label>
+                            </div>
+                            <div className="reportContentBot">
+                                {emptyNewUser!==true ?
+                                    <div style={{ width: 300 }}>
+                                        <PieChart chartData={newUserData} />
+                                        <br/>
+                                        <div className="centerContent">
+                                            <p><b>{pie7Total}</b> new user(s) this month.</p>
+                                        </div>
+                                    </div>
+                                :<div className="pieChartFiller"><b>No data.</b></div>}
+                            </div>
+                        </div>
+
+                        <div className="reportContent">
+                            <div className="reportContentTop">
+                                <label clasName="contentSubheading">Candidate Type (New Users)</label>
+                            </div>
+                            <div className="reportContentBot">
+                                {emptyNewUserCandidate!==true ?
+                                    <div style={{ width: 300 }}>
+                                        <PieChart chartData={newUserCandidateTypeData} />
+                                        <br/>
+                                        <div className="centerContent">
+                                            <p><b>{pie8Total}</b> new candidate user(s) this month.</p>
+                                        </div>
+                                    </div>
+                                :<div className="pieChartFiller"><b>No data.</b></div>}
+                            </div>
+                        </div>
+
+                        <div className="reportContent">
+                            <div className="reportContentTop">
+                                <label clasName="contentSubheading">Alumni Type (New Users)</label>
+                            </div>
+                            <div className="reportContentBot">
+                                {emptyNewUserAlumni!==true ?
+                                    <div style={{ width: 300 }}>
+                                        <PieChart chartData={newUserAlumniDegreeData} />
+                                        <br/>
+                                        <div className="centerContent">
+                                            <p><b>{pie9Total}</b> new alumni users this month.</p>
+                                        </div>
+                                    </div>
+                                :<div className="pieChartFiller"><b>No data.</b></div>}
+                            </div>
                         </div>
                     </div>
                     <br/>
+                    <div>
                     {viewData===true && (
                     <div>
                         <div className="horizontal_line"></div>
@@ -573,84 +779,117 @@ function Reports() {
                         </div>
                     </div>
                     )}
+                    </div>
                 </div>
                 )}
                 {currentView==="View Annual Reports" && (
-                <div className="toPrint" ref={componentRef} style={{width: '100%', height: '100%'}}>
-                    <div>
+                    <div className="toPrint" ref={componentRef}>
+                        {openHeader && (
+                            <div className="printHeader">
+                                <div className="cvsuHeaderWrapper">
+                                    <div className="cvsuHeaderLeft">
+                                        <img src={"/WebPhoto/About/CVSU-logo.png"}/>
+                                    </div>
+                                    <div className="cvsuHeaderRight">
+                                        <div className="cvsuHeader1">
+                                            Republic of the Philippines
+                                        </div>
+                                        <div className="cvsuHeader2">
+                                            <b>CAVITE STATE UNIVERSITY</b>
+                                        </div>
+                                        <div className="cvsuHeader1">
+                                            <b>Carmona Campus</b>
+                                        </div>
+                                        <div className="cvsuHeader3">
+                                            Market Road. Carmona, Cavite
+                                        </div>
+                                        <div className="cvsuHeader4">
+                                            (046) 487-6328/cvsucarmona@cvsu.edu.ph
+                                        </div>
+                                        <div className="cvsuHeader3">
+                                            www.cvsu.edu.ph
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="contentTitle">
+                                    <label><b>TRABAWHO? ANNUAL REPORT</b></label>
+                                </div>
+                            </div>
+                        )}
                         <div>
-                            <p>Annual Report of year {selectedYear}</p>
-                        </div>
-                        <br />
-                        <div className="annual-report-grid">
-                            <div className="reportContentBar" style={{ width: 700 }}>
-                                <BarChart chartData={annualRequestData} />
-                            </div>
-                            <div className="reportContentBar" style={{ width: 700 }}>
-                                <BarChart chartData={annualApprovedData} />
-                            </div>
-                            <div className="reportContentBar" style={{ width: 700 }}>
-                                <BarChart chartData={annualDeniedData} />
-                            </div>
-                            <div className="reportContentBar" style={{ width: 700 }}>
-                                <BarChart chartData={annualAccomplishedData} />
-                            </div>
-                        </div>
-                        <br />
-                    {viewData===true && (
-                    <div>
-                        <div className="horizontal_line"></div>
-                        <div>
-                            <div className="centerContent">
-                                <p className="contentSubheading"><b>Request Reports</b></p>
-                            </div>
                             <div>
-                                <AllProjectsTable tableType={"Annual Requests"} allTableData={allAnnualRequestData}/>
+                                <p>Annual Report of year {selectedYear}</p>
                             </div>
                             <br />
-                            <div>
-                                <AllProjectsTable tableType={"Approved Requests"} allTableData={allAnnualApprovedData}/>
+                            <div className="annual-report-grid">
+                                <div className="reportContentBar" style={{ width: 700 }}>
+                                    <BarChart chartData={annualRequestData} />
+                                </div>
+                                <div className="reportContentBar" style={{ width: 700 }}>
+                                    <BarChart chartData={annualApprovedData} />
+                                </div>
+                                <div className="reportContentBar" style={{ width: 700 }}>
+                                    <BarChart chartData={annualDeniedData} />
+                                </div>
+                                <div className="reportContentBar" style={{ width: 700 }}>
+                                    <BarChart chartData={annualAccomplishedData} />
+                                </div>
                             </div>
                             <br />
-                            <div>
-                                <AllProjectsTable tableType={"Denied Requests"} allTableData={allAnnualDeniedData}/>
-                            </div>
-                            <br/>
-                            <div>
-                                <AllProjectsTable tableType={"Accomplished Jobs & Projects"} allTableData={allAnnualAccomplishedData}/>
-                            </div>
+                            {viewData===true && (
+                                <div>
+                                    <div className="horizontal_line"></div>
+                                    <div>
+                                        <div className="centerContent">
+                                            <p className="contentSubheading"><b>Request Reports</b></p>
+                                        </div>
+                                        <div>
+                                            <AllProjectsTable tableType={"Annual Requests"} allTableData={allAnnualRequestData}/>
+                                        </div>
+                                        <br />
+                                        <div>
+                                            <AllProjectsTable tableType={"Approved Requests"} allTableData={allAnnualApprovedData}/>
+                                        </div>
+                                        <br />
+                                        <div>
+                                            <AllProjectsTable tableType={"Denied Requests"} allTableData={allAnnualDeniedData}/>
+                                        </div>
+                                        <br/>
+                                        <div>
+                                            <AllProjectsTable tableType={"Accomplished Jobs & Projects"} allTableData={allAnnualAccomplishedData}/>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    </div>
-                    )}
-                    </div>
-                    <br />
-                    <br />
-                    <div>
+                        <br />
+                        <br />
                         <div>
-                            <h3>User Reports:</h3>
-                        </div>
-                        <div className="requests-grid">
-                            <div className="reportContent">
-                                <h4>User Count: </h4>
-                                <div style={{ width: 300 }}>
-                                    <PieChart chartData={usersData} />
-                                </div>
+                            <div>
+                                <h3>User Reports:</h3>
                             </div>
-                            <div className="reportContent">
-                                <h4>Active Users Type: </h4>
-                                <div style={{ width: 300 }}>
-                                    <PieChart chartData={activeUsersData} />
+                            <div className="requests-grid">
+                                <div className="reportContent">
+                                    <h4>User Count: </h4>
+                                    <div style={{ width: 300 }}>
+                                        <PieChart chartData={usersData} />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="reportContent">
-                                <h4>Active Users Sex: </h4>
-                                <div style={{ width: 300 }}>
-                                    <PieChart chartData={activeUsersGenderData} />
+                                <div className="reportContent">
+                                    <h4>Active Users Type: </h4>
+                                    <div style={{ width: 300 }}>
+                                        <PieChart chartData={activeUsersData} />
+                                    </div>
+                                </div>
+                                <div className="reportContent">
+                                    <h4>Active Users Sex: </h4>
+                                    <div style={{ width: 300 }}>
+                                        <PieChart chartData={activeUsersGenderData} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 )}
         </div> 
     )

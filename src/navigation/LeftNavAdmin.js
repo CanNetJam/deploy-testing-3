@@ -64,9 +64,11 @@ function LeftNavAdmin({savedNotifications, setNumber}){
                         type = "Request" , 
                         readAll(userData.user.id), 
                         setNumber(prev=>prev+1), 
+                        setOpenProfile(false),
                         navigate("/all-requests")
                     }
                     if (projectNotif.length===0) {
+                        setOpenProfile(false),
                         navigate("/all-requests")
                     }
                 }}>
@@ -80,9 +82,11 @@ function LeftNavAdmin({savedNotifications, setNumber}){
                         type = "All Project", 
                         readAll(userData.user.id), 
                         setNumber(prev=>prev+1),
+                        setOpenProfile(false),
                         navigate("/all-projects")
                     }
                     if (endNotif.length===0) {
+                        setOpenProfile(false),
                         navigate("/all-projects")
                     }
                 }}>
@@ -91,16 +95,16 @@ function LeftNavAdmin({savedNotifications, setNumber}){
                         <div className="counter">{endNotif.length}</div>
                     :<></>}
                 </div>
-                <div className="leftButtons hovertext" data-hover="Register Account" onClick={()=>{navigate("/register")}}>
+                <div className="leftButtons hovertext" data-hover="Register Account" onClick={()=>{setOpenProfile(false), navigate("/register")}}>
                     <img src={"/WebPhoto/register.png"} alt={"register icon"} />
                 </div>
-                <div className="leftButtons hovertext" data-hover="Accounts List" onClick={()=>{navigate("/user-profile")}}>
+                <div className="leftButtons hovertext" data-hover="Accounts List" onClick={()=>{setOpenProfile(false), navigate("/user-profile")}}>
                     <img src={"/WebPhoto/folder-user.png"} alt={"folder-user icon"} />
                 </div>
-                <div className="leftButtons hovertext" data-hover="Reports" onClick={()=>{navigate("/reports")}}>
+                <div className="leftButtons hovertext" data-hover="Reports" onClick={()=>{setOpenProfile(false), navigate("/reports")}}>
                     <img src={"/WebPhoto/reports.png"} alt={"reports icon"} />
                 </div>
-                <div className="leftButtons hovertext" data-hover="Notifications" onClick={()=>{navigate("/notifications")}}>
+                <div className="leftButtons hovertext" data-hover="Notifications" onClick={()=>{setOpenProfile(false), navigate("/notifications")}}>
                     <img src={"/WebPhoto/notifications.png"} alt={"notifications icon"} />
                     {notifications[0] ? 
                         <div className="counter">{notifications.length}</div>
@@ -111,9 +115,11 @@ function LeftNavAdmin({savedNotifications, setNumber}){
                         type = "Message", 
                         readAll(userData.user.id), 
                         setNumber(prev=>prev+1), 
+                        setOpenProfile(false),
                         navigate("/messages")
                     }
                     if (messagesNotif.length===0) {
+                        setOpenProfile(false),
                         navigate("/messages")
                     }
                 }}>
@@ -131,13 +137,9 @@ function LeftNavAdmin({savedNotifications, setNumber}){
                         setOpenProfile(false)
                     }
                 }}>
-                        <img src={"/WebPhoto/administrator.png"} alt={"administrator icon"} />
-
+                    <img src={"/WebPhoto/menu.png"} alt={"menu icon"} />
                 {openProfile && (
                     <div className="accountPicker">
-                        <div className="leftButtons" onClick={()=>{setOpenProfile(false), navigate("/profile/user")}}> 
-                            <>My Profile</>
-                        </div>
                         <div className="leftButtons" onClick={()=>{setOpenProfile(false), navigate("/settings")}}>
                             <><img src={"/WebPhoto/settings.png"} alt={"settings icon"} />Settings</>
                         </div>

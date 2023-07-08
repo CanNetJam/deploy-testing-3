@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from "react"
+import React, {useState, useEffect, useContext, useRef } from "react"
 import Axios from "axios"
 import { useLocation, useNavigate } from 'react-router-dom'
 import { UserContext } from "../home"
@@ -21,7 +21,22 @@ function SearchProfile({socket}) {
     const [ available, setAvailable ] = useState(true)
     const [ requested, setRequested ] = useState(false)
     const [ reload, setReload ] = useState()
-    
+    const topPage = useRef(null)
+
+    const scrollToSection = (elementRef) => {
+        window.scrollTo({
+          top: elementRef.current.offsetTop,
+          behavior: "smooth",
+        })
+      }
+  
+      useEffect(()=> {
+          const windowOpen = () => {   
+              scrollToSection(topPage)
+          }
+          windowOpen()
+      }, [])
+
     useEffect(() => {
         const user = location?.state?._id
         const getUserData = async () => {
@@ -129,7 +144,7 @@ function SearchProfile({socket}) {
                         })
                     }
                 })
-                toastSucessNotification(projecttype)
+                toastHireSucessNotification()
             } catch (err) {
                 console.log(err)
             }
@@ -227,9 +242,23 @@ function SearchProfile({socket}) {
             theme: "light",
             })
     }
+
+    function toastHireSucessNotification() {
+        toast.success(`Hiring success.`, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            })
+    }
     
     return (
         <div className="profileCard">
+            <div ref={topPage}></div>
             {searchInfo && (
                 <div className="searchProfile">
                     <div className="searchProfileTop">

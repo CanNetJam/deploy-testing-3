@@ -35,6 +35,21 @@ function RegisterAccount() {
     const [ region, setRegion ] = useState("")
     const [ province, setProvince ] = useState("")
     const [ city, setCity ] = useState("")
+    const topPage = useRef(null)
+
+    const scrollToSection = (elementRef) => {
+      window.scrollTo({
+        top: elementRef.current.offsetTop,
+        behavior: "smooth",
+      })
+    }
+
+    useEffect(()=> {
+        const windowOpen = () => {   
+            scrollToSection(topPage)
+        }
+        windowOpen()
+    }, [])
 
     useEffect(() => {
       const getLocations = async () => {
@@ -142,6 +157,7 @@ function RegisterAccount() {
       data.append("school", school)
       data.append("degree", degree)
       data.append("course", course)
+      data.append("candidatetype", candidateType)
 
       CreatePhotoField.current.value = ""
       const usertype = userData?.user.type
@@ -177,6 +193,7 @@ function RegisterAccount() {
 
     return (
       <div className="register">
+        <div ref={topPage}></div>
         <form className="registerForm" onSubmit={submitHandler}>
           <div className="contentTitle centerContent">
             <label><b>Account Registration</b></label>

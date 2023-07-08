@@ -2,13 +2,15 @@ import React, { useState, useEffect, useContext } from "react"
 import { UserContext } from "../home"
 import Axios from "axios"
 import { useLocation, useNavigate } from 'react-router-dom'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-function CompanyProfile() {
+function CompanyProfile(props) {
     const location = useLocation()
     const cloud_name = "dzjkgjjut"
     const api_key = "848182664545332"
     const { userData, setUserData } = useContext(UserContext)
-    const [companyInfo, setCompanyInfo] = useState(location.state.companyinfo ? location.state.companyinfo : null)
+    const [companyInfo, setCompanyInfo] = useState(location?.state?.companyinfo ? location.state.companyinfo : userData.user.companyinfo)
     const [isEditing, setIsEditing] = useState(false)
     const [file, setFile] = useState()
     const [putFile, setPutFile] = useState(false)
@@ -29,6 +31,29 @@ function CompanyProfile() {
     const [ region, setRegion ] = useState("")
     const [ province, setProvince ] = useState("")
     const [ city, setCity ] = useState("")
+    const [ word, setWord ] = useState("more")
+    const [ expand, setExpand ] = useState(false)
+
+    function readMore(text) {
+        const resultString = !expand ? text.slice(0, 1000) :text
+        return (
+            <p>
+                {expand==false ? resultString+"...": resultString}
+                <br/>
+                <br/>
+                <button className="btn btn-outline-success allButtons" onClick={()=> {
+                    if (expand===false) {
+                        setExpand(true) 
+                        setWord("less")
+                    }
+                    if (expand===true) {
+                        setExpand(false) 
+                        setWord("more")
+                    }
+                }}>{`Read ${word}`}</button>
+            </p>
+        )
+    }
 
     useEffect(() => {
       const getLocations = async () => {
@@ -48,7 +73,7 @@ function CompanyProfile() {
     
     useEffect(() => {
         setFilteredRegions([])
-        if (selectedRegion!=="" && selectedRegion!==location.state?.companyinfo?.location?.region) {
+        if (selectedRegion!=="" && selectedRegion!==companyInfo?.location?.region) {
           if (region==="") {
             const data = regions?.filter((item) => item.name.includes(selectedRegion.toUpperCase()))
             setFilteredRegions(data)
@@ -61,7 +86,7 @@ function CompanyProfile() {
     
     useEffect(() => {
         setFilteredProvinces([])
-        if (selectedProvince!=="" && selectedProvince!==location.state?.companyinfo?.location?.province) {
+        if (selectedProvince!=="" && selectedProvince!==companyInfo?.location?.province) {
           if (province==="") {
             const data = provinces?.filter((item) => (item.region_code=== region?.id) 
             && (item.name.includes(selectedProvince.toUpperCase())))
@@ -75,7 +100,7 @@ function CompanyProfile() {
     
     useEffect(() => {
         setFilteredCities([])
-        if (selectedCity!=="" && selectedCity!==location.state?.companyinfo?.location?.city) {
+        if (selectedCity!=="" && selectedCity!==companyInfo?.location?.city) {
           if (city==="") {
             const data = cities?.filter((item) => (item.region_code=== region?.id) && 
             (item.province_code=== province?.id) && 
@@ -87,73 +112,80 @@ function CompanyProfile() {
           setCity("")
         }
     }, [selectedRegion, selectedProvince, selectedCity])
-
+    
     async function submitHandler(e) {
         e.preventDefault()
-        const data = new FormData()
-        let cloud_image
-        if (file) {
-            data.append("photo", file)
-            setCompanyInfo({ ...companyInfo, logo: file })
-            setPutFile(true)
-            setIsEditing(false)
-
-            const signatureResponse = await Axios.get("/get-signature")
-        
-            const image = new FormData()
-            image.append("file", file)
-            image.append("api_key", api_key)
-            image.append("signature", signatureResponse.data.signature)
-            image.append("timestamp", signatureResponse.data.timestamp)
-            
-            const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
-                headers: { "Content-Type": "multipart/form-data" },
-                onUploadProgress: function (e) {
-                console.log(e.loaded / e.total)
-                }
-            })
-            cloud_image = cloudinaryResponse.data.public_id
-        
-            data.append("image", cloud_image)
-            data.append("public_id", cloudinaryResponse.data.public_id)
-            data.append("version", cloudinaryResponse.data.version)
-            data.append("signature", cloudinaryResponse.data.signature)
-            console.log(cloud_image)
-            if (cloud_image!=="") {
-                setPutFile(false)
-            }
-        }
-        data.append("employerid", userData.user?.id)
-        data.append("companyname", draftCompanyName)
-        data.append("companysize", draftCompanySize)
-        data.append("companyinfo", draftInfo)
-        data.append("establishdate", draftDate)
-        data.append("region", region ? region.name : location.state?.companyinfo?.location?.region)
-        data.append("province", province ? province.name : location.state?.companyinfo?.location?.province)
-        data.append("city", city ? city.name : location.state?.companyinfo?.location?.city)
-        
-        
-        setCompanyInfo({ ...companyInfo, companyname: draftCompanyName, 
+        setCompanyInfo({...companyInfo, companyname: draftCompanyName, 
             companysize: draftCompanySize, 
             details: draftInfo,
             establishdate : draftDate,
             location: {
-                region: region ? region.name : location.state?.companyinfo?.location?.region, 
-                province: province ? province.name : location.state?.companyinfo?.location?.province, 
-                city: city ? city.name : location.state?.companyinfo?.location?.city
-            },
-            logo: cloud_image
+                region: region ? region.name : companyInfo?.location?.region, 
+                province: province ? province.name : companyInfo?.location?.province, 
+                city: city ? city.name : companyInfo?.location?.city
+            }
         })
-        setIsEditing(false)
-        await Axios.post("/api/upload/company-details", data, { headers: { "Content-Type": "multipart/form-data" } })
-    }
 
+        const loadingNotif = async function myPromise() {
+            const data = new FormData()
+            if (file) {
+                data.append("photo", file)
+                const signatureResponse = await Axios.get("/get-signature")
+            
+                const image = new FormData()
+                image.append("file", file)
+                image.append("api_key", api_key)
+                image.append("signature", signatureResponse.data.signature)
+                image.append("timestamp", signatureResponse.data.timestamp)
+                
+                const cloudinaryResponse = await Axios.post(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, image, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                    onUploadProgress: function (e) {
+                    console.log(e.loaded / e.total)
+                    }
+                })
+                let cloud_image = cloudinaryResponse.data.public_id
+            
+                data.append("image", cloud_image)
+                data.append("public_id", cloudinaryResponse.data.public_id)
+                data.append("version", cloudinaryResponse.data.version)
+                data.append("signature", cloudinaryResponse.data.signature)
+                
+                if (cloudinaryResponse) {
+                    setCompanyInfo({...companyInfo, logo: cloud_image})
+                }
+            }
+            data.append("employerid", userData.user?.id)
+            data.append("companyname", draftCompanyName)
+            data.append("companysize", draftCompanySize)
+            data.append("companyinfo", draftInfo)
+            data.append("establishdate", draftDate)
+            data.append("region", region ? region.name : companyInfo?.location?.region)
+            data.append("province", province ? province.name : companyInfo?.location?.province)
+            data.append("city", city ? city.name : companyInfo?.location?.city)
+
+            await Axios.post("/api/upload/company-details", data, { headers: { "Content-Type": "multipart/form-data" } })
+        }
+        toast.promise(
+            loadingNotif,
+            {
+                pending: 'Updating company profile...',
+                success: 'Company profile updated.',
+                error: 'Company profile update failed!'
+            }
+        )
+        setIsEditing(false)
+    }
+    
     return (
         <div className="companyProfile">
             <div className="companyProfileContent">
-                {userData.user && (
-                    <>
-                        {location.state?.employer===userData?.user.id && (
+                {userData?.user && (
+                    <div className="sideContent">
+                        <div className="contentTitle">
+                            <label><b>Company Profile</b></label>
+                        </div>
+                        {props.employer===userData?.user.id && (
                             <div className="rightContent">
                                 <button className="btn btn-outline-success allButtons" onClick={()=> {
                                     setIsEditing(true)
@@ -174,10 +206,10 @@ function CompanyProfile() {
                                 )}
                             </div>
                         )}
-                    </>
+                    </div>
                 )}
                 <div className="companyProfileTop">
-                    <div>
+                    <div className="companyProfileTopHeader">
                         {isEditing && (
                             <div className="our-custom-input">
                                 <div className="our-custom-input-interior">
@@ -185,44 +217,48 @@ function CompanyProfile() {
                                 </div>
                             </div>
                         )}
-                        {companyInfo?.logo!=="" ? 
-                            <>
-                                {putFile===true ? 
-                                    <img src={URL.createObjectURL(companyInfo.logo)} className="companyLogo"></img>
-                                :   <img src={`https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${companyInfo.logo}.jpg`} className="companyLogo"></img>}
-                            </>
-                        :<img src={"/fallback.png"} className="companyLogo"></img>}
+                        <img src={companyInfo?.logo ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_60/${companyInfo.logo}.jpg` : "/fallback.png"} className="companyLogo"></img>
                     </div>
-                    <div>
-                        <label className="contentTitle"><b>{companyInfo.companyname!=="" ? companyInfo.companyname : "Not yet specified."}</b></label>
-                    </div>
-                </div>
-
-                {isEditing===false && (
-                    <div className="companyProfileMidBot">
-                        <div className="companyProfileMid">
-                            <div className="paragraphSpaceBetween">
-                                <div><label className="companyDetailsLogo"><img src={"/WebPhoto/people.png"}/> <b>Company Size </b></label></div> 
-                                <div className="rightText">{companyInfo.companysize ? " "+companyInfo.companysize+" Employees" : <i>Not specified.</i>}</div>
+                    {isEditing===false && (
+                        <div className="companyProfileTopBot">
+                            <div>
+                                <label className="contentTitle"><b>{companyInfo.companyname!=="" ? companyInfo.companyname : "Not yet specified."}</b></label>
                             </div>
-                            <div className="paragraphSpaceBetween">
-                                <div><label className="companyDetailsLogo"><img src={"/WebPhoto/calendar.png"}/> <b>Established at </b></label></div>
-                                <div className="rightText">{companyInfo.establishdate ? " "+companyInfo.establishdate : <i>Not specified.</i>}</div>
-                            </div>
-                            <div className="paragraphSpaceBetween">
-                                <div><label className="companyDetailsLogo"><img src={"/WebPhoto/map.png"}/> <b>Location </b></label></div>
-                                <div className="rightText">{companyInfo.location ? companyInfo.location?.city+", " + companyInfo.location?.province+", " + companyInfo.location?.region: <i>Not specified.</i>}</div>
+                            <br/>
+                            <div className="companyProfileMid">
+                                <div className="paragraphSpaceBetween">
+                                    <div><label className="companyDetailsLogo"><img src={"/WebPhoto/people.png"}/> <b>Company Size: </b></label></div> 
+                                    <div className="rightText">{companyInfo.companysize ? " "+companyInfo.companysize+" Employees" : <i>Not specified.</i>}</div>
+                                </div>
+                                <div className="paragraphSpaceBetween">
+                                    <div><label className="companyDetailsLogo"><img src={"/WebPhoto/calendar.png"}/> <b>Established at: </b></label></div>
+                                    <div className="rightText">{companyInfo.establishdate ? " "+companyInfo.establishdate : <i>Not specified.</i>}</div>
+                                </div>
+                                <div className="paragraphSpaceBetween">
+                                    <div><label className="companyDetailsLogo"><img src={"/WebPhoto/map.png"}/> <b>Location: </b></label></div>
+                                    <div className="rightText">{companyInfo.location ? companyInfo.location?.city+", " + companyInfo.location?.province+", " + companyInfo.location?.region: <i>Not specified.</i>}</div>
+                                </div>
                             </div>
                         </div>
-                        <br />
+                    )}
+                </div>
+                <br/>
+                {isEditing===false && (
+                    <div className="companyProfileMidBot">
                         <div className="companyProfileBot">
                             <label><b>Company Overview: </b></label><br />
                             <div className="fromTextAreaContainer">
-                                <p className="fromTextArea">{companyInfo.details ? <p>{companyInfo.details}</p> : <i>No data.</i>}</p>
+                                <p className="fromTextArea">{companyInfo.details ?
+                                    <>
+                                        {companyInfo.details.length>1000 ? 
+                                        readMore(companyInfo.details)
+                                        : companyInfo.details}
+                                    </>
+                                : <i>No data.</i>}</p>
                             </div>
                         </div>
                     </div>
-                )}
+                )}      
                 {isEditing==true && (
                     <form className="editCompanyProfileForm" onSubmit={submitHandler}>
                         <div>
@@ -314,7 +350,7 @@ function CompanyProfile() {
 
                             <div className="mb-1">
                                 <label>Company Details:</label>
-                                <textarea rows = "5" cols = "60" onChange={e => setDraftInfo(e.target.value)} type="text" className="form-control form-control-sm" value={draftInfo}/>
+                                <textarea rows = "10" cols = "60" onChange={e => setDraftInfo(e.target.value)} type="text" className="form-control form-control-sm" value={draftInfo}/>
                             </div>
                             <br />
                             <div className="centerContent">
@@ -324,6 +360,7 @@ function CompanyProfile() {
                     </form>
                 )}
             </div>
+            <ToastContainer />
         </div>
     )
 }
