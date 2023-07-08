@@ -6,7 +6,7 @@ function Conversation({conversation, currentUser}) {
     const cloud_name = "dzjkgjjut"
     const [user, setUser] = useState(null)
     const [pic, setPic] = useState()
-    
+
     useEffect(() => {
         const memberId = conversation.members.find((m) => m !== currentUser.id)
         const getUser = async () => {

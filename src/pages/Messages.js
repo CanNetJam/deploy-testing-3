@@ -58,7 +58,7 @@ function Messages({socket}) {
             const res = await Axios.get("/conversations/",{params: {
               query: query,
               userId: userData.user.id
-          }})
+            }})
             setConversations(res.data)
             if (!location.state?._id && currentChat===null) {
               setCurrentChat(res.data[0])

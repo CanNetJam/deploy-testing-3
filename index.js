@@ -1098,34 +1098,33 @@ app.post("/api/create-conversation", async (req, res)=>{
   }
 })
 
-//get conversation for a single user
+//get conversation for a single user/searching for conversation
 app.get("/conversations/", async (req, res)=> {
   try {
     let userId = req.query.userId
     let query = req.query.query
-    let friend = ""
     const conversation = await conversations.find({members: { $in: [userId]}}).sort({updatedAt: -1})
-    if (query!=="") {
-      let conversationFriend
-      if (conversation.length!==0) {
-        for (let i = 0; i<conversation.length; i++) {
+      if (query!=="") {
+        let conversationFriend
+        if (conversation.length!==0) {
           conversationFriend = await accounts.find({$or: [{firstname: new RegExp(query, 'i')}, {lastname: new RegExp(query, 'i')}]})
-          if (conversationFriend.length!==0) {
-            friend = conversationFriend[0]._id
+          let theConversation = []
+          for (let i = 0; i<conversationFriend.length; i++) {
+            if (conversationFriend.length!==0) {
+              const member1 = userId
+              const member2 = conversationFriend[i]._id.toString()
+                
+              const haha = await conversations.findOne({members: { $all: [member1, member2]}})
+              if (haha!==null) {
+                theConversation = theConversation.concat([haha])
+              }
+            }
           }
-        }
+          res.status(200).json(theConversation)
+        } 
+      } else {
+        res.status(200).json(conversation)
       }
-    }
-    if (friend!=="") {
-      const member1 = userId
-      const member2 = friend.toString()
-
-      const theConversation = await conversations.findOne({members: { $all: [member1, member2]}})
-      res.status(200).json([theConversation])
-    } 
-    if (friend==="") {
-      res.status(200).json(conversation)
-    }
   } catch(err){ 
     res.status(500).json(err)
   }
