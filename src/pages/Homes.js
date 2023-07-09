@@ -136,7 +136,7 @@ function Home(props){
                     </div>
                     <div className="missionVissionContent">
                         <div>
-                        <p><b>Vission</b></p>
+                        <p><b>Vision</b></p>
                         <p>The premier university in historic Cavite recognized for excellence in the development of globally competitive and morally upright individuals.</p>
                         </div>
                     </div>

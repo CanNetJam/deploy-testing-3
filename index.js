@@ -177,7 +177,7 @@ app.get("/api/hiring-search", async (req, res)=> {
     }
   }
   const type = keyType(key)
-
+  
   function interpret(a) {
     let b, c
     if (a === "A-Z") {
@@ -202,7 +202,7 @@ app.get("/api/hiring-search", async (req, res)=> {
     }
   }
   const sort = interpret(rawsort)
-
+  
   function sallaryRange(a) {
     let b, c
     if (a === "1") {
@@ -237,10 +237,13 @@ app.get("/api/hiring-search", async (req, res)=> {
     }
   }
   let range = sallaryRange(sallary)
+  
     try {
       const allResults = (await projects.find({$and: [
-      {skillrequired: new RegExp(query, 'i'), 
-      $or: [{type: type.b}, {type: type.c}], 
+        
+      {skillrequired: new RegExp(query, 'i')}, 
+
+      {$or: [{type: type.b}, {type: type.c}], 
       status: "Hiring"},
 
       {$or: [{"location.province": new RegExp(location, 'i')}, 

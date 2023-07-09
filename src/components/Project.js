@@ -49,6 +49,29 @@ function Project({socket}) {
     const [ statusToReview, setStatusToReview ] = useState()
     const [ extend, setExtend ] = useState(false)
     const projectProgressScroll = useRef(null)
+    const [ word, setWord ] = useState("more")
+    const [ expand, setExpand ] = useState(false)
+
+    function readMore(text) {
+        const resultString = !expand ? text.slice(0, 400) :text
+        return (
+            <p>
+                {expand==false ? resultString+"...": resultString}
+                <br/>
+                <br/>
+                <button className="btn btn-outline-success allButtons" onClick={()=> {
+                    if (expand===false) {
+                        setExpand(true) 
+                        setWord("less")
+                    }
+                    if (expand===true) {
+                        setExpand(false) 
+                        setWord("more")
+                    }
+                }}>{`Read ${word}`}</button>
+            </p>
+        )
+    }
 
     const scrollToSection = (elementRef) => {
       window.scrollTo({
@@ -136,7 +159,7 @@ function Project({socket}) {
         }
         getProject()
     }, [accepted, rejected, done, applied, reload])
-
+    
     async function startConversation() {
       const members = [userData.user?.id, projectInfo?.employer._id]
       try {
@@ -640,7 +663,13 @@ function Project({socket}) {
                         <div>
                           <label>Description:</label>
                           <div className="fromTextAreaContainer">
-                          <p className="fromTextArea">{projectInfo.description}</p>
+                                <p className="fromTextArea">{projectInfo.description ?
+                                    <>
+                                        {projectInfo.description.length>400 ? 
+                                        readMore(projectInfo.description)
+                                        : projectInfo.description}
+                                    </>
+                                : <i>No data.</i>}</p>
                           </div>
                         </div>
                         {accepted ? 

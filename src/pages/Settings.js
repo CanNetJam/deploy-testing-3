@@ -134,7 +134,7 @@ function Settings(){
                             </div>
                             <div className="mb-1">
                                 <label>Please enter password to continue:</label>
-                                <input required autoFocus onChange={e => setPassword(e.target.value)} type="text" className="form-control form-control-sm" value={password} />
+                                <input required autoFocus onChange={e => setPassword(e.target.value)} type="password" className="form-control form-control-sm" value={password} />
                             </div>
                             {correctPass===false ?
                                 <div>
@@ -148,14 +148,14 @@ function Settings(){
                                     </div>
                                     <div className="mb-1">
                                         <label>Enter new password:</label>
-                                        <input required autoFocus onChange={e => setNewPassword(e.target.value)} type="text" className="form-control form-control-sm" value={newPassword} />
+                                        <input required autoFocus onChange={e => setNewPassword(e.target.value)} type="password" className="form-control form-control-sm" value={newPassword} />
                                     {samePassword===true ? 
                                         <label>Your new password can not be the same with your old password!</label>
                                     : <></>}
                                     </div>
                                     <div className="mb-1">
                                         <label>Confirm new password:</label>
-                                        <input required autoFocus onChange={e => setConfirmPassword(e.target.value)} type="text" className="form-control form-control-sm" value={confirmPassword} />
+                                        <input required autoFocus onChange={e => setConfirmPassword(e.target.value)} type="password" className="form-control form-control-sm" value={confirmPassword} />
                                         {isConfirmed===false ? 
                                             <label>New password does not match!</label>
                                         : <></>}

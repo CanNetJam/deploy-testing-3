@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { UserContext } from "../home"
 import RatingsAndReviews from "../components/Ratings&Reviews"
 import Gallery from "../components/Gallery"
+import CompanyProfile from "../components/CompanyProfile"
 import moment from "moment"
 import {format} from "timeago.js"
 import { ToastContainer, toast } from 'react-toastify'
@@ -380,6 +381,9 @@ function SearchProfile({socket}) {
                             </div>
                         : <>This user has no ongoing jobs or projects.</>}
                     </div>
+                    {location.state.type && location.state.type==="Employer" ? 
+                        <CompanyProfile employer={location.state._id}/>
+                    :
                     <div>
                         <div>
                             <Gallery candidate={searchInfo._id}/>
@@ -388,6 +392,7 @@ function SearchProfile({socket}) {
                             <RatingsAndReviews ratings={searchInfo.ratings} averagerating={searchInfo.averagerating} candidate={searchInfo._id}/>
                         </div>
                     </div>
+                    }
                 </div>
             )}
             <ToastContainer />

@@ -17,8 +17,19 @@ function Gallery(props) {
     const [ freeFirstName, setFreeFirstName ] = useState("")
     const [ photos, setPhotos ] = useState([])
     const [ isPhoto, setIsPhoto ] = useState()
+    const [ result, setResult ] = useState([])
+    const [ page, setPage ] = useState(0)
+    const [ searchCount, setSearchCount ] = useState(5)
+    const [ photosResult, setPhotosResult ] = useState([])
     const CreatePhotoField = useRef()
     
+    let length = photos.length
+    let index = 0
+    
+    const scrollToEnd = ()=> {
+        setPage(page+1)
+    }
+
     useEffect(() => {
         let userId
         if (props.candidate) {
@@ -37,7 +48,36 @@ function Gallery(props) {
         }
         getUserData()
     }, [])
- 
+
+    useEffect(() => {
+        const getFiltered = () => { 
+            setResult([])
+            let slice = (source, index) => source.slice(index, index + searchCount)
+            while (index < length) {
+                let temp = [slice(photos, index)]
+                setResult(prev=>prev.concat(temp))
+                index += searchCount
+            }
+        }
+        getFiltered()
+    }, [photos])
+
+    useEffect(() => {
+        const getFiltered = () => { 
+            result[0] ? setPhotosResult(result[0]) : <></>
+        }
+        getFiltered()
+    }, [result])
+
+    useEffect(() => {
+        const getFiltered = () => { 
+            result[page] !== undefined ?
+                photosResult!==[] ? setPhotosResult(prev=>prev.concat(result[page])) : <></>
+            : <></>
+        }
+        getFiltered()
+    }, [page])
+
     useEffect(() => {
         let user
         if (props.candidate) {
@@ -159,9 +199,9 @@ function Gallery(props) {
                     )}
                 </div>
             <div className="galleryBot">
-                {photos[0] ?
+                {photosResult[0] ?
                     <div className="galleryPhotoList">
-                        {photos.map(function(photo) {
+                        {photosResult.map(function(photo) {
                         return <GalleryPhotos 
                         key={photo._id} 
                         _id={photo._id}
@@ -174,6 +214,13 @@ function Gallery(props) {
                         createdAt={photo.createdAt}
                         setPhotos={setPhotos}/>
                         })}
+                        <div className="centerContent">
+                            {result[page+1]!==undefined ?
+                                <button className="allButtons" onClick={()=> {
+                                    scrollToEnd()
+                                }}>View More</button>
+                            :null}
+                        </div>
                     </div>
                 : <div className="galleryPhotoList">No photo available.</div>}
             </div>

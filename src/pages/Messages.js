@@ -53,21 +53,27 @@ function Messages({socket}) {
     }, [userData])
 
     useEffect(() => {
+      let isCancelled = false
         const getConversations = async () => {
           try {
             const res = await Axios.get("/conversations/",{params: {
               query: query,
               userId: userData.user.id
             }})
-            setConversations(res.data)
-            if (!location.state?._id && currentChat===null) {
-              setCurrentChat(res.data[0])
+            if (!isCancelled) {
+              setConversations(res.data)
+              if (!location.state?._id && currentChat===null) {
+                setCurrentChat(res.data[0])
+              }
             }
           } catch (err) {
             console.log(err)
           }
         }
-        getConversations()
+      getConversations()
+      return ()=> {
+        isCancelled = true
+      }
     }, [userData.user.id, query])
 
     useEffect(() => {
@@ -130,7 +136,7 @@ function Messages({socket}) {
       const key = a + b 
       return key
     }
-    console.log(conversations)
+
     return (
             <div className="messages">
               <div ref={topPage}></div>

@@ -211,7 +211,7 @@ function ApproveRequestModal({ setRequestModalOpen, toUpdate, socket, isApproved
       setStatus("")
     }
     setDraftTitle(toUpdate.title)
-    setDraftCompany(toUpdate?.employer?.company)
+    setDraftCompany(toUpdate?.company)
     setDraftDescription(toUpdate.description)
     setDraftSkillRequired(toUpdate.skillrequired)
     setDraftEmployer(toUpdate?.employer?.firstname +" "+ (toUpdate?.employer?.middlename ? toUpdate.employer.middlename.charAt(0).toUpperCase() + ". " : "") + toUpdate?.employer?.lastname)
@@ -251,10 +251,10 @@ function ApproveRequestModal({ setRequestModalOpen, toUpdate, socket, isApproved
     let res
     if (draftStatus==="Approved") {
       res = await Axios.post("/update-project", data, { headers: { "Content-Type": "multipart/form-data" } })
-      
+
       const logType = "APPROVE"
       const subject = toUpdate._id
-      const type = toUpdate.type==="Project Request" || toUpdate.type==="Project Request" ? toUpdate.type : (toUpdate.type+" post extension")
+      const type = toUpdate.type==="Job Request" || toUpdate.type==="Project Request" ? toUpdate.type : (toUpdate.type+" post extension")
       const action = "approved your"
       await Axios.post(`/api/send-notifications/${userData.user.id}/${toUpdate?.employer?._id}/${action}/${type}/${subject}`)
       await Axios.post(`/api/admin-logs/${userData.user.id}/${toUpdate?.employer?._id}/${subject}/${logType}`)

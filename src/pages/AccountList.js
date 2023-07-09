@@ -341,7 +341,7 @@ function AllAccounts(){
 
                                     <td><div className="constantHW">
                                         <button className="btn btn-outline-success allButtons" onClick={()=> {
-                                            navigate("/search-profile", {state: {_id: acc._id, projectid: ""}})
+                                            navigate("/search-profile", {state: {_id: acc._id, type: acc.type, companyinfo:acc.companyinfo, projectid: ""}})
                                         }}>
                                             Profile
                                         </button>

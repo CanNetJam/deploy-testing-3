@@ -245,9 +245,9 @@ function ProjectProposal({socket}) {
       toast.promise(
         loadingNotif,
         {
-          pending: 'Uploading image...',
-          success: 'Image uploaded.',
-          error: 'Image upload failed!'
+          pending: 'Processing request...',
+          success: 'Request sucessfully sent.',
+          error: 'Request failed!'
         }
       )
       }

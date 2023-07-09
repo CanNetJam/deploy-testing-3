@@ -435,7 +435,7 @@ function RegisterAccount() {
             </div>
             <div className="mb-2 centerLabel">
               <label>Password:</label>
-              <input required onChange={e => setPassword(e.target.value)} value={password} type="text" className="form-control" placeholder="ex: j.delacruz2022" />
+              <input required onChange={e => setPassword(e.target.value)} value={password} type="password" className="form-control" placeholder="ex: j.delacruz2022" />
               <p className="requiredAlert"> <b> *</b></p>
             </div>
           </div>

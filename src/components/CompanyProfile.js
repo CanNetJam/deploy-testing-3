@@ -115,17 +115,19 @@ function CompanyProfile(props) {
     
     async function submitHandler(e) {
         e.preventDefault()
-        setCompanyInfo({...companyInfo, companyname: draftCompanyName, 
-            companysize: draftCompanySize, 
-            details: draftInfo,
-            establishdate : draftDate,
-            location: {
-                region: region ? region.name : companyInfo?.location?.region, 
-                province: province ? province.name : companyInfo?.location?.province, 
-                city: city ? city.name : companyInfo?.location?.city
+        setCompanyInfo(prevState => ({
+            companyInfo: {
+                ...prevState.companyInfo, companyname: draftCompanyName, 
+                companysize: draftCompanySize, 
+                details: draftInfo,
+                establishdate : draftDate,
+                location: {
+                    region: region ? region.name : companyInfo?.location?.region, 
+                    province: province ? province.name : companyInfo?.location?.province, 
+                    city: city ? city.name : companyInfo?.location?.city
+                }
             }
-        })
-
+        }))
         const loadingNotif = async function myPromise() {
             const data = new FormData()
             if (file) {
@@ -152,7 +154,9 @@ function CompanyProfile(props) {
                 data.append("signature", cloudinaryResponse.data.signature)
                 
                 if (cloudinaryResponse) {
-                    setCompanyInfo({...companyInfo, logo: cloud_image})
+                    setCompanyInfo(prevState => ({
+                        ...prevState.companyInfo, logo: cloud_image
+                    }))
                 }
             }
             data.append("employerid", userData.user?.id)
@@ -176,7 +180,7 @@ function CompanyProfile(props) {
         )
         setIsEditing(false)
     }
-    
+
     return (
         <div className="companyProfile">
             <div className="companyProfileContent">
