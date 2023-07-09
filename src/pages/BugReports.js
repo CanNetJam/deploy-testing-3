@@ -56,36 +56,38 @@ function BugReports() {
             <div className="contentTitle">
                 <label><b>Bug Reports</b></label>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th><div className="constantHWBugs">No.</div></th>
-                        <th><div className="constantHWBugs">Photo</div></th>
-                        <th><div className="constantHWBugs">Title</div></th>
-                        <th><div className="constantHWBugs">Description</div></th>
-                        <th><div className="constantHWBugs">Sender</div></th>
-                        <th><div className="constantHWBugs">Report Id</div></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {result[0] ? 
-                        <>
-                            {result[page]?.map((a) => {
-                                return (
-                                    <tr key={a.month}>
-                                        <td><div className="constantHWBugs">{(( bugReports.indexOf(a))+1)<10 ? "0"+(( bugReports.indexOf(a))+1) : (( bugReports.indexOf(a))+1) }</div></td>
-                                        <td><div className="constantHWBugs"><img src={a.photo ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_55/${a.photo}.jpg` : "/fallback.png"} className="bugImg"></img></div></td>
-                                        <td><div className="constantHWBugs">{a.title}</div></td>
-                                        <td><div className="constantHWBugs">{a.description}</div></td>
-                                        <td><div className="constantHWBugs">{a.userid?.firstname} {a.userid?.middlename ? a.userid.middlename.charAt(0).toUpperCase() + ". " : "" }{a.userid?.lastname}</div></td>
-                                        <td><div className="constantHWBugs">{a._id}</div></td>
-                                    </tr>
-                                )   
-                            })}
-                        </>
-                    :<></>}
-                </tbody>
-            </table>
+            <div className="tableList">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><div className="constantHWBugs">No.</div></th>
+                            <th><div className="constantHWBugs">Photo</div></th>
+                            <th><div className="constantHWBugs">Title</div></th>
+                            <th><div className="constantHWBugs">Description</div></th>
+                            <th><div className="constantHWBugs">Sender</div></th>
+                            <th><div className="constantHWBugs">Report Id</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {result[0] ? 
+                            <>
+                                {result[page]?.map((a) => {
+                                    return (
+                                        <tr key={a.month}>
+                                            <td><div className="constantHWBugs">{(( bugReports.indexOf(a))+1)<10 ? "0"+(( bugReports.indexOf(a))+1) : (( bugReports.indexOf(a))+1) }</div></td>
+                                            <td><div className="constantHWBugs"><img src={a.photo ? `https://res.cloudinary.com/${cloud_name}/image/upload/q_55/${a.photo}.jpg` : "/fallback.png"} className="bugImg"></img></div></td>
+                                            <td><div className="constantHWBugs">{a.title}</div></td>
+                                            <td><div className="constantHWBugs">{a.description}</div></td>
+                                            <td><div className="constantHWBugs">{a.userid?.firstname} {a.userid?.middlename ? a.userid.middlename.charAt(0).toUpperCase() + ". " : "" }{a.userid?.lastname}</div></td>
+                                            <td><div className="constantHWBugs">{a._id}</div></td>
+                                        </tr>
+                                    )   
+                                })}
+                            </>
+                        :<></>}
+                    </tbody>
+                </table>
+            </div>
             {result[0] ? 
                 <div className="pageNumber">
                     <button disabled={page===0? true : false} className="btn btn-outline-success pageButtons" onClick={()=>setPage(page-1)}>Previous</button>
